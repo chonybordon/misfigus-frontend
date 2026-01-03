@@ -7,7 +7,8 @@ const resources = {
     translation: {
       app: {
         name: 'MisFigus',
-        tagline: 'Intercambia figuritas con tu álbum'
+        tagline: 'Intercambia figuritas con tu álbum',
+        defaultUser: 'Usuario'
       },
       login: {
         title: 'MisFigus',
