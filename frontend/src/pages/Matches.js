@@ -145,7 +145,7 @@ export const Matches = () => {
                   </div>
                   <div className="mt-4 p-3 bg-blue-50 rounded-lg text-sm">
                     <p className="font-semibold text-blue-900">
-                      {t('matches.netGain')}: +{match.net_gain} figuritas faltantes
+                      {t('matches.netGain')}: +{match.net_gain}
                     </p>
                   </div>
                 </CardContent>
