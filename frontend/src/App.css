@@ -3,15 +3,15 @@
 }
 
 .sticker-card-missing {
-  @apply bg-slate-100 text-slate-400 border-dashed border-slate-300;
+  @apply bg-slate-100 text-slate-400 border-dashed border-2 border-slate-300;
 }
 
 .sticker-card-have {
-  @apply bg-emerald-100 text-emerald-800 border-solid border-emerald-500;
+  @apply bg-emerald-100 text-emerald-800 border-solid border-2 border-emerald-500;
 }
 
 .sticker-card-duplicate {
-  @apply bg-amber-100 text-amber-800 border-solid border-amber-500;
+  @apply bg-amber-100 text-amber-800 border-solid border-2 border-amber-500;
   box-shadow: 0 0 10px rgba(245, 158, 11, 0.3);
 }
 
@@ -35,18 +35,30 @@
   @apply bg-secondary text-secondary-foreground hover:bg-secondary/90 font-medium py-2 px-6 rounded-full transition-all duration-300;
 }
 
-.btn-accent {
-  @apply bg-accent text-accent-foreground hover:bg-accent/90 font-medium py-2 px-6 rounded-full transition-all duration-300;
+.album-bg {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
 
-.hero-bg {
-  background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('https://images.unsplash.com/photo-1759156207348-0010a9fc013c?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2NzF8MHwxfHNlYXJjaHwxfHxmb290YmFsbCUyMHN0YWRpdW0lMjBhdG1vc3BoZXJlfGVufDB8fHx8MTc2NzM5OTc5MHww&ixlib=rb-4.1.0&q=85');
-  background-size: cover;
-  background-position: center;
+.sticker-album-pattern {
+  background-color: #f8f9fa;
+  background-image: 
+    repeating-linear-gradient(45deg, transparent, transparent 35px, rgba(102, 126, 234, 0.05) 35px, rgba(102, 126, 234, 0.05) 70px),
+    repeating-linear-gradient(-45deg, transparent, transparent 35px, rgba(118, 75, 162, 0.05) 35px, rgba(118, 75, 162, 0.05) 70px);
 }
 
 .login-bg {
-  background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('https://images.unsplash.com/photo-1761396677022-3678bcb336f0?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2NzF8MHwxfHNlYXJjaHwyfHxmb290YmFsbCUyMHN0YWRpdW0lMjBhdG1vc3BoZXJlfGVufDB8fHx8MTc2NzM5OTc5MHww&ixlib=rb-4.1.0&q=85');
-  background-size: cover;
-  background-position: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  position: relative;
+}
+
+.login-bg::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    repeating-linear-gradient(45deg, transparent, transparent 35px, rgba(255, 255, 255, 0.03) 35px, rgba(255, 255, 255, 0.03) 70px),
+    repeating-linear-gradient(-45deg, transparent, transparent 35px, rgba(255, 255, 255, 0.03) 35px, rgba(255, 255, 255, 0.03) 70px);
 }

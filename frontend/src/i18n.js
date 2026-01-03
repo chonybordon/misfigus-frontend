@@ -5,154 +5,151 @@ import LanguageDetector from 'i18next-browser-languagedetector';
 const resources = {
   es: {
     translation: {
+      app: {
+        name: 'MisFigus',
+        tagline: 'Intercambia figuritas con tu álbum'
+      },
       login: {
-        title: 'StickerSwap',
-        subtitle: 'Intercambia cromos con tu grupo',
+        title: 'MisFigus',
+        subtitle: 'Intercambia figuritas con tu álbum',
         emailPlaceholder: 'Tu correo electrónico',
         sendOTP: 'Enviar código',
         otpPlaceholder: 'Código de 6 dígitos',
         verify: 'Verificar',
         resend: 'Reenviar código',
+        devMode: 'MODO DEV - Código OTP',
+        devNote: 'Solo para pruebas. Revisa los logs del backend para más detalles.'
       },
-      groups: {
-        title: 'Mis Grupos',
-        createGroup: 'Crear Grupo',
-        joinGroup: 'Unirse al Grupo',
-        noGroups: 'No tienes grupos todavía',
-        createFirst: 'Crea o únete a un grupo para empezar',
-        groupName: 'Nombre del Grupo',
-        create: 'Crear',
-        cancel: 'Cancelar',
+      albums: {
+        title: 'Mis Álbumes',
+        select: 'Selecciona un álbum',
+        active: 'ACTIVO',
+        comingSoon: 'PRÓXIMAMENTE',
+        noAlbums: 'No hay álbumes disponibles'
       },
-      groupHome: {
+      albumHome: {
         members: 'Miembros',
-        albums: 'Álbumes',
+        myInventory: 'Mi Inventario',
+        duplicates: 'Duplicados',
+        matches: 'Intercambios',
+        offers: 'Ofertas',
         invite: 'Invitar',
         progress: 'Progreso',
-        inviteTitle: 'Invitar Miembro',
-        inviteEmail: 'Email del nuevo miembro',
-        generateLink: 'Generar Link de Invitación',
-        invitesLeft: 'Invitaciones restantes',
-        inviteSuccess: 'Link de invitación generado',
-        copyLink: 'Copiar Link',
-        linkCopied: '¡Link copiado!',
+        completed: 'completado'
+      },
+      invite: {
+        title: 'Invitar al Álbum',
+        subtitle: 'Comparte este enlace con quien quieras invitar',
+        generate: 'Generar Link de Invitación',
+        copy: 'Copiar Link',
+        select: 'Seleccionar Link',
+        openTab: 'Abrir en Nueva Pestaña',
+        copied: '¡Link copiado!',
+        expires: 'Expira en 1 hora',
+        singleUse: 'Uso único',
+        accept: 'Aceptar Invitación',
+        accepting: 'Aceptando...',
+        expired: 'Este enlace ha expirado',
+        used: 'Este enlace ya fue usado',
+        invalid: 'Enlace inválido',
+        loginFirst: 'Inicia sesión para aceptar la invitación'
       },
       inventory: {
         title: 'Mi Inventario',
-        search: 'Buscar cromos...',
+        search: 'Buscar figuritas...',
         all: 'Todos',
         missing: 'Faltan',
         have: 'Tengo',
         duplicates: 'Duplicados',
-        team: 'Equipo',
-        category: 'Categoría',
-        completed: 'completado',
+        owned: 'Tengo',
+        duplicate: 'Duplicado'
       },
       matches: {
         title: 'Intercambios Sugeridos',
-        direct: 'Directos',
-        partial: 'Parciales',
         youGive: 'Das',
         youGet: 'Recibes',
-        netGain: 'Ganancia',
-        createOffer: 'Crear Oferta',
         noMatches: 'No hay intercambios disponibles',
-        findMore: 'Actualiza tu inventario para encontrar más intercambios',
+        updateInventory: 'Actualiza tu inventario para encontrar intercambios'
       },
       offers: {
         title: 'Ofertas',
         sent: 'Enviadas',
         received: 'Recibidas',
-        create: 'Crear Oferta',
-        send: 'Enviar Oferta',
         accept: 'Aceptar',
         reject: 'Rechazar',
-        counter: 'Contraoferta',
-        cancel: 'Cancelar',
-        updateInventory: '¿Actualizar inventarios ahora?',
-        yes: 'Sí',
-        later: 'Más tarde',
         status: {
-          draft: 'Borrador',
           sent: 'Enviada',
           accepted: 'Aceptada',
-          rejected: 'Rechazada',
-          countered: 'Contraoferida',
-          cancelled: 'Cancelada',
-        },
-      },
-      chat: {
-        title: 'Chat',
-        placeholder: 'Escribe un mensaje...',
-        send: 'Enviar',
-        block: 'Bloquear',
-        report: 'Reportar',
-        templates: {
-          greeting: '¡Hola! ¿Hacemos este intercambio?',
-          thanks: '¡Gracias por el intercambio!',
-          question: '¿Tienes otros cromos disponibles?',
-          meetup: '¿Cuándo podemos vernos para intercambiar?',
-        },
-      },
-      notifications: {
-        title: 'Notificaciones',
-        newMatch: 'Nuevo intercambio disponible con',
-        newOffer: 'Nueva oferta de',
-        offerAccepted: 'aceptó tu oferta',
-        offerCountered: 'contraofreció tu oferta',
-        newMessage: 'Nuevo mensaje de',
+          rejected: 'Rechazada'
+        }
       },
       settings: {
         title: 'Configuración',
         language: 'Idioma',
         spanish: 'Español',
         english: 'English',
-        logout: 'Cerrar Sesión',
+        logout: 'Cerrar Sesión'
       },
       common: {
         loading: 'Cargando...',
         error: 'Error',
         success: 'Éxito',
-        save: 'Guardar',
-        delete: 'Eliminar',
-        edit: 'Editar',
+        back: 'Volver',
         close: 'Cerrar',
-      },
-    },
+        cancel: 'Cancelar'
+      }
+    }
   },
   en: {
     translation: {
+      app: {
+        name: 'MisFigus',
+        tagline: 'Trade stickers with your album'
+      },
       login: {
-        title: 'StickerSwap',
-        subtitle: 'Trade stickers with your group',
+        title: 'MisFigus',
+        subtitle: 'Trade stickers with your album',
         emailPlaceholder: 'Your email',
         sendOTP: 'Send Code',
         otpPlaceholder: '6-digit code',
         verify: 'Verify',
         resend: 'Resend Code',
+        devMode: 'DEV MODE - OTP Code',
+        devNote: 'Testing only. Check backend logs for details.'
       },
-      groups: {
-        title: 'My Groups',
-        createGroup: 'Create Group',
-        joinGroup: 'Join Group',
-        noGroups: "You don't have any groups yet",
-        createFirst: 'Create or join a group to get started',
-        groupName: 'Group Name',
-        create: 'Create',
-        cancel: 'Cancel',
+      albums: {
+        title: 'My Albums',
+        select: 'Select an album',
+        active: 'ACTIVE',
+        comingSoon: 'COMING SOON',
+        noAlbums: 'No albums available'
       },
-      groupHome: {
+      albumHome: {
         members: 'Members',
-        albums: 'Albums',
+        myInventory: 'My Inventory',
+        duplicates: 'Duplicates',
+        matches: 'Trades',
+        offers: 'Offers',
         invite: 'Invite',
         progress: 'Progress',
-        inviteTitle: 'Invite Member',
-        inviteEmail: 'New member email',
-        generateLink: 'Generate Invite Link',
-        invitesLeft: 'Invites left',
-        inviteSuccess: 'Invite link generated',
-        copyLink: 'Copy Link',
-        linkCopied: 'Link copied!',
+        completed: 'completed'
+      },
+      invite: {
+        title: 'Invite to Album',
+        subtitle: 'Share this link with who you want to invite',
+        generate: 'Generate Invite Link',
+        copy: 'Copy Link',
+        select: 'Select Link',
+        openTab: 'Open in New Tab',
+        copied: 'Link copied!',
+        expires: 'Expires in 1 hour',
+        singleUse: 'Single use',
+        accept: 'Accept Invitation',
+        accepting: 'Accepting...',
+        expired: 'This link has expired',
+        used: 'This link has already been used',
+        invalid: 'Invalid link',
+        loginFirst: 'Login to accept the invitation'
       },
       inventory: {
         title: 'My Inventory',
@@ -161,82 +158,45 @@ const resources = {
         missing: 'Missing',
         have: 'Have',
         duplicates: 'Duplicates',
-        team: 'Team',
-        category: 'Category',
-        completed: 'completed',
+        owned: 'Owned',
+        duplicate: 'Duplicate'
       },
       matches: {
         title: 'Suggested Trades',
-        direct: 'Direct',
-        partial: 'Partial',
         youGive: 'You Give',
         youGet: 'You Get',
-        netGain: 'Net Gain',
-        createOffer: 'Create Offer',
         noMatches: 'No trades available',
-        findMore: 'Update your inventory to find more trades',
+        updateInventory: 'Update your inventory to find trades'
       },
       offers: {
         title: 'Offers',
         sent: 'Sent',
         received: 'Received',
-        create: 'Create Offer',
-        send: 'Send Offer',
         accept: 'Accept',
         reject: 'Reject',
-        counter: 'Counter',
-        cancel: 'Cancel',
-        updateInventory: 'Update inventories now?',
-        yes: 'Yes',
-        later: 'Later',
         status: {
-          draft: 'Draft',
           sent: 'Sent',
           accepted: 'Accepted',
-          rejected: 'Rejected',
-          countered: 'Countered',
-          cancelled: 'Cancelled',
-        },
-      },
-      chat: {
-        title: 'Chat',
-        placeholder: 'Type a message...',
-        send: 'Send',
-        block: 'Block',
-        report: 'Report',
-        templates: {
-          greeting: 'Hi! Shall we do this trade?',
-          thanks: 'Thanks for the trade!',
-          question: 'Do you have other stickers available?',
-          meetup: 'When can we meet to trade?',
-        },
-      },
-      notifications: {
-        title: 'Notifications',
-        newMatch: 'New trade available with',
-        newOffer: 'New offer from',
-        offerAccepted: 'accepted your offer',
-        offerCountered: 'countered your offer',
-        newMessage: 'New message from',
+          rejected: 'Rejected'
+        }
       },
       settings: {
         title: 'Settings',
         language: 'Language',
         spanish: 'Español',
         english: 'English',
-        logout: 'Logout',
+        logout: 'Logout'
       },
       common: {
         loading: 'Loading...',
         error: 'Error',
         success: 'Success',
-        save: 'Save',
-        delete: 'Delete',
-        edit: 'Edit',
+        back: 'Back',
         close: 'Close',
-      },
-    },
-  },
+        cancel: 'Cancel'
+      }
+    }
+  }
 };
 
 i18n
@@ -247,8 +207,8 @@ i18n
     fallbackLng: 'es',
     lng: 'es',
     interpolation: {
-      escapeValue: false,
-    },
+      escapeValue: false
+    }
   });
 
 export default i18n;
