@@ -101,3 +101,87 @@
 #====================================================================================================
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
+
+user_problem_statement: "Complete i18n integration, member count logic (excluding current user), album deactivation feature, and language selector with 6 languages"
+
+backend:
+  - task: "Album deactivation endpoint"
+    implemented: true
+    working: true
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "DELETE /api/albums/{album_id}/deactivate endpoint implemented, tested via curl"
+
+frontend:
+  - task: "i18n integration - all components use translation keys"
+    implemented: true
+    working: true
+    file: "frontend/src/i18n.js, frontend/src/pages/*.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "All hardcoded strings replaced with t() translation keys. Verified via screenshots."
+
+  - task: "Member count logic - exclude current user"
+    implemented: true
+    working: true
+    file: "frontend/src/pages/AlbumHome.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Header shows otherMembersCount = members.filter(m => m.id !== currentUserId).length. Tested: 0 miembros (alone), 1 miembro (singular), 3 miembros (plural). Empty state message shows when alone."
+
+  - task: "Album deactivation UI with confirmation modal"
+    implemented: true
+    working: true
+    file: "frontend/src/pages/AlbumHome.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Settings icon in header opens dropdown with 'Desactivar álbum' option. Confirmation modal with Cancelar/Desactivar buttons. On confirm, calls DELETE endpoint and redirects to albums."
+
+  - task: "Language selector with 6 languages"
+    implemented: true
+    working: true
+    file: "frontend/src/pages/Settings.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Dropdown selector with Español, English, Português, Français, Deutsch, Italiano. Language switch updates UI immediately. Tested switching es->en."
+
+metadata:
+  created_by: "main_agent"
+  version: "1.0"
+  test_sequence: 1
+  run_ui: true
+
+test_plan:
+  current_focus:
+    - "i18n integration - all pages"
+    - "Member count logic"
+    - "Album deactivation flow"
+    - "Language selector"
+  stuck_tasks: []
+  test_all: true
+  test_priority: "high_first"
+
+agent_communication:
+  - agent: "main"
+    message: "Implemented all 4 requested features: 1) i18n integration with 6 languages, 2) Member count excluding current user with proper singular/plural, 3) Album deactivation with settings icon and confirmation modal, 4) Language dropdown selector in Settings. Please test: login flow, album list, album home (member count 0/1/N cases), deactivation flow, settings language switching, inventory page translations."
