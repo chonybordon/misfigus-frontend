@@ -126,7 +126,7 @@ export const AlbumHome = () => {
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground">
-                Gestiona tus figuritas, duplicados y faltantes
+                {t('albumHome.manageInventory')}
               </p>
             </CardContent>
           </Card>
