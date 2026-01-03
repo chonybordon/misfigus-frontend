@@ -200,7 +200,9 @@ export const Inventory = () => {
 
         {filteredStickers.length === 0 && (
           <div className="text-center py-20 text-muted-foreground">
-            {filter === 'duplicates' 
+            {stickers.length === 0 
+              ? t('albumHome.noStickersYet')
+              : filter === 'duplicates' 
               ? t('inventory.noDuplicates')
               : t('inventory.noStickers')}
           </div>
