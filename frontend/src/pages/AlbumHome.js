@@ -267,7 +267,7 @@ export const AlbumHome = () => {
               </div>
             ) : (
               <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                {album?.members?.filter(m => m.id !== currentUserId).slice(0, 6).map((member) => (
+                {album?.members?.slice(0, 6).map((member) => (
                   <div key={member.id} className="flex items-center gap-2 p-2 rounded-lg bg-muted">
                     <div className="h-8 w-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-sm">
                       {getDisplayName(member, t)[0].toUpperCase()}
