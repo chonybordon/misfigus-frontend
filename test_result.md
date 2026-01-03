@@ -142,11 +142,14 @@ frontend:
     file: "frontend/src/pages/AlbumHome.js"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: true
         agent: "main"
         comment: "Header shows otherMembersCount = members.filter(m => m.id !== currentUserId).length. Tested: 0 miembros (alone), 1 miembro (singular), 3 miembros (plural). Empty state message shows when alone."
+      - working: true
+        agent: "testing"
+        comment: "✅ TESTED - Member count logic working correctly. Displays '5 miembros' (excluding current user) with proper plural form. Empty state message 'Todavía no hay otros miembros en este álbum' displays when user is alone. Member count calculation properly excludes current user from the total count."
 
   - task: "Album deactivation UI with confirmation modal"
     implemented: true
