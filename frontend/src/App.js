@@ -43,7 +43,7 @@ api.interceptors.response.use(
   }
 );
 
-export const AuthContext = React.createContext();
+export const AuthContext = React.createContext(null);
 
 const PrivateRoute = ({ children }) => {
   const token = localStorage.getItem('token');
