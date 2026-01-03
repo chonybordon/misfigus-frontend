@@ -17,7 +17,21 @@ def generate_otp() -> str:
     return str(random.randint(100000, 999999))
 
 def send_otp_email(email: str, otp: str):
-    logger.info(f"\n{'='*50}\nMOCK EMAIL SERVICE\nTo: {email}\nSubject: Your StickerSwap OTP\nOTP Code: {otp}\n{'='*50}\n")
+    message = f"""
+{'='*60}
+🔐 MOCK EMAIL SERVICE - OTP CODE FOR TESTING
+{'='*60}
+To: {email}
+Subject: Your StickerSwap OTP Code
+{'='*60}
+YOUR OTP CODE: {otp}
+{'='*60}
+This code expires in 10 minutes.
+Use this code to login to StickerSwap.
+{'='*60}
+"""
+    logger.info(message)
+    print(message)  # Also print to stdout for visibility
 
 def store_otp(email: str, otp: str):
     otp_storage[email] = {
