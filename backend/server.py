@@ -231,6 +231,19 @@ async def activate_album(album_id: str, user_id: str = Depends(get_current_user)
     
     return {"message": "Album activated successfully"}
 
+@api_router.post("/albums/{album_id}/deactivate")
+async def deactivate_album(album_id: str, user_id: str = Depends(get_current_user)):
+    # Remove activation record (inventory is preserved)
+    result = await db.user_album_activations.delete_one({
+        "user_id": user_id,
+        "album_id": album_id
+    })
+    
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=400, detail="Album not activated")
+    
+    return {"message": "Album deactivated successfully"}
+
 @api_router.post("/albums/{album_id}/join")
 async def join_album(album_id: str, user_id: str = Depends(get_current_user)):
     album = await db.albums.find_one({"id": album_id}, {"_id": 0})
