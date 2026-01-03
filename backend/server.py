@@ -49,7 +49,7 @@ async def send_otp(user_input: UserCreate):
         doc['created_at'] = doc['created_at'].isoformat()
         await db.users.insert_one(doc)
     
-    return {"message": "OTP sent", "email": user_input.email}
+    return {"message": "OTP sent", "email": user_input.email, "dev_otp": otp}
 
 @api_router.post("/auth/verify-otp")
 async def verify_otp_endpoint(otp_data: OTPVerify):
