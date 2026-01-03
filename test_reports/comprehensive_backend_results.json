@@ -1,0 +1,39 @@
+{
+  "timestamp": "2026-01-03T00:34:55.307478",
+  "base_url": "https://stickertrade-1.preview.emergentagent.com",
+  "tests_run": 6,
+  "tests_passed": 3,
+  "success_rate": 50.0,
+  "detailed_results": [
+    {
+      "test": "Base URL Access",
+      "success": true,
+      "details": "Status: 200"
+    },
+    {
+      "test": "Invalid endpoint handling",
+      "success": false,
+      "details": "Should return 404 for invalid endpoint"
+    },
+    {
+      "test": "Malformed JSON handling",
+      "success": true,
+      "details": "Status: 422"
+    },
+    {
+      "test": "CORS Headers",
+      "success": false,
+      "details": "CORS headers missing"
+    },
+    {
+      "test": "Send OTP",
+      "success": true,
+      "details": "Email: test_003455@example.com"
+    },
+    {
+      "test": "Protected endpoint without auth",
+      "success": false,
+      "details": "Should have rejected unauthorized request"
+    }
+  ]
+}
