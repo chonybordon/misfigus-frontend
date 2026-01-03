@@ -281,6 +281,34 @@ export const AlbumHome = () => {
             </div>
           </DialogContent>
         </Dialog>
+
+        <Dialog open={membersDialogOpen} onOpenChange={setMembersDialogOpen}>
+          <DialogContent data-testid="members-dialog" className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>{t('members.title')}</DialogTitle>
+            </DialogHeader>
+            <div className="max-h-[60vh] overflow-y-auto">
+              <div className="space-y-2">
+                {album?.members?.map((member, index) => (
+                  <div key={member.id} className="flex items-center justify-between p-3 rounded-lg bg-muted">
+                    <div className="flex items-center gap-3 flex-1">
+                      <div className="h-10 w-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold">
+                        {getDisplayName(member, t)[0].toUpperCase()}
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-semibold">{getDisplayName(member, t)}</p>
+                        <p className="text-xs text-muted-foreground">{maskEmail(member.email)}</p>
+                      </div>
+                    </div>
+                    <Badge variant={index === 0 ? 'default' : 'secondary'} className={index === 0 ? 'bg-primary' : ''}>
+                      {index === 0 ? t('members.creator') : t('members.member')}
+                    </Badge>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );
