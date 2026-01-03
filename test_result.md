@@ -172,11 +172,14 @@ frontend:
     file: "frontend/src/pages/Settings.js"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: true
         agent: "main"
         comment: "Dropdown selector with Español, English, Português, Français, Deutsch, Italiano. Language switch updates UI immediately. Tested switching es->en."
+      - working: true
+        agent: "testing"
+        comment: "✅ TESTED - Language selector working perfectly. Settings page shows 'Configuración' title in Spanish. Language dropdown contains all 6 required languages: Español, English, Português, Français, Deutsch, Italiano. Language switching from Spanish to English works correctly, updating UI elements like 'Settings', 'My Profile', 'Language', 'Logout'. Inventory page translations also work correctly with 'My Inventory', 'Search stickers...', 'All', 'Missing', 'Have', 'Duplicates' tabs."
 
 metadata:
   created_by: "main_agent"
