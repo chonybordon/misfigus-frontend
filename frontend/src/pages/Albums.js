@@ -45,7 +45,7 @@ export const Albums = () => {
   const joinAlbum = async (albumId) => {
     try {
       await api.post(`/albums/${albumId}/join`);
-      toast.success('Te has unido al álbum');
+      toast.success(t('albumHome.joinedSuccess'));
       fetchAlbums(); // Refresh to update membership status
       navigate(`/albums/${albumId}`);
     } catch (error) {
