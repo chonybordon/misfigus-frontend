@@ -45,7 +45,8 @@ const resources = {
         completed: 'completado',
         manageInventory: 'Gestiona tus figuritas, duplicados y faltantes',
         findTrades: 'Encuentra intercambios con otros coleccionistas',
-        joinedSuccess: 'Te has unido al álbum'
+        joinedSuccess: 'Te has unido al álbum',
+        noStickersYet: 'Figuritas próximamente'
       },
       invite: {
         title: 'Invitar al Álbum',
