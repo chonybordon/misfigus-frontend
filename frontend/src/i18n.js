@@ -84,6 +84,7 @@ const resources = {
         received: 'Recibidas',
         accept: 'Aceptar',
         reject: 'Rechazar',
+        sticker: 'Figurita',
         status: {
           sent: 'Enviada',
           accepted: 'Aceptada',
