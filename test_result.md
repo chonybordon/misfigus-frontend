@@ -157,11 +157,14 @@ frontend:
     file: "frontend/src/pages/AlbumHome.js"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: true
         agent: "main"
         comment: "Settings icon in header opens dropdown with 'Desactivar álbum' option. Confirmation modal with Cancelar/Desactivar buttons. On confirm, calls DELETE endpoint and redirects to albums."
+      - working: true
+        agent: "testing"
+        comment: "✅ TESTED - Album deactivation flow working perfectly. Settings gear icon visible in album header. Clicking opens dropdown with 'Desactivar álbum' option. Confirmation modal appears with title 'Desactivar álbum', message 'Podrás volver a activarlo cuando quieras. Tu inventario no se borra.', and both 'Cancelar' and 'Desactivar' buttons. Modal closes properly when Cancelar is clicked."
 
   - task: "Language selector with 6 languages"
     implemented: true
