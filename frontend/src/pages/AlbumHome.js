@@ -195,27 +195,35 @@ export const AlbumHome = () => {
                 <Users className="h-5 w-5" />
                 {t('albumHome.members')}
               </div>
-              <Button
-                data-testid="view-all-members-btn"
-                variant="outline"
-                size="sm"
-                onClick={() => setMembersDialogOpen(true)}
-              >
-                {t('members.viewAll')}
-              </Button>
+              {album?.members && album.members.filter(m => m.id !== currentUserId).length > 0 && (
+                <Button
+                  data-testid="view-all-members-btn"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setMembersDialogOpen(true)}
+                >
+                  {t('members.viewAll')}
+                </Button>
+              )}
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-              {album?.members?.slice(0, 6).map((member) => (
-                <div key={member.id} className="flex items-center gap-2 p-2 rounded-lg bg-muted">
-                  <div className="h-8 w-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-sm">
-                    {getDisplayName(member, t)[0].toUpperCase()}
+            {album?.members && album.members.filter(m => m.id !== currentUserId).length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                <p>Todavía no hay otros miembros en este álbum</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                {album?.members?.filter(m => m.id !== currentUserId).slice(0, 6).map((member) => (
+                  <div key={member.id} className="flex items-center gap-2 p-2 rounded-lg bg-muted">
+                    <div className="h-8 w-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-sm">
+                      {getDisplayName(member, t)[0].toUpperCase()}
+                    </div>
+                    <span className="text-sm font-medium truncate">{getDisplayName(member, t)}</span>
                   </div>
-                  <span className="text-sm font-medium truncate">{getDisplayName(member, t)}</span>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
 
