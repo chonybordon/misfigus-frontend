@@ -180,14 +180,24 @@ export const AlbumHome = () => {
 
         <Card data-testid="members-card" className="mb-8">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Users className="h-5 w-5" />
-              {t('albumHome.members')}
+            <CardTitle className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Users className="h-5 w-5" />
+                {t('albumHome.members')}
+              </div>
+              <Button
+                data-testid="view-all-members-btn"
+                variant="outline"
+                size="sm"
+                onClick={() => setMembersDialogOpen(true)}
+              >
+                {t('members.viewAll')}
+              </Button>
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-              {album?.members?.map((member) => (
+              {album?.members?.slice(0, 6).map((member) => (
                 <div key={member.id} className="flex items-center gap-2 p-2 rounded-lg bg-muted">
                   <div className="h-8 w-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-sm">
                     {getDisplayName(member, t)[0].toUpperCase()}
