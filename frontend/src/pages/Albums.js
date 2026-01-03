@@ -33,11 +33,24 @@ export const Albums = () => {
     if (album.status === 'coming_soon') {
       return;
     }
-    if (!album.is_member) {
-      toast.error('Necesitas una invitación para unirte a este álbum');
-      return;
+    
+    if (album.is_member) {
+      navigate(`/albums/${album.id}`);
+    } else {
+      // For ACTIVE albums, join directly without invitation
+      joinAlbum(album.id);
     }
-    navigate(`/albums/${album.id}`);
+  };
+
+  const joinAlbum = async (albumId) => {
+    try {
+      await api.post(`/albums/${albumId}/join`);
+      toast.success('Te has unido al álbum');
+      fetchAlbums(); // Refresh to update membership status
+      navigate(`/albums/${albumId}`);
+    } catch (error) {
+      toast.error(error.response?.data?.detail || t('common.error'));
+    }
   };
 
   if (loading) {
