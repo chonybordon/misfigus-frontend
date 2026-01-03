@@ -4,7 +4,17 @@ import { useTranslation } from 'react-i18next';
 import { AuthContext } from '../App';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, Globe, LogOut } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { ArrowLeft, Globe, LogOut, User } from 'lucide-react';
+
+const languages = [
+  { code: 'es', name: 'Español' },
+  { code: 'en', name: 'English' },
+  { code: 'pt', name: 'Português' },
+  { code: 'fr', name: 'Français' },
+  { code: 'de', name: 'Deutsch' },
+  { code: 'it', name: 'Italiano' }
+];
 
 export const Settings = () => {
   const navigate = useNavigate();
@@ -38,7 +48,10 @@ export const Settings = () => {
         <div className="space-y-6">
           <Card data-testid="profile-card">
             <CardHeader>
-              <CardTitle>{t('settings.profile')}</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <User className="h-5 w-5" />
+                {t('settings.profile')}
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <Button
@@ -54,7 +67,7 @@ export const Settings = () => {
 
           <Card data-testid="user-info-card">
             <CardHeader>
-              <CardTitle>{user?.full_name}</CardTitle>
+              <CardTitle>{user?.display_name || user?.email}</CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground">{user?.email}</p>
@@ -69,24 +82,22 @@ export const Settings = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="flex gap-2">
-                <Button
-                  data-testid="lang-spanish-btn"
-                  variant={i18n.language === 'es' ? 'default' : 'outline'}
-                  onClick={() => changeLanguage('es')}
-                  className={i18n.language === 'es' ? 'btn-primary' : ''}
-                >
-                  {t('settings.spanish')}
-                </Button>
-                <Button
-                  data-testid="lang-english-btn"
-                  variant={i18n.language === 'en' ? 'default' : 'outline'}
-                  onClick={() => changeLanguage('en')}
-                  className={i18n.language === 'en' ? 'btn-primary' : ''}
-                >
-                  {t('settings.english')}
-                </Button>
-              </div>
+              <Select value={i18n.language} onValueChange={changeLanguage}>
+                <SelectTrigger data-testid="language-select" className="w-full">
+                  <SelectValue placeholder={t('settings.language')} />
+                </SelectTrigger>
+                <SelectContent>
+                  {languages.map((lang) => (
+                    <SelectItem 
+                      key={lang.code} 
+                      value={lang.code}
+                      data-testid={`lang-${lang.code}`}
+                    >
+                      {lang.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </CardContent>
           </Card>
 
