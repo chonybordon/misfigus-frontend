@@ -11,12 +11,34 @@ import { Progress } from '@/components/ui/progress';
 
 const getDisplayName = (user, t) => {
   if (!user) return t('app.defaultUser');
-  if (user.full_name && user.full_name !== user.email.split('@')[0]) {
-    return user.full_name;
+  
+  // Priority 1: Display name if exists
+  if (user.profile?.displayName) {
+    return user.profile.displayName;
   }
+  
+  // Priority 2: Email prefix with Spanish mapping
   if (user.email) {
-    return user.email.split('@')[0];
+    const prefix = user.email.split('@')[0].trim().toLowerCase();
+    
+    // Map generic/test prefixes to Spanish
+    const spanishMappings = {
+      'user': 'Usuario',
+      'newuser': 'Nuevo usuario',
+      'testuser': 'Usuario de prueba',
+      'demo': 'Usuario de prueba',
+      'test': 'Usuario de prueba'
+    };
+    
+    if (spanishMappings[prefix]) {
+      return spanishMappings[prefix];
+    }
+    
+    // Title-case for other prefixes
+    const emailPrefix = user.email.split('@')[0];
+    return emailPrefix.charAt(0).toUpperCase() + emailPrefix.slice(1).toLowerCase();
   }
+  
   return t('app.defaultUser');
 };
 
