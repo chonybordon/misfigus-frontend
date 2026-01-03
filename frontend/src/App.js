@@ -14,6 +14,7 @@ import Inventory from './pages/Inventory';
 import Matches from './pages/Matches';
 import Offers from './pages/Offers';
 import Settings from './pages/Settings';
+import Profile from './pages/Profile';
 import JoinAlbum from './pages/JoinAlbum';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
