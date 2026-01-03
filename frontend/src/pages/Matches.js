@@ -7,6 +7,17 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowLeft, ArrowRight, TrendingUp } from 'lucide-react';
 
+const getDisplayName = (user, t) => {
+  if (!user) return t('app.defaultUser');
+  if (user.full_name && user.full_name !== user.email.split('@')[0]) {
+    return user.full_name;
+  }
+  if (user.email) {
+    return user.email.split('@')[0];
+  }
+  return t('app.defaultUser');
+};
+
 export const Matches = () => {
   const { albumId } = useParams();
   const [matches, setMatches] = useState([]);
