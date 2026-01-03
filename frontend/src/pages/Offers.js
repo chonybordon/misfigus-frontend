@@ -9,34 +9,42 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Send } from 'lucide-react';
 
+const maskEmail = (email) => {
+  if (!email) return '';
+  const [local, domain] = email.split('@');
+  if (local.length <= 3) {
+    return `${local[0]}***@${domain}`;
+  }
+  return `${local.substring(0, 3)}***@${domain}`;
+};
+
 const getDisplayName = (user, t) => {
   if (!user) return t('app.defaultUser');
   
   // Priority 1: Display name if exists
-  if (user.profile?.displayName) {
-    return user.profile.displayName;
+  if (user.display_name && user.display_name.trim()) {
+    return user.display_name.trim();
   }
   
-  // Priority 2: Email prefix with Spanish mapping
+  // Priority 2: Check for test/demo accounts
   if (user.email) {
     const prefix = user.email.split('@')[0].trim().toLowerCase();
     
-    // Map generic/test prefixes to Spanish
-    const spanishMappings = {
-      'user': 'Usuario',
-      'newuser': 'Nuevo usuario',
-      'testuser': 'Usuario de prueba',
-      'demo': 'Usuario de prueba',
-      'test': 'Usuario de prueba'
+    const testMappings = {
+      'user': t('members.testUser'),
+      'newuser': t('members.newTestUser'),
+      'testuser': t('members.testUser'),
+      'test': t('members.testUser'),
+      'demo': t('members.testUser'),
+      'testactivation': t('members.technicalAccount')
     };
     
-    if (spanishMappings[prefix]) {
-      return spanishMappings[prefix];
+    if (testMappings[prefix]) {
+      return testMappings[prefix];
     }
     
-    // Title-case for other prefixes
-    const emailPrefix = user.email.split('@')[0];
-    return emailPrefix.charAt(0).toUpperCase() + emailPrefix.slice(1).toLowerCase();
+    // Priority 3: Masked email
+    return maskEmail(user.email);
   }
   
   return t('app.defaultUser');
