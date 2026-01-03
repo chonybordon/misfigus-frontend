@@ -72,9 +72,9 @@ export const Offers = () => {
         <CardTitle className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="h-10 w-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold">
-              {(type === 'sent' ? offer.to_user : offer.from_user)?.full_name[0].toUpperCase()}
+              {getDisplayName(type === 'sent' ? offer.to_user : offer.from_user, t)[0].toUpperCase()}
             </div>
-            <span>{(type === 'sent' ? offer.to_user : offer.from_user)?.full_name}</span>
+            <span>{getDisplayName(type === 'sent' ? offer.to_user : offer.from_user, t)}</span>
           </div>
           {getStatusBadge(offer.status)}
         </CardTitle>
