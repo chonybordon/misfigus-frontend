@@ -201,8 +201,8 @@ export const Inventory = () => {
         {filteredStickers.length === 0 && (
           <div className="text-center py-20 text-muted-foreground">
             {filter === 'duplicates' 
-              ? 'No tienes duplicados todavía' 
-              : 'No se encontraron figuritas'}
+              ? t('inventory.noDuplicates')
+              : t('inventory.noStickers')}
           </div>
         )}
       </div>
