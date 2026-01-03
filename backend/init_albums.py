@@ -19,41 +19,46 @@ async def init_albums():
     await db.stickers.delete_many({})
     
     albums_data = [
-        # ACTIVE albums - can be activated by users
+        # AVAILABLE albums - can be activated by users
         {
             "id": str(uuid.uuid4()),
             "name": "FIFA World Cup Qatar 2022",
             "year": 2022,
             "category": "Fútbol",
-            "status": "active"
+            "status": "active",
+            "has_placeholder": False
         },
         {
             "id": str(uuid.uuid4()),
             "name": "Pokémon",
             "year": 2024,
             "category": "Trading Cards",
-            "status": "active"
+            "status": "active",
+            "has_placeholder": True
         },
         {
             "id": str(uuid.uuid4()),
             "name": "Dragon Ball",
             "year": 2024,
             "category": "Anime",
-            "status": "active"
+            "status": "active",
+            "has_placeholder": True
         },
         {
             "id": str(uuid.uuid4()),
             "name": "Marvel",
             "year": 2024,
             "category": "Superhéroes",
-            "status": "active"
+            "status": "active",
+            "has_placeholder": True
         },
         {
             "id": str(uuid.uuid4()),
             "name": "Disney",
             "year": 2024,
             "category": "Entretenimiento",
-            "status": "active"
+            "status": "active",
+            "has_placeholder": True
         },
         # COMING SOON albums - not activable yet
         {
@@ -61,21 +66,8 @@ async def init_albums():
             "name": "FIFA World Cup 2026",
             "year": 2026,
             "category": "Fútbol",
-            "status": "coming_soon"
-        },
-        {
-            "id": str(uuid.uuid4()),
-            "name": "Copa América 2024",
-            "year": 2024,
-            "category": "Fútbol",
-            "status": "coming_soon"
-        },
-        {
-            "id": str(uuid.uuid4()),
-            "name": "UEFA Champions League",
-            "year": 2024,
-            "category": "Fútbol",
-            "status": "coming_soon"
+            "status": "coming_soon",
+            "has_placeholder": False
         }
     ]
     
@@ -83,7 +75,7 @@ async def init_albums():
         await db.albums.insert_one(album_data)
         print(f"Created album: {album_data['name']} ({album_data['status']})")
     
-    # Load Qatar 2022 stickers for the first active album
+    # Load Qatar 2022 stickers (real dataset)
     qatar_album_id = albums_data[0]['id']
     stickers_path = ROOT_DIR / 'qatar_stickers.json'
     
@@ -99,11 +91,29 @@ async def init_albums():
         await db.stickers.insert_one(sticker)
     
     print(f"Loaded {len(stickers_data)} stickers for Qatar 2022 album")
-    print(f"\nNote: Other ACTIVE albums (Pokémon, Dragon Ball, Marvel, Disney)")
-    print(f"are activable but show 'Figuritas próximamente' until datasets are loaded.")
+    
+    # Create placeholder stickers for other ACTIVE albums (Pokémon, Dragon Ball, Marvel, Disney)
+    placeholder_albums = albums_data[1:5]  # Skip Qatar 2022, get next 4
+    
+    for album in placeholder_albums:
+        placeholder_stickers = []
+        for i in range(1, 201):  # Create 200 placeholder stickers
+            sticker = {
+                "id": str(uuid.uuid4()),
+                "album_id": album['id'],
+                "number": i,
+                "name": f"Figurita #{i}",
+                "team": "Colección",
+                "category": "General"
+            }
+            placeholder_stickers.append(sticker)
+            await db.stickers.insert_one(sticker)
+        
+        print(f"Created 200 placeholder stickers for {album['name']}")
     
     client.close()
-    print("\nAlbum initialization complete!")
+    print("\n✅ Album initialization complete!")
+    print("Note: Pokémon, Dragon Ball, Marvel, Disney use placeholder stickers (1-200)")
 
 if __name__ == "__main__":
     asyncio.run(init_albums())
