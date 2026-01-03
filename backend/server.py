@@ -114,8 +114,12 @@ async def get_albums(user_id: str = Depends(get_current_user)):
             album['is_member'] = False
         
         if album['is_member']:
-            member_count = await db.album_members.count_documents({"album_id": album['id']})
-            album['member_count'] = member_count
+            # Count OTHER members only (excluding current user)
+            other_member_count = await db.album_members.count_documents({
+                "album_id": album['id'],
+                "user_id": {"$ne": user_id}
+            })
+            album['member_count'] = other_member_count
             
             sticker_count = await db.stickers.count_documents({"album_id": album['id']})
             inventory_count = await db.user_inventory.count_documents({
