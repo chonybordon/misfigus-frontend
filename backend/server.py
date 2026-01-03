@@ -141,12 +141,18 @@ async def get_album(album_id: str, user_id: str = Depends(get_current_user)):
     if not album:
         raise HTTPException(status_code=404, detail="Album not found")
     
-    members = await db.album_members.find({"album_id": album_id}, {"_id": 0}).to_list(100)
-    member_ids = [m['user_id'] for m in members]
-    users = await db.users.find({"id": {"$in": member_ids}}, {"_id": 0}).to_list(100)
+    # Get OTHER members only (excluding current user)
+    other_members = await db.album_members.find({
+        "album_id": album_id,
+        "user_id": {"$ne": user_id}
+    }, {"_id": 0}).to_list(100)
+    other_member_ids = [m['user_id'] for m in other_members]
     
-    album['members'] = users
-    album['member_count'] = len(users)
+    # Get user details for other members only
+    other_users = await db.users.find({"id": {"$in": other_member_ids}}, {"_id": 0}).to_list(100)
+    
+    album['members'] = other_users
+    album['member_count'] = len(other_users)
     
     sticker_count = await db.stickers.count_documents({"album_id": album_id})
     inventory_count = await db.user_inventory.count_documents({
