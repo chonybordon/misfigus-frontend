@@ -25,8 +25,14 @@ const resources = {
         title: 'Mis Álbumes',
         select: 'Selecciona un álbum',
         active: 'ACTIVO',
+        inactive: 'INACTIVO',
         comingSoon: 'PRÓXIMAMENTE',
-        noAlbums: 'No hay álbumes disponibles'
+        noAlbums: 'No hay álbumes disponibles',
+        activate: 'Activar álbum',
+        activateQuestion: '¿Querés activar este álbum?',
+        activateConfirm: 'Activar',
+        activateSuccess: 'Álbum activado correctamente',
+        activateError: 'Error al activar el álbum'
       },
       albumHome: {
         members: 'Miembros',
