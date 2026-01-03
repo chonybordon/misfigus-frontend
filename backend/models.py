@@ -8,12 +8,17 @@ class User(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     full_name: str
     email: str
+    display_name: Optional[str] = None
     verified: bool = False
     language: str = 'es'
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 class UserCreate(BaseModel):
     email: str
+
+class UserUpdate(BaseModel):
+    display_name: Optional[str] = None
+    language: Optional[str] = None
 
 class OTPVerify(BaseModel):
     email: str
