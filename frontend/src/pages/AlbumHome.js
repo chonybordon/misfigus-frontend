@@ -9,6 +9,17 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { ArrowLeft, Users, Package, UserPlus, ExternalLink } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 
+const getDisplayName = (user, t) => {
+  if (!user) return t('app.defaultUser');
+  if (user.full_name && user.full_name !== user.email.split('@')[0]) {
+    return user.full_name;
+  }
+  if (user.email) {
+    return user.email.split('@')[0];
+  }
+  return t('app.defaultUser');
+};
+
 export const AlbumHome = () => {
   const { albumId } = useParams();
   const [album, setAlbum] = useState(null);
