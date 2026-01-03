@@ -13,6 +13,7 @@ export const Login = () => {
   const [otp, setOtp] = useState('');
   const [step, setStep] = useState('email');
   const [loading, setLoading] = useState(false);
+  const [devOtp, setDevOtp] = useState('');
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
   const { login } = React.useContext(AuthContext);
@@ -21,7 +22,8 @@ export const Login = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      await api.post('/auth/send-otp', { email });
+      const response = await api.post('/auth/send-otp', { email });
+      setDevOtp(response.data.dev_otp);
       toast.success(t('login.sendOTP'));
       setStep('otp');
     } catch (error) {
