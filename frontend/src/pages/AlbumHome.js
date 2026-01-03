@@ -360,7 +360,7 @@ export const AlbumHome = () => {
             </DialogHeader>
             <div className="max-h-[60vh] overflow-y-auto">
               <div className="space-y-2">
-                {album?.members?.filter(m => m.id !== currentUserId).map((member, index) => (
+                {album?.members?.map((member) => (
                   <div key={member.id} className="flex items-center justify-between p-3 rounded-lg bg-muted">
                     <div className="flex items-center gap-3 flex-1">
                       <div className="h-10 w-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold">
