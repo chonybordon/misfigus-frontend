@@ -9,6 +9,17 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Send } from 'lucide-react';
 
+const getDisplayName = (user, t) => {
+  if (!user) return t('app.defaultUser');
+  if (user.full_name && user.full_name !== user.email.split('@')[0]) {
+    return user.full_name;
+  }
+  if (user.email) {
+    return user.email.split('@')[0];
+  }
+  return t('app.defaultUser');
+};
+
 export const Offers = () => {
   const { albumId } = useParams();
   const [offers, setOffers] = useState({ sent: [], received: [] });
