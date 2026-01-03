@@ -1,0 +1,18 @@
+{
+  "timestamp": "2026-01-03T00:34:07.001490",
+  "tests_run": 2,
+  "tests_passed": 2,
+  "success_rate": 100.0,
+  "results": [
+    {
+      "test": "Send OTP",
+      "success": true,
+      "details": "Status: 200"
+    },
+    {
+      "test": "Verify OTP (Mock)",
+      "success": true,
+      "details": "Status: 400"
+    }
+  ]
+}
