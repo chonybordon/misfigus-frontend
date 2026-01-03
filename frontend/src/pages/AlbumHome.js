@@ -60,6 +60,7 @@ export const AlbumHome = () => {
   const [inviteLink, setInviteLink] = useState('');
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const currentUserId = JSON.parse(localStorage.getItem('user'))?.id;
 
   useEffect(() => {
     fetchAlbum();
