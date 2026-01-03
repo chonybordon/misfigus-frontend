@@ -36,6 +36,22 @@ export const Settings = () => {
         </div>
 
         <div className="space-y-6">
+          <Card data-testid="profile-card">
+            <CardHeader>
+              <CardTitle>{t('settings.profile')}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Button
+                data-testid="profile-btn"
+                variant="outline"
+                className="w-full"
+                onClick={() => navigate('/profile')}
+              >
+                {t('profile.title')}
+              </Button>
+            </CardContent>
+          </Card>
+
           <Card data-testid="user-info-card">
             <CardHeader>
               <CardTitle>{user?.full_name}</CardTitle>
