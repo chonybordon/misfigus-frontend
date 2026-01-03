@@ -55,6 +55,7 @@ export const AlbumHome = () => {
   const [album, setAlbum] = useState(null);
   const [loading, setLoading] = useState(true);
   const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
+  const [membersDialogOpen, setMembersDialogOpen] = useState(false);
   const [inviteLink, setInviteLink] = useState('');
   const navigate = useNavigate();
   const { t } = useTranslation();
