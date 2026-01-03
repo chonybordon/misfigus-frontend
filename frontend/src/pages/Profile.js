@@ -96,7 +96,7 @@ export const Profile = () => {
                   maxLength={50}
                 />
                 <p className="text-xs text-muted-foreground mt-1">
-                  Este nombre se mostrará a otros miembros del álbum
+                  {t('profile.helperText')}
                 </p>
               </div>
 

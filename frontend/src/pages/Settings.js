@@ -28,7 +28,7 @@ export const Settings = () => {
             data-testid="back-btn"
             variant="outline"
             size="icon"
-            onClick={() => navigate('/groups')}
+            onClick={() => navigate('/albums')}
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>

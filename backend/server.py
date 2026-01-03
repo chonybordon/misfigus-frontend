@@ -231,7 +231,7 @@ async def activate_album(album_id: str, user_id: str = Depends(get_current_user)
     
     return {"message": "Album activated successfully"}
 
-@api_router.post("/albums/{album_id}/deactivate")
+@api_router.delete("/albums/{album_id}/deactivate")
 async def deactivate_album(album_id: str, user_id: str = Depends(get_current_user)):
     # Remove activation record (inventory is preserved)
     result = await db.user_album_activations.delete_one({

@@ -40,7 +40,7 @@ export const Login = () => {
       const response = await api.post('/auth/verify-otp', { email, otp });
       login(response.data.token, response.data.user);
       toast.success(t('common.success'));
-      navigate('/groups');
+      navigate('/albums');
     } catch (error) {
       toast.error(error.response?.data?.detail || t('common.error'));
     } finally {
