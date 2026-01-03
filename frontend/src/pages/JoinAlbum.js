@@ -102,12 +102,10 @@ export const JoinAlbum = () => {
               </div>
               <div className="bg-muted p-4 rounded-lg space-y-2 text-sm">
                 <div className="flex justify-between">
-                  <span>{t('invite.expires')}:</span>
-                  <span className="font-semibold">1 hora</span>
+                  <span>{t('invite.expires')}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span>{t('invite.singleUse')}:</span>
-                  <span className="font-semibold">✓</span>
+                  <span>{t('invite.singleUse')}</span>
                 </div>
               </div>
               <Button
