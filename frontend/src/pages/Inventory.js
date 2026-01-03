@@ -10,7 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ArrowLeft, Search, Plus, Minus } from 'lucide-react';
 
 export const Inventory = () => {
-  const { groupId, albumId } = useParams();
+  const { albumId } = useParams();
   const [stickers, setStickers] = useState([]);
   const [filteredStickers, setFilteredStickers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -53,9 +53,10 @@ export const Inventory = () => {
     if (filter === 'missing') {
       filtered = filtered.filter((s) => s.owned_qty === 0);
     } else if (filter === 'have') {
-      filtered = filtered.filter((s) => s.owned_qty === 1);
+      filtered = filtered.filter((s) => s.owned_qty >= 1);
     } else if (filter === 'duplicates') {
-      filtered = filtered.filter((s) => s.owned_qty > 1);
+      // ONLY show stickers where owned_qty >= 2
+      filtered = filtered.filter((s) => s.owned_qty >= 2);
     }
 
     setFilteredStickers(filtered);
@@ -68,17 +69,36 @@ export const Inventory = () => {
         owned_qty: Math.max(0, newQty),
       });
       setStickers((prev) =>
-        prev.map((s) => (s.id === stickerId ? { ...s, owned_qty: Math.max(0, newQty) } : s))
+        prev.map((s) => {
+          if (s.id === stickerId) {
+            const updated_qty = Math.max(0, newQty);
+            return {
+              ...s,
+              owned_qty: updated_qty,
+              duplicate_count: Math.max(updated_qty - 1, 0)
+            };
+          }
+          return s;
+        })
       );
     } catch (error) {
       toast.error(error.response?.data?.detail || t('common.error'));
     }
   };
 
-  const getStickerClass = (qty) => {
-    if (qty === 0) return 'sticker-card-missing';
-    if (qty === 1) return 'sticker-card-have';
+  const getStickerClass = (sticker) => {
+    if (sticker.owned_qty === 0) return 'sticker-card-missing';
+    if (sticker.owned_qty === 1) return 'sticker-card-have';
     return 'sticker-card-duplicate';
+  };
+
+  const getDisplayValue = (sticker) => {
+    // In "Duplicates" tab, show duplicate_count
+    // In other tabs, show owned_qty
+    if (filter === 'duplicates') {
+      return sticker.duplicate_count;
+    }
+    return sticker.owned_qty;
   };
 
   const progress = stickers.length > 0 ? (stickers.filter((s) => s.owned_qty > 0).length / stickers.length) * 100 : 0;
@@ -92,21 +112,21 @@ export const Inventory = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-20">
+    <div className="min-h-screen sticker-album-pattern pb-20">
       <div className="max-w-7xl mx-auto p-6">
         <div className="flex items-center gap-4 mb-6">
           <Button
-            data-testid="back-to-group-btn"
+            data-testid="back-to-album-btn"
             variant="outline"
             size="icon"
-            onClick={() => navigate(`/groups/${groupId}`)}
+            onClick={() => navigate(`/albums/${albumId}`)}
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div className="flex-1">
             <h1 className="text-3xl font-black tracking-tight text-primary">{t('inventory.title')}</h1>
             <p className="text-muted-foreground text-sm">
-              {Math.round(progress)}% {t('inventory.completed')}
+              {Math.round(progress)}% {t('albumHome.completed')}
             </p>
           </div>
         </div>
@@ -138,7 +158,7 @@ export const Inventory = () => {
             <Card
               key={sticker.id}
               data-testid={`sticker-card-${sticker.id}`}
-              className={`p-4 border-2 transition-all duration-300 ${getStickerClass(sticker.owned_qty)}`}
+              className={`p-4 transition-all duration-300 ${getStickerClass(sticker)}`}
             >
               <div className="text-center mb-2">
                 <div className="text-2xl font-black text-primary mb-1">#{sticker.number}</div>
@@ -156,8 +176,13 @@ export const Inventory = () => {
                 >
                   <Minus className="h-4 w-4" />
                 </Button>
-                <div className="text-xl font-bold min-w-[2rem] text-center" data-testid={`sticker-qty-${sticker.id}`}>
-                  {sticker.owned_qty}
+                <div className="flex flex-col items-center">
+                  <div className="text-xl font-bold min-w-[2rem] text-center" data-testid={`sticker-qty-${sticker.id}`}>
+                    {getDisplayValue(sticker)}
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    {filter === 'duplicates' ? t('inventory.duplicate') : t('inventory.owned')}
+                  </div>
                 </div>
                 <Button
                   data-testid={`increase-qty-btn-${sticker.id}`}
@@ -172,6 +197,14 @@ export const Inventory = () => {
             </Card>
           ))}
         </div>
+
+        {filteredStickers.length === 0 && (
+          <div className="text-center py-20 text-muted-foreground">
+            {filter === 'duplicates' 
+              ? 'No tienes duplicados todavía' 
+              : 'No se encontraron figuritas'}
+          </div>
+        )}
       </div>
     </div>
   );
