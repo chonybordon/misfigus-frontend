@@ -137,6 +137,14 @@ export const AlbumHome = () => {
           </div>
         </div>
 
+        {album?.has_placeholder && (
+          <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+            <p className="text-sm text-amber-900">
+              <strong>Colección en preparación:</strong> por ahora usá numeración (1..200).
+            </p>
+          </div>
+        )}
+
         <div className="mb-8">
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm font-semibold">{t('albumHome.progress')}</span>
