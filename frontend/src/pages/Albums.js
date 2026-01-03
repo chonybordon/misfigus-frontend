@@ -147,10 +147,17 @@ export const Albums = () => {
                     <span>{album.year}</span>
                     <span>•</span>
                     <span>{album.category}</span>
-                    {album.is_member && album.member_count && (
+                    {album.is_member && album.member_count !== undefined && (
                       <>
                         <span>•</span>
-                        <span>{album.member_count} {t('albumHome.members')}</span>
+                        <span>
+                          {album.member_count === 0 
+                            ? `0 ${t('albumHome.memberPlural')}`
+                            : album.member_count === 1 
+                              ? `1 ${t('albumHome.member')}`
+                              : `${album.member_count} ${t('albumHome.memberPlural')}`
+                          }
+                        </span>
                       </>
                     )}
                     {album.is_member && album.progress !== undefined && (
