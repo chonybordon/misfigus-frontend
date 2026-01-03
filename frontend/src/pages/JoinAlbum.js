@@ -56,7 +56,7 @@ export const JoinAlbum = () => {
     } catch (error) {
       const detail = error.response?.data?.detail;
       if (detail === 'Already a member') {
-        toast.info('Ya eres miembro de este álbum');
+        toast.info(t('albumHome.joinedSuccess'));
         navigate(`/albums/${album.id}`);
       } else {
         toast.error(error.response?.data?.detail || t('common.error'));
