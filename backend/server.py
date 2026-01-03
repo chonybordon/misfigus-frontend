@@ -143,6 +143,30 @@ async def create_invite(album_id: str, user_id: str = Depends(get_current_user))
     
     return {"token": invite.token, "expires_at": invite.expires_at}
 
+@api_router.post("/albums/{album_id}/join")
+async def join_album(album_id: str, user_id: str = Depends(get_current_user)):
+    album = await db.albums.find_one({"id": album_id}, {"_id": 0})
+    if not album:
+        raise HTTPException(status_code=404, detail="Album not found")
+    
+    if album['status'] != 'active':
+        raise HTTPException(status_code=400, detail="Album is not active")
+    
+    existing = await db.album_members.find_one({"album_id": album_id, "user_id": user_id}, {"_id": 0})
+    if existing:
+        return {"message": "Already a member"}
+    
+    member = AlbumMember(
+        album_id=album_id,
+        user_id=user_id,
+        invited_by_user_id=None
+    )
+    member_doc = member.model_dump()
+    member_doc['created_at'] = member_doc['created_at'].isoformat()
+    await db.album_members.insert_one(member_doc)
+    
+    return {"message": "Joined album successfully"}
+
 @api_router.get("/invites/{token}")
 async def get_invite(token: str):
     invite = await db.invite_tokens.find_one({"token": token}, {"_id": 0})
