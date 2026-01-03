@@ -5,9 +5,10 @@ import { api } from '../App';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from '@/components/ui/dialog';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Users, Package, UserPlus, ExternalLink } from 'lucide-react';
+import { ArrowLeft, Users, Package, UserPlus, ExternalLink, Settings, LogOut } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 
 const maskEmail = (email) => {
@@ -57,6 +58,8 @@ export const AlbumHome = () => {
   const [loading, setLoading] = useState(true);
   const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
   const [membersDialogOpen, setMembersDialogOpen] = useState(false);
+  const [deactivateDialogOpen, setDeactivateDialogOpen] = useState(false);
+  const [deactivating, setDeactivating] = useState(false);
   const [inviteLink, setInviteLink] = useState('');
   const navigate = useNavigate();
   const { t } = useTranslation();
@@ -109,6 +112,36 @@ export const AlbumHome = () => {
     window.open(inviteLink, '_blank');
   };
 
+  const handleDeactivateAlbum = async () => {
+    setDeactivating(true);
+    try {
+      await api.delete(`/albums/${albumId}/deactivate`);
+      toast.success(t('albums.deactivateSuccess'));
+      setDeactivateDialogOpen(false);
+      navigate('/albums');
+    } catch (error) {
+      toast.error(error.response?.data?.detail || t('common.error'));
+    } finally {
+      setDeactivating(false);
+    }
+  };
+
+  // Calculate other members count (excluding current user)
+  const otherMembersCount = album?.members 
+    ? Math.max(album.members.filter(m => m.id !== currentUserId).length, 0)
+    : 0;
+
+  // Get member count display string with proper singular/plural
+  const getMemberCountDisplay = () => {
+    if (otherMembersCount === 0) {
+      return `0 ${t('albumHome.memberPlural')}`;
+    } else if (otherMembersCount === 1) {
+      return `1 ${t('albumHome.member')}`;
+    } else {
+      return `${otherMembersCount} ${t('albumHome.memberPlural')}`;
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -132,15 +165,36 @@ export const AlbumHome = () => {
           <div className="flex-1">
             <h1 className="text-3xl font-black tracking-tight text-primary">{album?.name}</h1>
             <p className="text-muted-foreground">
-              {album?.member_count} {t('albumHome.members')}
+              {getMemberCountDisplay()}
             </p>
           </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                data-testid="album-settings-btn"
+                variant="outline"
+                size="icon"
+              >
+                <Settings className="h-5 w-5" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem 
+                data-testid="deactivate-album-menu-item"
+                onClick={() => setDeactivateDialogOpen(true)}
+                className="text-destructive cursor-pointer"
+              >
+                <LogOut className="h-4 w-4 mr-2" />
+                {t('albums.deactivate')}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
 
         {album?.has_placeholder && (
           <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-lg">
             <p className="text-sm text-amber-900">
-              <strong>Colección en preparación:</strong> por ahora usá numeración (1..200).
+              {t('albumHome.placeholderBanner')}
             </p>
           </div>
         )}
@@ -195,7 +249,7 @@ export const AlbumHome = () => {
                 <Users className="h-5 w-5" />
                 {t('albumHome.members')}
               </div>
-              {album?.members && album.members.filter(m => m.id !== currentUserId).length > 0 && (
+              {otherMembersCount > 0 && (
                 <Button
                   data-testid="view-all-members-btn"
                   variant="outline"
@@ -208,9 +262,9 @@ export const AlbumHome = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            {album?.members && album.members.filter(m => m.id !== currentUserId).length === 0 ? (
+            {otherMembersCount === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
-                <p>Todavía no hay otros miembros en este álbum</p>
+                <p>{t('albumHome.noOtherMembers')}</p>
               </div>
             ) : (
               <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
@@ -325,6 +379,36 @@ export const AlbumHome = () => {
                 ))}
               </div>
             </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Deactivate Album Dialog */}
+        <Dialog open={deactivateDialogOpen} onOpenChange={setDeactivateDialogOpen}>
+          <DialogContent data-testid="deactivate-dialog">
+            <DialogHeader>
+              <DialogTitle>{t('albums.deactivate')}</DialogTitle>
+              <DialogDescription>
+                {t('albums.deactivateQuestion')}
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter className="gap-2 sm:gap-0">
+              <Button
+                data-testid="cancel-deactivate-btn"
+                variant="outline"
+                onClick={() => setDeactivateDialogOpen(false)}
+                disabled={deactivating}
+              >
+                {t('common.cancel')}
+              </Button>
+              <Button
+                data-testid="confirm-deactivate-btn"
+                variant="destructive"
+                onClick={handleDeactivateAlbum}
+                disabled={deactivating}
+              >
+                {deactivating ? t('common.loading') : t('albums.deactivateConfirm')}
+              </Button>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
       </div>
