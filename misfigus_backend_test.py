@@ -297,8 +297,8 @@ class MisFigusAPITester:
             expected_status=401
         )
         
-        # Note: FastAPI might return 422 for missing auth, so we check for non-200
-        actual_success = not success  # We expect this to fail
+        # We expect this to fail with 401, so success means it properly denied access
+        actual_success = success  # We expect this to return 401
         self.log_test("Unauthenticated access denied", actual_success, 
                      "Should deny access without token")
         
