@@ -50,7 +50,7 @@ export const AlbumHome = () => {
       const response = await api.post(`/albums/${albumId}/invites`);
       const link = `${window.location.origin}/join/${response.data.token}`;
       setInviteLink(link);
-      toast.success('Link generado');
+      toast.success(t('invite.generate'));
     } catch (error) {
       toast.error(error.response?.data?.detail || t('common.error'));
     }
