@@ -126,10 +126,9 @@ export const AlbumHome = () => {
     }
   };
 
-  // Calculate other members count (excluding current user)
-  const otherMembersCount = album?.members 
-    ? Math.max(album.members.filter(m => m.id !== currentUserId).length, 0)
-    : 0;
+  // Backend now returns only OTHER members (excluding current user)
+  // So we can use the count directly
+  const otherMembersCount = album?.member_count ?? 0;
 
   // Get member count display string with proper singular/plural
   const getMemberCountDisplay = () => {
