@@ -108,7 +108,7 @@ const resources = {
       profile: {
         title: 'Mi Perfil',
         displayName: 'Nombre y apellido',
-        displayNamePlaceholder: 'Ej: Jonathan Bordón',
+        displayNamePlaceholder: 'Ejemplo: Juan Pérez',
         email: 'Correo electrónico',
         save: 'Guardar cambios',
         saved: 'Perfil actualizado correctamente'
