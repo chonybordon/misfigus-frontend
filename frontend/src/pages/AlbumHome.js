@@ -159,9 +159,9 @@ export const AlbumHome = () => {
               {album?.members?.map((member) => (
                 <div key={member.id} className="flex items-center gap-2 p-2 rounded-lg bg-muted">
                   <div className="h-8 w-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-sm">
-                    {member.full_name[0].toUpperCase()}
+                    {getDisplayName(member, t)[0].toUpperCase()}
                   </div>
-                  <span className="text-sm font-medium truncate">{member.full_name}</span>
+                  <span className="text-sm font-medium truncate">{getDisplayName(member, t)}</span>
                 </div>
               ))}
             </div>
