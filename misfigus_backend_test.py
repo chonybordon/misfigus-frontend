@@ -313,8 +313,8 @@ class MisFigusAPITester:
                 expected_status=403  # or 404
             )
             
-            # We expect this to fail with 403 or 404
-            actual_success = not success
+            # We expect this to fail with 403 or 404, so success means it properly denied access
+            actual_success = success  # We expect this to return 403/404
             self.log_test("Non-existent album access denied", actual_success,
                          "Should return error for non-existent album")
 
