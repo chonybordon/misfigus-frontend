@@ -104,7 +104,7 @@ export const Offers = () => {
                 .filter((item) => item.direction === 'get')
                 .map((item, idx) => (
                   <div key={idx} className="text-sm bg-muted p-2 rounded">
-                    Figurita #{item.sticker_id.slice(-4)} (x{item.qty})
+                    {t('offers.sticker')} #{item.sticker_id.slice(-4)} (x{item.qty})
                   </div>
                 ))}
             </div>
