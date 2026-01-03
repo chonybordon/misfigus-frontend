@@ -99,6 +99,19 @@ export const Login = () => {
           </form>
         ) : (
           <form onSubmit={handleVerifyOTP} className="space-y-6" data-testid="otp-form">
+            {devOtp && (
+              <div className="bg-amber-100 border-2 border-amber-500 rounded-lg p-4 mb-4" data-testid="dev-otp-display">
+                <p className="text-sm font-semibold text-amber-900 mb-2">
+                  🔐 DEV MODE - Your OTP Code:
+                </p>
+                <div className="bg-white rounded px-4 py-3 text-center">
+                  <p className="text-3xl font-black text-primary tracking-widest">{devOtp}</p>
+                </div>
+                <p className="text-xs text-amber-800 mt-2">
+                  This is displayed for testing only. Check backend logs for details.
+                </p>
+              </div>
+            )}
             <div className="flex flex-col items-center space-y-4">
               <InputOTP
                 data-testid="otp-input"
