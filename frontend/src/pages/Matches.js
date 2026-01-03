@@ -82,9 +82,9 @@ export const Matches = () => {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <div className="h-10 w-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold">
-                      {match.user.full_name[0].toUpperCase()}
+                      {getDisplayName(match.user, t)[0].toUpperCase()}
                     </div>
-                    <span>{match.user.full_name}</span>
+                    <span>{getDisplayName(match.user, t)}</span>
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
