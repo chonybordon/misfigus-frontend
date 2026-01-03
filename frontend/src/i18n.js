@@ -73,7 +73,8 @@ const resources = {
         youGive: 'Das',
         youGet: 'Recibes',
         noMatches: 'No hay intercambios disponibles',
-        updateInventory: 'Actualiza tu inventario para encontrar intercambios'
+        updateInventory: 'Actualiza tu inventario para encontrar intercambios',
+        netGain: 'Ganas'
       },
       offers: {
         title: 'Ofertas',
