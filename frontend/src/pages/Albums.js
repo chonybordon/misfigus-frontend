@@ -6,10 +6,14 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Settings as SettingsIcon, ChevronRight } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 
 export const Albums = () => {
   const [albums, setAlbums] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [activationDialogOpen, setActivationDialogOpen] = useState(false);
+  const [selectedAlbum, setSelectedAlbum] = useState(null);
+  const [activating, setActivating] = useState(false);
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { user } = useContext(AuthContext);
@@ -30,26 +34,64 @@ export const Albums = () => {
   };
 
   const handleAlbumClick = (album) => {
-    if (album.status === 'coming_soon') {
+    if (album.user_state === 'coming_soon') {
       return;
     }
     
-    if (album.is_member) {
+    if (album.user_state === 'active') {
       navigate(`/albums/${album.id}`);
-    } else {
-      // For ACTIVE albums, join directly without invitation
-      joinAlbum(album.id);
+    } else if (album.user_state === 'inactive') {
+      setSelectedAlbum(album);
+      setActivationDialogOpen(true);
     }
   };
 
-  const joinAlbum = async (albumId) => {
+  const handleActivateAlbum = async () => {
+    if (!selectedAlbum) return;
+    
+    setActivating(true);
     try {
-      await api.post(`/albums/${albumId}/join`);
-      toast.success(t('albumHome.joinedSuccess'));
-      fetchAlbums(); // Refresh to update membership status
-      navigate(`/albums/${albumId}`);
+      await api.post(`/albums/${selectedAlbum.id}/activate`);
+      toast.success(t('albums.activateSuccess'));
+      setActivationDialogOpen(false);
+      fetchAlbums(); // Refresh albums list
+      navigate(`/albums/${selectedAlbum.id}`);
     } catch (error) {
-      toast.error(error.response?.data?.detail || t('common.error'));
+      toast.error(error.response?.data?.detail || t('albums.activateError'));
+    } finally {
+      setActivating(false);
+    }
+  };
+
+  const getAlbumBadge = (userState) => {
+    if (userState === 'active') {
+      return (
+        <Badge className="bg-green-500 text-white">
+          {t('albums.active')}
+        </Badge>
+      );
+    } else if (userState === 'inactive') {
+      return (
+        <Badge variant="secondary" className="bg-gray-400 text-white">
+          {t('albums.inactive')}
+        </Badge>
+      );
+    } else {
+      return (
+        <Badge variant="secondary" className="bg-gray-400 text-white">
+          {t('albums.comingSoon')}
+        </Badge>
+      );
+    }
+  };
+
+  const getAlbumStyles = (userState) => {
+    if (userState === 'active') {
+      return 'hover:shadow-md cursor-pointer border-2 hover:border-primary';
+    } else if (userState === 'inactive') {
+      return 'hover:shadow-md cursor-pointer border-2 border-dashed opacity-75 hover:opacity-100';
+    } else {
+      return 'opacity-50 cursor-not-allowed border-2 border-dashed';
     }
   };
 
@@ -93,24 +135,13 @@ export const Albums = () => {
               <div
                 key={album.id}
                 data-testid={`album-item-${album.id}`}
-                className={`bg-white rounded-lg p-4 flex items-center justify-between transition-all ${
-                  album.status === 'coming_soon'
-                    ? 'opacity-50 cursor-not-allowed'
-                    : album.is_member
-                    ? 'hover:shadow-md cursor-pointer border-2 hover:border-primary'
-                    : 'cursor-not-allowed border-2 border-dashed'
-                }`}
+                className={`bg-white rounded-lg p-4 flex items-center justify-between transition-all ${getAlbumStyles(album.user_state)}`}
                 onClick={() => handleAlbumClick(album)}
               >
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-1">
                     <h3 className="text-lg font-bold">{album.name}</h3>
-                    <Badge
-                      variant={album.status === 'active' ? 'default' : 'secondary'}
-                      className={album.status === 'active' ? 'bg-green-500' : 'bg-gray-400'}
-                    >
-                      {album.status === 'active' ? t('albums.active') : t('albums.comingSoon')}
-                    </Badge>
+                    {getAlbumBadge(album.user_state)}
                   </div>
                   <div className="flex items-center gap-4 text-sm text-muted-foreground">
                     <span>{album.year}</span>
@@ -132,13 +163,49 @@ export const Albums = () => {
                     )}
                   </div>
                 </div>
-                {album.is_member && album.status === 'active' && (
+                {album.user_state === 'active' && (
                   <ChevronRight className="h-5 w-5 text-muted-foreground" />
                 )}
               </div>
             ))}
           </div>
         )}
+
+        <Dialog open={activationDialogOpen} onOpenChange={setActivationDialogOpen}>
+          <DialogContent data-testid="activation-dialog">
+            <DialogHeader>
+              <DialogTitle>{t('albums.activate')}</DialogTitle>
+            </DialogHeader>
+            <div className="py-4">
+              <p className="text-lg mb-4">{t('albums.activateQuestion')}</p>
+              {selectedAlbum && (
+                <div className="bg-muted p-4 rounded-lg">
+                  <p className="font-bold text-lg">{selectedAlbum.name}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {selectedAlbum.year} • {selectedAlbum.category}
+                  </p>
+                </div>
+              )}
+            </div>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => setActivationDialogOpen(false)}
+                disabled={activating}
+              >
+                {t('common.cancel')}
+              </Button>
+              <Button
+                data-testid="confirm-activate-btn"
+                onClick={handleActivateAlbum}
+                disabled={activating}
+                className="btn-primary"
+              >
+                {activating ? t('common.loading') : t('albums.activateConfirm')}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );
