@@ -78,12 +78,27 @@ async def get_me(user_id: str = Depends(get_current_user)):
 async def get_albums(user_id: str = Depends(get_current_user)):
     all_albums = await db.albums.find({}, {"_id": 0}).to_list(100)
     
-    user_album_ids = []
+    # Get user's album activations
+    activations = await db.user_album_activations.find({"user_id": user_id}, {"_id": 0}).to_list(100)
+    activated_album_ids = [a['album_id'] for a in activations]
+    
+    # Get user's memberships
     memberships = await db.album_members.find({"user_id": user_id}, {"_id": 0}).to_list(100)
-    user_album_ids = [m['album_id'] for m in memberships]
+    member_album_ids = [m['album_id'] for m in memberships]
     
     for album in all_albums:
-        album['is_member'] = album['id'] in user_album_ids
+        # Determine state per user
+        if album['id'] in activated_album_ids:
+            album['user_state'] = 'active'
+            album['is_member'] = album['id'] in member_album_ids
+        elif album['status'] == 'active':
+            # FIFA Qatar 2022 or other albums marked as 'active' in DB are INACTIVE by default
+            album['user_state'] = 'inactive'
+            album['is_member'] = False
+        else:
+            # Albums with status 'coming_soon' remain coming_soon
+            album['user_state'] = 'coming_soon'
+            album['is_member'] = False
         
         if album['is_member']:
             member_count = await db.album_members.count_documents({"album_id": album['id']})
