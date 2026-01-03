@@ -36,7 +36,10 @@ const resources = {
         offers: 'Ofertas',
         invite: 'Invitar',
         progress: 'Progreso',
-        completed: 'completado'
+        completed: 'completado',
+        manageInventory: 'Gestiona tus figuritas, duplicados y faltantes',
+        findTrades: 'Encuentra intercambios con otros coleccionistas',
+        joinedSuccess: 'Te has unido al álbum'
       },
       invite: {
         title: 'Invitar al Álbum',
