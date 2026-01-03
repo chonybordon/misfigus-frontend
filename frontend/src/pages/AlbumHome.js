@@ -141,7 +141,7 @@ export const AlbumHome = () => {
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground">
-                Encuentra intercambios con otros coleccionistas
+                {t('albumHome.findTrades')}
               </p>
             </CardContent>
           </Card>
