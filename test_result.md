@@ -116,6 +116,9 @@ backend:
       - working: true
         agent: "main"
         comment: "DELETE /api/albums/{album_id}/deactivate endpoint implemented, tested via curl"
+      - working: true
+        agent: "testing"
+        comment: "COMPREHENSIVE BACKEND TESTING COMPLETED - All core APIs working perfectly. Authentication flow (send-otp, verify-otp) working with dev_otp field. Album features fully functional: GET /api/albums returns proper user_state field, POST /api/albums/{id}/activate works correctly, DELETE /api/albums/{id}/deactivate preserves inventory and updates state, GET /api/albums/{id} returns member lists correctly. Member count logic working. Error handling proper (401 for unauth, 403 for non-member access). All 15 test scenarios passed including edge cases."
 
 frontend:
   - task: "i18n integration - all components use translation keys"
