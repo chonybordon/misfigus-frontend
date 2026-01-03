@@ -96,6 +96,7 @@ function App() {
           <Route path="/albums/:albumId/matches" element={<PrivateRoute><Matches /></PrivateRoute>} />
           <Route path="/albums/:albumId/offers" element={<PrivateRoute><Offers /></PrivateRoute>} />
           <Route path="/settings" element={<PrivateRoute><Settings /></PrivateRoute>} />
+          <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
           <Route path="/join/:token" element={<JoinAlbum />} />
         </Routes>
         <Toaster position="top-center" richColors />
