@@ -1,0 +1,83 @@
+{
+  "timestamp": "2026-01-03T23:23:04.226438",
+  "tests_run": 15,
+  "tests_passed": 13,
+  "success_rate": 86.66666666666667,
+  "results": [
+    {
+      "test": "Send OTP",
+      "success": true,
+      "details": "Status: 200"
+    },
+    {
+      "test": "Verify OTP",
+      "success": true,
+      "details": "Status: 200"
+    },
+    {
+      "test": "Get Albums",
+      "success": true,
+      "details": "Status: 200"
+    },
+    {
+      "test": "Albums have user_state field",
+      "success": true,
+      "details": "All albums should have user_state field"
+    },
+    {
+      "test": "Activate Album",
+      "success": true,
+      "details": "Status: 200"
+    },
+    {
+      "test": "Get Album Details",
+      "success": true,
+      "details": "Status: 200"
+    },
+    {
+      "test": "User in album members list",
+      "success": true,
+      "details": "Current user should be in members list. Found 5 members"
+    },
+    {
+      "test": "Album state is active after activation",
+      "success": true,
+      "details": "Album user_state: active"
+    },
+    {
+      "test": "Deactivate Album",
+      "success": true,
+      "details": "Status: 200"
+    },
+    {
+      "test": "Album state is inactive after deactivation",
+      "success": true,
+      "details": "Album user_state: inactive"
+    },
+    {
+      "test": "Activate Another Album",
+      "success": true,
+      "details": "Status: 200"
+    },
+    {
+      "test": "Album has member count",
+      "success": true,
+      "details": "Member count: 5"
+    },
+    {
+      "test": "Invalid OTP returns 400",
+      "success": true,
+      "details": "Status: 400"
+    },
+    {
+      "test": "Unauthenticated access denied",
+      "success": false,
+      "details": "Should deny access without token"
+    },
+    {
+      "test": "Non-existent album access denied",
+      "success": false,
+      "details": "Should return error for non-existent album"
+    }
+  ]
+}
