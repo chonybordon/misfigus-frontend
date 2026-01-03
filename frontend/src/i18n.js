@@ -102,7 +102,25 @@ const resources = {
         language: 'Idioma',
         spanish: 'Español',
         english: 'English',
-        logout: 'Cerrar Sesión'
+        logout: 'Cerrar Sesión',
+        profile: 'Mi Perfil'
+      },
+      profile: {
+        title: 'Mi Perfil',
+        displayName: 'Nombre y apellido',
+        displayNamePlaceholder: 'Ej: Jonathan Bordón',
+        email: 'Correo electrónico',
+        save: 'Guardar cambios',
+        saved: 'Perfil actualizado correctamente'
+      },
+      members: {
+        title: 'Miembros',
+        viewAll: 'Ver todos',
+        creator: 'Creador',
+        member: 'Miembro',
+        testUser: 'Usuario de prueba',
+        newTestUser: 'Nuevo usuario (prueba)',
+        technicalAccount: 'Cuenta técnica (prueba)'
       },
       common: {
         loading: 'Cargando...',
