@@ -10,7 +10,7 @@ from datetime import datetime, timedelta, timezone
 import json
 
 from models import (
-    User, UserCreate, OTPVerify, Album, AlbumMember, Sticker, 
+    User, UserCreate, UserUpdate, OTPVerify, Album, AlbumMember, Sticker, 
     UserInventory, InventoryUpdate, InviteToken, InviteCreate,
     Offer, OfferCreate, OfferUpdate, OfferItem
 )
