@@ -66,7 +66,9 @@ const resources = {
         have: 'Tengo',
         duplicates: 'Duplicados',
         owned: 'Tengo',
-        duplicate: 'Duplicado'
+        duplicate: 'Duplicado',
+        noDuplicates: 'No tienes duplicados todavía',
+        noStickers: 'No se encontraron figuritas'
       },
       matches: {
         title: 'Intercambios Sugeridos',
