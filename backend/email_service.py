@@ -74,6 +74,15 @@ def send_otp_email(email: str, otp: str) -> bool:
     logger.info(f"[OTP] Attempting to send OTP email to: {email}")
     logger.info(f"[OTP] From: {sender}")
     
+    # In DEV_MODE, always log OTP to console for testing
+    dev_mode = os.environ.get('DEV_MODE', 'false').lower() == 'true'
+    if dev_mode:
+        logger.warning("="*50)
+        logger.warning(f"[OTP] DEV MODE - OTP for testing")
+        logger.warning(f"[OTP] To: {email}")
+        logger.warning(f"[OTP] OTP: {otp}")
+        logger.warning("="*50)
+    
     if get_resend_configured():
         logger.info(f"[OTP] Resend configured, attempting to send...")
         try:
