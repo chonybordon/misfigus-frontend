@@ -409,7 +409,7 @@ class MisFigusAlbumTester:
         
         self.log_test(
             "Invalid album ID returns 404", 
-            not success,  # Should fail with 404
+            success,  # Should succeed in getting 404 error
             f"Correctly returned error: {response}"
         )
         
