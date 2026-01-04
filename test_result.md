@@ -102,10 +102,10 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Complete i18n integration, member count logic (excluding current user), album deactivation feature, and language selector with 6 languages"
+user_problem_statement: "Production-ready cleanup: consistent member counts, remove test users, DEV-only OTP display"
 
 backend:
-  - task: "Album deactivation endpoint"
+  - task: "Member count helpers - exclude current user"
     implemented: true
     working: true
     file: "backend/server.py"
@@ -115,92 +115,72 @@ backend:
     status_history:
       - working: true
         agent: "main"
-        comment: "DELETE /api/albums/{album_id}/deactivate endpoint implemented, tested via curl"
+        comment: "Added get_other_members_count() and get_other_members_list() helpers. Both album list and album details use these for consistent counting."
+
+  - task: "DEV_OTP_MODE flag"
+    implemented: true
+    working: true
+    file: "backend/server.py, backend/.env"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
       - working: true
-        agent: "testing"
-        comment: "COMPREHENSIVE BACKEND TESTING COMPLETED - All core APIs working perfectly. Authentication flow (send-otp, verify-otp) working with dev_otp field. Album features fully functional: GET /api/albums returns proper user_state field, POST /api/albums/{id}/activate works correctly, DELETE /api/albums/{id}/deactivate preserves inventory and updates state, GET /api/albums/{id} returns member lists correctly. Member count logic working. Error handling proper (401 for unauth, 403 for non-member access). All 15 test scenarios passed including edge cases."
+        agent: "main"
+        comment: "Added DEV_OTP_MODE env variable. OTP only returned in response when DEV_OTP_MODE=true."
+
+  - task: "Database cleanup script"
+    implemented: true
+    working: true
+    file: "backend/cleanup_db.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Created cleanup_db.py script. Executed and removed 21 test users and related data."
 
 frontend:
-  - task: "i18n integration - all components use translation keys"
+  - task: "Consistent member count display"
     implemented: true
     working: true
-    file: "frontend/src/i18n.js, frontend/src/pages/*.js"
+    file: "frontend/src/pages/Albums.js, frontend/src/pages/AlbumHome.js"
     stuck_count: 0
     priority: "high"
     needs_retesting: false
     status_history:
       - working: true
         agent: "main"
-        comment: "All hardcoded strings replaced with t() translation keys. Verified via screenshots."
-      - working: true
-        agent: "testing"
-        comment: "✅ TESTED - i18n integration working perfectly. All 6 languages present in dropdown (Español, English, Português, Français, Deutsch, Italiano). Language switching works correctly from Spanish to English. All UI elements properly translated including login page, albums page, settings page, and inventory page. Translation keys properly implemented throughout the application."
+        comment: "Both pages now use backend's member_count directly. Verified: Qatar shows '3 miembros' on both album list and album home."
 
-  - task: "Member count logic - exclude current user"
+  - task: "DEV OTP box conditional display"
     implemented: true
     working: true
-    file: "frontend/src/pages/AlbumHome.js"
+    file: "frontend/src/pages/Login.js"
     stuck_count: 0
     priority: "high"
     needs_retesting: false
     status_history:
       - working: true
         agent: "main"
-        comment: "Header shows otherMembersCount = members.filter(m => m.id !== currentUserId).length. Tested: 0 miembros (alone), 1 miembro (singular), 3 miembros (plural). Empty state message shows when alone."
-      - working: true
-        agent: "testing"
-        comment: "✅ TESTED - Member count logic working correctly. Displays '5 miembros' (excluding current user) with proper plural form. Empty state message 'Todavía no hay otros miembros en este álbum' displays when user is alone. Member count calculation properly excludes current user from the total count."
-
-  - task: "Album deactivation UI with confirmation modal"
-    implemented: true
-    working: true
-    file: "frontend/src/pages/AlbumHome.js"
-    stuck_count: 0
-    priority: "high"
-    needs_retesting: false
-    status_history:
-      - working: true
-        agent: "main"
-        comment: "Settings icon in header opens dropdown with 'Desactivar álbum' option. Confirmation modal with Cancelar/Desactivar buttons. On confirm, calls DELETE endpoint and redirects to albums."
-      - working: true
-        agent: "testing"
-        comment: "✅ TESTED - Album deactivation flow working perfectly. Settings gear icon visible in album header. Clicking opens dropdown with 'Desactivar álbum' option. Confirmation modal appears with title 'Desactivar álbum', message 'Podrás volver a activarlo cuando quieras. Tu inventario no se borra.', and both 'Cancelar' and 'Desactivar' buttons. Modal closes properly when Cancelar is clicked."
-
-  - task: "Language selector with 6 languages"
-    implemented: true
-    working: true
-    file: "frontend/src/pages/Settings.js"
-    stuck_count: 0
-    priority: "high"
-    needs_retesting: false
-    status_history:
-      - working: true
-        agent: "main"
-        comment: "Dropdown selector with Español, English, Português, Français, Deutsch, Italiano. Language switch updates UI immediately. Tested switching es->en."
-      - working: true
-        agent: "testing"
-        comment: "✅ TESTED - Language selector working perfectly. Settings page shows 'Configuración' title in Spanish. Language dropdown contains all 6 required languages: Español, English, Português, Français, Deutsch, Italiano. Language switching from Spanish to English works correctly, updating UI elements like 'Settings', 'My Profile', 'Language', 'Logout'. Inventory page translations also work correctly with 'My Inventory', 'Search stickers...', 'All', 'Missing', 'Have', 'Duplicates' tabs."
+        comment: "OTP box only renders when API returns dev_otp. Shows 'check your email' message in production mode."
 
 metadata:
   created_by: "main_agent"
-  version: "1.0"
-  test_sequence: 1
+  version: "2.0"
+  test_sequence: 2
   run_ui: true
 
 test_plan:
   current_focus:
-    - "i18n integration - all pages"
-    - "Member count logic"
-    - "Album deactivation flow"
-    - "Language selector"
+    - "Member count consistency between album list and album home"
+    - "No test users in members list"
+    - "DEV OTP mode working"
   stuck_tasks: []
   test_all: true
   test_priority: "high_first"
 
 agent_communication:
   - agent: "main"
-    message: "Implemented all 4 requested features: 1) i18n integration with 6 languages, 2) Member count excluding current user with proper singular/plural, 3) Album deactivation with settings icon and confirmation modal, 4) Language dropdown selector in Settings. Please test: login flow, album list, album home (member count 0/1/N cases), deactivation flow, settings language switching, inventory page translations."
-  - agent: "testing"
-    message: "BACKEND TESTING COMPLETE ✅ - All MisFigus sticker trading app backend APIs are working perfectly. Tested authentication flow (send-otp with dev_otp field, verify-otp), album management (list albums with user_state, activate/deactivate albums, get album details with members), and error scenarios. All 15 test cases passed. The backend is production-ready. Key findings: 1) Authentication works with proper OTP flow, 2) Album activation/deactivation preserves inventory correctly, 3) Member lists include current user after activation, 4) User state transitions work (inactive→active→inactive), 5) Error handling is proper (401/403 responses). No critical issues found."
-  - agent: "testing"
-    message: "FRONTEND TESTING COMPLETE ✅ - Comprehensive testing of all requested MisFigus features completed successfully. All core functionality working: 1) Login flow with OTP works perfectly (DEV MODE OTP display, email verification), 2) Albums page shows Spanish 'Selecciona un álbum' text with INACTIVO/ACTIVO badges and activation dialog, 3) Album home page displays correct member count logic (5 miembros excluding current user), empty state message when alone, 4) Album deactivation flow works with settings gear icon, dropdown menu, confirmation modal with proper Spanish text, 5) Settings page shows 'Configuración' title with language selector containing all 6 languages (Español, English, Português, Français, Deutsch, Italiano), 6) Language switching works (Spanish to English), 7) Inventory page translations work correctly. All i18n integration, member count logic, deactivation features, and language selector functioning as expected. No critical issues found."
+    message: "Production cleanup complete. Verified: (1) Member counts consistent (3 miembros in both views), (2) Test users removed from DB, (3) DEV_OTP_MODE controls OTP display. Please test: login flow, album list member counts, album home member counts, invite flow."
