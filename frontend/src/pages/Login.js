@@ -25,7 +25,13 @@ export const Login = () => {
       toast.success(t('login.otpSent'));
       setStep('otp');
     } catch (error) {
-      toast.error(error.response?.data?.detail || t('common.error'));
+      const errorDetail = error.response?.data?.detail;
+      // Map backend errors to localized messages
+      if (errorDetail === 'No OTP requested for this email') {
+        toast.error(t('login.otpNotRequested'));
+      } else {
+        toast.error(t('common.error'));
+      }
     } finally {
       setLoading(false);
     }
@@ -40,7 +46,17 @@ export const Login = () => {
       toast.success(t('common.success'));
       navigate('/groups');
     } catch (error) {
-      toast.error(error.response?.data?.detail || t('common.error'));
+      const errorDetail = error.response?.data?.detail;
+      // Map backend errors to localized messages
+      if (errorDetail === 'Invalid OTP') {
+        toast.error(t('login.otpInvalid'));
+      } else if (errorDetail === 'OTP expired') {
+        toast.error(t('login.otpExpired'));
+      } else if (errorDetail === 'No OTP requested for this email') {
+        toast.error(t('login.otpNotRequested'));
+      } else {
+        toast.error(t('common.error'));
+      }
     } finally {
       setLoading(false);
     }
