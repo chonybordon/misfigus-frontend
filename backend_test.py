@@ -101,17 +101,14 @@ class MisFigusAlbumTester:
             log_lines = result.stdout.split('\n')
             otp_code = None
             
+            # Look for the most recent OTP for our test email
             for line in reversed(log_lines):
-                if "DEV MODE" in line and "OTP for testing" in line:
-                    # Look for the OTP in the next few lines
-                    idx = log_lines.index(line)
-                    for i in range(idx, min(idx + 5, len(log_lines))):
-                        if "[OTP] OTP:" in log_lines[i]:
-                            parts = log_lines[i].split("[OTP] OTP:")
-                            if len(parts) > 1:
-                                otp_code = parts[1].strip()
-                                break
-                    break
+                if "[OTP] OTP:" in line:
+                    # Extract OTP from log line
+                    parts = line.split("[OTP] OTP:")
+                    if len(parts) > 1:
+                        otp_code = parts[1].strip()
+                        break
             
             if otp_code:
                 print(f"✅ Found OTP in logs: {otp_code}")
