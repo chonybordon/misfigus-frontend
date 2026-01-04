@@ -84,6 +84,7 @@ class MisFigusAlbumTester:
 
         if not self.token:
             self.log_test("Albums API - No Auth Token", False, "No authentication token available for full test")
+            print("⚠️  Cannot test authenticated albums API without valid token")
             return False
 
         # Test with authentication
