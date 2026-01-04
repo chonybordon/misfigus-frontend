@@ -215,6 +215,7 @@ const resources = {
         subtitle: 'Trade stickers with your album',
         emailPlaceholder: 'Your email',
         sendOTP: 'Send Code',
+        otpSent: 'Code sent successfully. Check your email.',
         otpPlaceholder: '6-digit code',
         verify: 'Verify',
         resend: 'Resend Code',
