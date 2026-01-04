@@ -162,6 +162,9 @@ frontend:
       - working: true
         agent: "main"
         comment: "Both pages now use backend's member_count directly. Verified: Qatar shows '3 miembros' on both album list and album home."
+      - working: true
+        agent: "testing"
+        comment: "SMOKE TEST VERIFIED: Member count consistency confirmed. Albums list shows '5 miembros', Album home header shows '5 miembros' - CONSISTENT. Current user (smoketest@gmail.com) correctly excluded from count and members display."
 
   - task: "DEV OTP box conditional display"
     implemented: true
