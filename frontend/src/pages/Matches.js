@@ -49,7 +49,9 @@ const getDisplayName = (user, t) => {
 };
 
 export const Matches = () => {
-  const { groupId } = useParams();
+  const { groupId, albumId } = useParams();
+  const contextId = groupId || albumId; // Support both group and album routes
+  const isGroupContext = !!groupId;
   const [matches, setMatches] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
@@ -57,17 +59,31 @@ export const Matches = () => {
 
   useEffect(() => {
     fetchMatches();
-  }, [groupId]);
+  }, [contextId]);
 
   const fetchMatches = async () => {
     try {
-      const response = await api.get(`/groups/${groupId}/matches`);
+      // Use group endpoint if groupId, otherwise album endpoint
+      const endpoint = isGroupContext 
+        ? `/groups/${contextId}/matches`
+        : `/matches?album_id=${contextId}`;
+      const response = await api.get(endpoint);
       setMatches(response.data);
     } catch (error) {
       toast.error(error.response?.data?.detail || t('common.error'));
     } finally {
       setLoading(false);
     }
+  };
+
+  // Get back navigation path
+  const getBackPath = () => {
+    return isGroupContext ? `/groups/${contextId}` : `/albums/${contextId}`;
+  };
+
+  // Get inventory path
+  const getInventoryPath = () => {
+    return isGroupContext ? `/groups/${contextId}/inventory` : `/albums/${contextId}/inventory`;
   };
 
   if (loading) {
@@ -83,10 +99,10 @@ export const Matches = () => {
       <div className="max-w-4xl mx-auto p-6">
         <div className="flex items-center gap-4 mb-8">
           <Button
-            data-testid="back-to-group-btn"
+            data-testid="back-btn"
             variant="outline"
             size="icon"
-            onClick={() => navigate(`/groups/${groupId}`)}
+            onClick={() => navigate(getBackPath())}
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
