@@ -10,7 +10,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ArrowLeft, Search, Plus, Minus } from 'lucide-react';
 
 export const Inventory = () => {
-  const { groupId } = useParams();
+  const { groupId, albumId } = useParams();
+  const contextId = groupId || albumId; // Support both group and album routes
+  const isGroupContext = !!groupId;
   const [stickers, setStickers] = useState([]);
   const [filteredStickers, setFilteredStickers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -21,7 +23,7 @@ export const Inventory = () => {
 
   useEffect(() => {
     fetchInventory();
-  }, [groupId]);
+  }, [contextId]);
 
   useEffect(() => {
     applyFilters();
@@ -29,7 +31,11 @@ export const Inventory = () => {
 
   const fetchInventory = async () => {
     try {
-      const response = await api.get(`/groups/${groupId}/inventory`);
+      // Use group endpoint if groupId, otherwise album endpoint
+      const endpoint = isGroupContext 
+        ? `/groups/${contextId}/inventory`
+        : `/inventory?album_id=${contextId}`;
+      const response = await api.get(endpoint);
       setStickers(response.data);
     } catch (error) {
       toast.error(error.response?.data?.detail || t('common.error'));
