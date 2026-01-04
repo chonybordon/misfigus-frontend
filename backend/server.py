@@ -5,20 +5,24 @@ from motor.motor_asyncio import AsyncIOMotorClient
 import os
 import logging
 from pathlib import Path
-from typing import List
+from typing import List, Optional
 from datetime import datetime, timedelta, timezone
 import json
 import re
 
 from models import (
-    User, UserCreate, UserUpdate, OTPVerify, Album, AlbumMember, Sticker, 
-    UserInventory, InventoryUpdate, InviteToken, InviteCreate,
-    Offer, OfferCreate, OfferUpdate, OfferItem
+    User, UserCreate, UserUpdate, OTPVerify, 
+    Album, Group, GroupMember, GroupCreate,
+    EmailInvite, EmailInviteCreate, EmailInviteAccept,
+    Sticker, UserInventory, InventoryUpdate,
+    Offer, OfferCreate, OfferUpdate, OfferItem,
+    Chat, ChatMessage
 )
-from auth import (
-    generate_otp, send_otp_email, store_otp, verify_otp,
-    create_token, get_current_user
+from email_service import (
+    generate_otp_code, generate_invite_code, hash_otp, verify_otp_hash,
+    send_otp_email, send_invite_email
 )
+from auth import create_token, get_current_user
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -28,14 +32,10 @@ client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
 
 # ============================================
-# ENVIRONMENT FLAGS (SOURCE OF TRUTH)
+# ENVIRONMENT FLAGS
 # ============================================
-# DEV_MODE: Enables dev-only endpoints like /api/dev/purge_test_data
-# DEV_OTP_MODE: Shows OTP on screen (for testing without email)
-# DEV_SEED: Allows seeding test data on startup
 DEV_MODE = os.environ.get('DEV_MODE', 'false').lower() == 'true'
-DEV_OTP_MODE = os.environ.get('DEV_OTP_MODE', 'false').lower() == 'true'
-DEV_SEED = os.environ.get('DEV_SEED', 'false').lower() == 'true'
+# DEV_OTP_MODE is REMOVED - OTP should NEVER be shown in UI
 
 app = FastAPI()
 api_router = APIRouter(prefix="/api")
@@ -46,80 +46,39 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# ============================================
-# TEST USER PATTERNS (for purging)
-# ============================================
-TEST_EMAIL_PATTERNS = [
-    r'@example\.com$',
-    r'owner_test',
-    r'friend[0-9]',
-    r'^test',
-    r'testuser',
-    r'testbackend',
-    r'frontendtest',
-    r'smoketest',
-    r'verifytest',
-    r'lonelyuser',
-    r'uniquealone',
-    r'loner@',
-    r'newreal@',
-    r'realuser@',
-]
-
-def is_test_email(email: str) -> bool:
-    """Check if email matches any test pattern."""
-    email_lower = email.lower()
-    for pattern in TEST_EMAIL_PATTERNS:
-        if re.search(pattern, email_lower):
-            return True
-    return False
+# OTP storage (in production, use Redis with TTL)
+OTP_STORE = {}  # {email: {hash: str, expires: datetime}}
 
 # ============================================
-# HELPER: Get album owner (first member who activated)
+# HELPER: Validate group membership
 # ============================================
-async def get_album_owner_id(album_id: str) -> str:
+async def validate_group_member(group_id: str, user_id: str) -> dict:
     """
-    Returns the owner of an album.
-    Owner = first user who joined the album (earliest created_at with invited_by_user_id=None)
+    Validate that user is an active member of the group.
+    Returns group data if valid, raises HTTPException otherwise.
     """
-    owner_membership = await db.album_members.find_one(
-        {
-            "album_id": album_id,
-            "invited_by_user_id": None
-        },
-        {"_id": 0, "user_id": 1, "created_at": 1},
-        sort=[("created_at", 1)]
+    group = await db.groups.find_one({"id": group_id}, {"_id": 0})
+    if not group:
+        raise HTTPException(status_code=404, detail="Group not found")
+    
+    membership = await db.group_members.find_one(
+        {"group_id": group_id, "user_id": user_id},
+        {"_id": 0}
     )
+    if not membership:
+        raise HTTPException(status_code=403, detail="Not a member of this group")
     
-    if owner_membership:
-        return owner_membership['user_id']
-    
-    first_member = await db.album_members.find_one(
-        {"album_id": album_id},
-        {"_id": 0, "user_id": 1},
-        sort=[("created_at", 1)]
-    )
-    
-    return first_member['user_id'] if first_member else None
+    return group
 
 # ============================================
-# HELPER: Get members EXCLUDING owner
+# HELPER: Get group members (excluding owner)
 # ============================================
-async def get_members_excluding_owner(album_id: str) -> tuple:
+async def get_group_members_excluding_user(group_id: str, exclude_user_id: str) -> tuple:
     """
-    Returns (members_list, member_count) EXCLUDING the album owner.
-    This is the SINGLE SOURCE OF TRUTH for member data.
+    Returns (members_list, member_count) excluding specified user.
     """
-    owner_id = await get_album_owner_id(album_id)
-    
-    if not owner_id:
-        return [], 0
-    
-    other_memberships = await db.album_members.find(
-        {
-            "album_id": album_id,
-            "user_id": {"$ne": owner_id}
-        },
+    other_memberships = await db.group_members.find(
+        {"group_id": group_id, "user_id": {"$ne": exclude_user_id}},
         {"_id": 0}
     ).to_list(100)
     
@@ -136,94 +95,23 @@ async def get_members_excluding_owner(album_id: str) -> tuple:
     return other_users, len(other_users)
 
 # ============================================
-# DEV ENDPOINTS (only active when DEV_MODE=true)
-# ============================================
-@api_router.post("/dev/purge_test_data")
-async def purge_test_data():
-    """Purge all test/seed users and their data. Only works when DEV_MODE=true."""
-    if not DEV_MODE:
-        raise HTTPException(status_code=403, detail="Dev endpoints disabled in production")
-    
-    # Find test users
-    all_users = await db.users.find({}, {"_id": 0, "id": 1, "email": 1}).to_list(10000)
-    test_users = [u for u in all_users if is_test_email(u['email'])]
-    test_user_ids = [u['id'] for u in test_users]
-    
-    if not test_users:
-        return {"message": "No test users found", "deleted_count": 0}
-    
-    deleted = {
-        "users": 0,
-        "memberships": 0,
-        "activations": 0,
-        "inventories": 0,
-        "invites": 0,
-        "offers": 0
-    }
-    
-    # Delete memberships
-    r = await db.album_members.delete_many({"user_id": {"$in": test_user_ids}})
-    deleted["memberships"] = r.deleted_count
-    
-    # Delete activations
-    r = await db.user_album_activations.delete_many({"user_id": {"$in": test_user_ids}})
-    deleted["activations"] = r.deleted_count
-    
-    # Delete inventories
-    r = await db.user_inventory.delete_many({"user_id": {"$in": test_user_ids}})
-    deleted["inventories"] = r.deleted_count
-    
-    # Delete invites
-    r = await db.invite_tokens.delete_many({"created_by_user_id": {"$in": test_user_ids}})
-    deleted["invites"] = r.deleted_count
-    
-    # Delete offers
-    r = await db.offers.delete_many({
-        "$or": [
-            {"from_user_id": {"$in": test_user_ids}},
-            {"to_user_id": {"$in": test_user_ids}}
-        ]
-    })
-    deleted["offers"] = r.deleted_count
-    
-    # Delete users
-    r = await db.users.delete_many({"id": {"$in": test_user_ids}})
-    deleted["users"] = r.deleted_count
-    
-    return {
-        "message": "Test data purged",
-        "purged_emails": [u['email'] for u in test_users],
-        "deleted": deleted
-    }
-
-@api_router.get("/dev/status")
-async def dev_status():
-    """Get dev mode status. Only works when DEV_MODE=true."""
-    if not DEV_MODE:
-        raise HTTPException(status_code=403, detail="Dev endpoints disabled in production")
-    
-    user_count = await db.users.count_documents({})
-    all_users = await db.users.find({}, {"_id": 0, "email": 1}).to_list(1000)
-    test_users = [u for u in all_users if is_test_email(u['email'])]
-    
-    return {
-        "DEV_MODE": DEV_MODE,
-        "DEV_OTP_MODE": DEV_OTP_MODE,
-        "DEV_SEED": DEV_SEED,
-        "total_users": user_count,
-        "test_users_count": len(test_users),
-        "test_users": [u['email'] for u in test_users]
-    }
-
-# ============================================
-# AUTH ENDPOINTS
+# AUTH ENDPOINTS (OTP never shown in UI)
 # ============================================
 @api_router.post("/auth/send-otp")
 async def send_otp(user_input: UserCreate):
-    otp = generate_otp()
-    store_otp(user_input.email, otp)
-    send_otp_email(user_input.email, otp)
+    """
+    Send OTP via email. OTP is NEVER returned in response.
+    """
+    otp = generate_otp_code()
+    otp_hash = hash_otp(otp)
     
+    # Store hashed OTP with expiry
+    OTP_STORE[user_input.email.lower()] = {
+        "hash": otp_hash,
+        "expires": datetime.now(timezone.utc) + timedelta(minutes=10)
+    }
+    
+    # Create user if doesn't exist
     user = await db.users.find_one({"email": user_input.email}, {"_id": 0})
     if not user:
         new_user = User(email=user_input.email, full_name=user_input.email.split('@')[0], verified=False)
@@ -231,17 +119,32 @@ async def send_otp(user_input: UserCreate):
         doc['created_at'] = doc['created_at'].isoformat()
         await db.users.insert_one(doc)
     
-    # Only return dev_otp when DEV_OTP_MODE is explicitly true
-    response = {"message": "OTP sent", "email": user_input.email}
-    if DEV_OTP_MODE:
-        response["dev_otp"] = otp
+    # Send OTP via email (logged to console if Resend not configured)
+    send_otp_email(user_input.email, otp)
     
-    return response
+    # NEVER return OTP in response
+    return {"message": "OTP sent", "email": user_input.email}
 
 @api_router.post("/auth/verify-otp")
 async def verify_otp_endpoint(otp_data: OTPVerify):
-    if not verify_otp(otp_data.email, otp_data.otp):
-        raise HTTPException(status_code=400, detail="Invalid or expired OTP")
+    """
+    Verify OTP code. Validates against stored hash.
+    """
+    email_lower = otp_data.email.lower()
+    stored = OTP_STORE.get(email_lower)
+    
+    if not stored:
+        raise HTTPException(status_code=400, detail="No OTP requested for this email")
+    
+    if datetime.now(timezone.utc) > stored['expires']:
+        del OTP_STORE[email_lower]
+        raise HTTPException(status_code=400, detail="OTP expired")
+    
+    if not verify_otp_hash(otp_data.otp, stored['hash']):
+        raise HTTPException(status_code=400, detail="Invalid OTP")
+    
+    # Clear used OTP
+    del OTP_STORE[email_lower]
     
     user = await db.users.find_one({"email": otp_data.email}, {"_id": 0})
     if not user:
@@ -265,276 +168,321 @@ async def get_me(user_id: str = Depends(get_current_user)):
 @api_router.patch("/auth/me")
 async def update_me(user_update: UserUpdate, user_id: str = Depends(get_current_user)):
     update_data = {k: v for k, v in user_update.model_dump().items() if v is not None}
-    
     if update_data:
-        await db.users.update_one(
-            {"id": user_id},
-            {"$set": update_data}
-        )
-    
+        await db.users.update_one({"id": user_id}, {"$set": update_data})
     user = await db.users.find_one({"id": user_id}, {"_id": 0})
     return user
 
 # ============================================
-# ALBUM ENDPOINTS
+# ALBUM ENDPOINTS (album templates)
 # ============================================
 @api_router.get("/albums")
 async def get_albums(user_id: str = Depends(get_current_user)):
+    """Get all album templates (catalog)."""
     all_albums = await db.albums.find({}, {"_id": 0}).to_list(100)
-    
-    activations = await db.user_album_activations.find({"user_id": user_id}, {"_id": 0}).to_list(100)
-    activated_album_ids = [a['album_id'] for a in activations]
-    
-    memberships = await db.album_members.find({"user_id": user_id}, {"_id": 0}).to_list(100)
-    member_album_ids = [m['album_id'] for m in memberships]
-    
-    for album in all_albums:
-        if album['id'] in activated_album_ids:
-            album['user_state'] = 'active'
-            album['is_member'] = album['id'] in member_album_ids
-        elif album['status'] == 'active':
-            album['user_state'] = 'inactive'
-            album['is_member'] = False
-        else:
-            album['user_state'] = 'coming_soon'
-            album['is_member'] = False
-        
-        if album['is_member']:
-            _, member_count = await get_members_excluding_owner(album['id'])
-            album['member_count'] = member_count
-            
-            sticker_count = await db.stickers.count_documents({"album_id": album['id']})
-            inventory_count = await db.user_inventory.count_documents({
-                "user_id": user_id,
-                "sticker_id": {"$in": [s['id'] async for s in db.stickers.find({"album_id": album['id']}, {"id": 1, "_id": 0})]},
-                "owned_qty": {"$gte": 1}
-            })
-            album['progress'] = round((inventory_count / sticker_count * 100) if sticker_count > 0 else 0, 1)
-    
     return all_albums
 
 @api_router.get("/albums/{album_id}")
 async def get_album(album_id: str, user_id: str = Depends(get_current_user)):
-    membership = await db.album_members.find_one({"album_id": album_id, "user_id": user_id}, {"_id": 0})
-    if not membership:
-        raise HTTPException(status_code=403, detail="Not a member of this album")
-    
+    """Get album template details."""
     album = await db.albums.find_one({"id": album_id}, {"_id": 0})
     if not album:
         raise HTTPException(status_code=404, detail="Album not found")
-    
-    members_list, member_count = await get_members_excluding_owner(album_id)
-    album['members'] = members_list
-    album['member_count'] = member_count
-    
-    owner_id = await get_album_owner_id(album_id)
-    album['owner_id'] = owner_id
-    album['is_owner'] = (user_id == owner_id)
-    
-    sticker_count = await db.stickers.count_documents({"album_id": album_id})
-    inventory_count = await db.user_inventory.count_documents({
-        "user_id": user_id,
-        "sticker_id": {"$in": [s['id'] async for s in db.stickers.find({"album_id": album_id}, {"id": 1, "_id": 0})]},
-        "owned_qty": {"$gte": 1}
-    })
-    album['progress'] = round((inventory_count / sticker_count * 100) if sticker_count > 0 else 0, 1)
-    
     return album
 
-@api_router.post("/albums/{album_id}/invites")
-async def create_invite(album_id: str, user_id: str = Depends(get_current_user)):
-    membership = await db.album_members.find_one({"album_id": album_id, "user_id": user_id}, {"_id": 0})
-    if not membership:
-        raise HTTPException(status_code=403, detail="Not a member of this album")
+# ============================================
+# GROUP ENDPOINTS (private album instances)
+# ============================================
+@api_router.get("/groups")
+async def get_my_groups(user_id: str = Depends(get_current_user)):
+    """
+    Get all groups the user is a member of.
+    """
+    memberships = await db.group_members.find({"user_id": user_id}, {"_id": 0}).to_list(100)
+    group_ids = [m['group_id'] for m in memberships]
     
-    invite = InviteToken(
-        album_id=album_id,
-        created_by_user_id=user_id,
-        expires_at=datetime.now(timezone.utc) + timedelta(hours=1)
+    if not group_ids:
+        return []
+    
+    groups = await db.groups.find({"id": {"$in": group_ids}}, {"_id": 0}).to_list(100)
+    
+    # Enrich with album info and member count
+    for group in groups:
+        album = await db.albums.find_one({"id": group['album_id']}, {"_id": 0})
+        group['album'] = album
+        
+        # Get member count excluding current user
+        _, member_count = await get_group_members_excluding_user(group['id'], user_id)
+        group['member_count'] = member_count
+        
+        # Check if user is owner
+        group['is_owner'] = (group['owner_id'] == user_id)
+        
+        # Calculate progress
+        sticker_count = await db.stickers.count_documents({"album_id": group['album_id']})
+        if sticker_count > 0:
+            inventory_count = await db.user_inventory.count_documents({
+                "user_id": user_id,
+                "group_id": group['id'],
+                "owned_qty": {"$gte": 1}
+            })
+            group['progress'] = round((inventory_count / sticker_count * 100), 1)
+        else:
+            group['progress'] = 0
+    
+    return groups
+
+@api_router.post("/groups")
+async def create_group(group_input: GroupCreate, user_id: str = Depends(get_current_user)):
+    """
+    Create a new private group for an album.
+    User becomes the owner and first member.
+    """
+    # Verify album exists
+    album = await db.albums.find_one({"id": group_input.album_id}, {"_id": 0})
+    if not album:
+        raise HTTPException(status_code=404, detail="Album not found")
+    
+    if album.get('status') != 'active':
+        raise HTTPException(status_code=400, detail="Album is not available")
+    
+    # Create group
+    group = Group(
+        album_id=group_input.album_id,
+        name=group_input.name,
+        owner_id=user_id
     )
-    doc = invite.model_dump()
-    doc['expires_at'] = doc['expires_at'].isoformat()
-    await db.invite_tokens.insert_one(doc)
+    group_doc = group.model_dump()
+    group_doc['created_at'] = group_doc['created_at'].isoformat()
+    await db.groups.insert_one(group_doc)
     
-    return {"token": invite.token, "expires_at": invite.expires_at}
-
-@api_router.post("/albums/{album_id}/activate")
-async def activate_album(album_id: str, user_id: str = Depends(get_current_user)):
-    album = await db.albums.find_one({"id": album_id}, {"_id": 0})
-    if not album:
-        raise HTTPException(status_code=404, detail="Album not found")
-    
-    if album['status'] != 'active':
-        raise HTTPException(status_code=400, detail="Album cannot be activated")
-    
-    existing_activation = await db.user_album_activations.find_one({
-        "user_id": user_id,
-        "album_id": album_id
-    }, {"_id": 0})
-    
-    if existing_activation:
-        existing_member = await db.album_members.find_one({
-            "album_id": album_id,
-            "user_id": user_id
-        }, {"_id": 0})
-        
-        if not existing_member:
-            member = AlbumMember(
-                album_id=album_id,
-                user_id=user_id,
-                invited_by_user_id=None
-            )
-            member_doc = member.model_dump()
-            member_doc['created_at'] = member_doc['created_at'].isoformat()
-            await db.album_members.insert_one(member_doc)
-        
-        return {"message": "Album already activated"}
-    
-    activation = {
-        "user_id": user_id,
-        "album_id": album_id,
-        "activated_at": datetime.now(timezone.utc).isoformat()
-    }
-    await db.user_album_activations.insert_one(activation)
-    
-    existing_member = await db.album_members.find_one({
-        "album_id": album_id,
-        "user_id": user_id
-    }, {"_id": 0})
-    
-    if not existing_member:
-        member = AlbumMember(
-            album_id=album_id,
-            user_id=user_id,
-            invited_by_user_id=None
-        )
-        member_doc = member.model_dump()
-        member_doc['created_at'] = member_doc['created_at'].isoformat()
-        await db.album_members.insert_one(member_doc)
-    
-    return {"message": "Album activated successfully"}
-
-@api_router.delete("/albums/{album_id}/deactivate")
-async def deactivate_album(album_id: str, user_id: str = Depends(get_current_user)):
-    result = await db.user_album_activations.delete_one({
-        "user_id": user_id,
-        "album_id": album_id
-    })
-    
-    if result.deleted_count == 0:
-        raise HTTPException(status_code=400, detail="Album not activated")
-    
-    return {"message": "Album deactivated successfully"}
-
-@api_router.post("/albums/{album_id}/join")
-async def join_album(album_id: str, user_id: str = Depends(get_current_user)):
-    album = await db.albums.find_one({"id": album_id}, {"_id": 0})
-    if not album:
-        raise HTTPException(status_code=404, detail="Album not found")
-    
-    if album['status'] != 'active':
-        raise HTTPException(status_code=400, detail="Album is not active")
-    
-    existing = await db.album_members.find_one({"album_id": album_id, "user_id": user_id}, {"_id": 0})
-    if existing:
-        return {"message": "Already a member"}
-    
-    member = AlbumMember(
-        album_id=album_id,
+    # Add owner as first member
+    member = GroupMember(
+        group_id=group.id,
         user_id=user_id,
         invited_by_user_id=None
     )
     member_doc = member.model_dump()
-    member_doc['created_at'] = member_doc['created_at'].isoformat()
-    await db.album_members.insert_one(member_doc)
+    member_doc['joined_at'] = member_doc['joined_at'].isoformat()
+    await db.group_members.insert_one(member_doc)
     
-    return {"message": "Joined album successfully"}
+    return {"message": "Group created", "group": group_doc}
 
-@api_router.get("/invites/{token}")
-async def get_invite(token: str):
-    invite = await db.invite_tokens.find_one({"token": token}, {"_id": 0})
-    if not invite:
-        raise HTTPException(status_code=404, detail="Invite not found")
+@api_router.get("/groups/{group_id}")
+async def get_group(group_id: str, user_id: str = Depends(get_current_user)):
+    """
+    Get group details. User must be a member.
+    """
+    group = await validate_group_member(group_id, user_id)
     
+    # Enrich with album info
+    album = await db.albums.find_one({"id": group['album_id']}, {"_id": 0})
+    group['album'] = album
+    
+    # Get members excluding current user
+    members, member_count = await get_group_members_excluding_user(group_id, user_id)
+    group['members'] = members
+    group['member_count'] = member_count
+    group['is_owner'] = (group['owner_id'] == user_id)
+    
+    return group
+
+@api_router.delete("/groups/{group_id}/leave")
+async def leave_group(group_id: str, user_id: str = Depends(get_current_user)):
+    """
+    Leave a group. Owner cannot leave (must transfer ownership first).
+    """
+    group = await validate_group_member(group_id, user_id)
+    
+    if group['owner_id'] == user_id:
+        raise HTTPException(status_code=400, detail="Owner cannot leave the group")
+    
+    await db.group_members.delete_one({"group_id": group_id, "user_id": user_id})
+    return {"message": "Left group successfully"}
+
+# ============================================
+# EMAIL INVITE ENDPOINTS
+# ============================================
+@api_router.post("/groups/{group_id}/invite")
+async def create_email_invite(group_id: str, invite_input: EmailInviteCreate, user_id: str = Depends(get_current_user)):
+    """
+    Send email invite to join group. Any member can invite.
+    Code is sent via email only - NEVER returned in response.
+    """
+    # Validate membership
+    group = await validate_group_member(group_id, user_id)
+    
+    # Check if email is already a member
+    existing_user = await db.users.find_one({"email": invite_input.email.lower()}, {"_id": 0})
+    if existing_user:
+        existing_member = await db.group_members.find_one(
+            {"group_id": group_id, "user_id": existing_user['id']},
+            {"_id": 0}
+        )
+        if existing_member:
+            raise HTTPException(status_code=400, detail="User is already a member")
+    
+    # Check for existing unexpired invite
+    existing_invite = await db.email_invites.find_one({
+        "group_id": group_id,
+        "invited_email": invite_input.email.lower(),
+        "used_at": None,
+        "expires_at": {"$gt": datetime.now(timezone.utc).isoformat()}
+    }, {"_id": 0})
+    
+    if existing_invite:
+        raise HTTPException(status_code=400, detail="Active invite already exists for this email")
+    
+    # Generate invite code
+    invite_code = generate_invite_code()
+    
+    # Create invite record
+    invite = EmailInvite(
+        group_id=group_id,
+        invited_email=invite_input.email.lower(),
+        invite_code=invite_code,
+        created_by_user_id=user_id,
+        expires_at=datetime.now(timezone.utc) + timedelta(hours=1)
+    )
+    invite_doc = invite.model_dump()
+    invite_doc['expires_at'] = invite_doc['expires_at'].isoformat()
+    invite_doc['created_at'] = invite_doc['created_at'].isoformat()
+    await db.email_invites.insert_one(invite_doc)
+    
+    # Get inviter info
+    inviter = await db.users.find_one({"id": user_id}, {"_id": 0})
+    inviter_name = inviter.get('display_name') or inviter.get('full_name') or inviter['email']
+    
+    # Get album info for group name
+    album = await db.albums.find_one({"id": group['album_id']}, {"_id": 0})
+    group_display_name = f"{group['name']} ({album['name']})"
+    
+    # Send invite via email (logged to console if Resend not configured)
+    send_invite_email(invite_input.email, invite_code, group_display_name, inviter_name)
+    
+    # NEVER return invite code in response
+    return {
+        "message": "Invite sent",
+        "invited_email": invite_input.email,
+        "expires_in_hours": 1
+    }
+
+@api_router.post("/invites/accept")
+async def accept_email_invite(invite_data: EmailInviteAccept, user_id: str = Depends(get_current_user)):
+    """
+    Accept an email invite using the 6-digit code.
+    Code must match, not be expired, and not be used.
+    User's email must match the invited email.
+    """
+    user = await db.users.find_one({"id": user_id}, {"_id": 0})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Find invite by code
+    invite = await db.email_invites.find_one(
+        {"invite_code": invite_data.invite_code},
+        {"_id": 0}
+    )
+    
+    if not invite:
+        raise HTTPException(status_code=404, detail="Invalid invite code")
+    
+    # Check if already used
     if invite.get('used_at'):
         raise HTTPException(status_code=400, detail="Invite already used")
     
+    # Check expiry
     expires_at = datetime.fromisoformat(invite['expires_at'])
     if datetime.now(timezone.utc) > expires_at:
-        raise HTTPException(status_code=400, detail="Invite expired")
+        raise HTTPException(status_code=400, detail="INVITE_EXPIRED")
     
-    album = await db.albums.find_one({"id": invite['album_id']}, {"_id": 0})
-    if not album:
-        raise HTTPException(status_code=404, detail="Album not found")
+    # Check email matches
+    if user['email'].lower() != invite['invited_email'].lower():
+        raise HTTPException(status_code=403, detail="Invite was sent to a different email")
     
-    return {"album": album, "invite": invite}
-
-@api_router.post("/invites/{token}/accept")
-async def accept_invite(token: str, user_id: str = Depends(get_current_user)):
-    invite = await db.invite_tokens.find_one({"token": token}, {"_id": 0})
-    if not invite:
-        raise HTTPException(status_code=404, detail="Invite not found")
+    # Check not already a member
+    existing_member = await db.group_members.find_one(
+        {"group_id": invite['group_id'], "user_id": user_id},
+        {"_id": 0}
+    )
+    if existing_member:
+        raise HTTPException(status_code=400, detail="Already a member of this group")
     
-    if invite.get('used_at'):
-        raise HTTPException(status_code=400, detail="Invite already used")
-    
-    expires_at = datetime.fromisoformat(invite['expires_at'])
-    if datetime.now(timezone.utc) > expires_at:
-        raise HTTPException(status_code=400, detail="Invite expired")
-    
-    existing = await db.album_members.find_one({"album_id": invite['album_id'], "user_id": user_id}, {"_id": 0})
-    if existing:
-        raise HTTPException(status_code=400, detail="Already a member")
-    
-    member = AlbumMember(
-        album_id=invite['album_id'],
+    # Add user to group
+    member = GroupMember(
+        group_id=invite['group_id'],
         user_id=user_id,
         invited_by_user_id=invite['created_by_user_id']
     )
     member_doc = member.model_dump()
-    member_doc['created_at'] = member_doc['created_at'].isoformat()
-    await db.album_members.insert_one(member_doc)
+    member_doc['joined_at'] = member_doc['joined_at'].isoformat()
+    await db.group_members.insert_one(member_doc)
     
-    existing_activation = await db.user_album_activations.find_one({
-        "user_id": user_id,
-        "album_id": invite['album_id']
-    }, {"_id": 0})
-    
-    if not existing_activation:
-        activation = {
-            "user_id": user_id,
-            "album_id": invite['album_id'],
-            "activated_at": datetime.now(timezone.utc).isoformat()
-        }
-        await db.user_album_activations.insert_one(activation)
-    
-    await db.invite_tokens.update_one(
-        {"token": token},
+    # Mark invite as used
+    await db.email_invites.update_one(
+        {"id": invite['id']},
         {"$set": {"used_at": datetime.now(timezone.utc).isoformat()}}
     )
     
-    return {"message": "Joined album successfully"}
-
-@api_router.get("/albums/{album_id}/stickers")
-async def get_stickers(album_id: str, user_id: str = Depends(get_current_user)):
-    membership = await db.album_members.find_one({"album_id": album_id, "user_id": user_id}, {"_id": 0})
-    if not membership:
-        raise HTTPException(status_code=403, detail="Not a member of this album")
+    # Get group info
+    group = await db.groups.find_one({"id": invite['group_id']}, {"_id": 0})
     
-    stickers = await db.stickers.find({"album_id": album_id}, {"_id": 0}).to_list(1000)
+    return {"message": "Joined group successfully", "group_id": invite['group_id'], "group_name": group['name']}
+
+@api_router.get("/invites/pending")
+async def get_pending_invites(user_id: str = Depends(get_current_user)):
+    """
+    Get pending invites for the current user's email.
+    """
+    user = await db.users.find_one({"id": user_id}, {"_id": 0})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    invites = await db.email_invites.find({
+        "invited_email": user['email'].lower(),
+        "used_at": None,
+        "expires_at": {"$gt": datetime.now(timezone.utc).isoformat()}
+    }, {"_id": 0}).to_list(100)
+    
+    # Enrich with group/album info (don't expose the code)
+    for invite in invites:
+        group = await db.groups.find_one({"id": invite['group_id']}, {"_id": 0})
+        if group:
+            album = await db.albums.find_one({"id": group['album_id']}, {"_id": 0})
+            invite['group_name'] = group['name']
+            invite['album_name'] = album['name'] if album else None
+        # Remove code from response
+        invite.pop('invite_code', None)
+    
+    return invites
+
+# ============================================
+# STICKER ENDPOINTS (scoped by group)
+# ============================================
+@api_router.get("/groups/{group_id}/stickers")
+async def get_stickers(group_id: str, user_id: str = Depends(get_current_user)):
+    """
+    Get stickers for a group's album. User must be a member.
+    """
+    group = await validate_group_member(group_id, user_id)
+    stickers = await db.stickers.find({"album_id": group['album_id']}, {"_id": 0}).to_list(1000)
     return stickers
 
-@api_router.get("/inventory")
-async def get_inventory(album_id: str, user_id: str = Depends(get_current_user)):
-    membership = await db.album_members.find_one({"album_id": album_id, "user_id": user_id}, {"_id": 0})
-    if not membership:
-        raise HTTPException(status_code=403, detail="Not a member of this album")
+# ============================================
+# INVENTORY ENDPOINTS (scoped by group)
+# ============================================
+@api_router.get("/groups/{group_id}/inventory")
+async def get_inventory(group_id: str, user_id: str = Depends(get_current_user)):
+    """
+    Get user's inventory for a group. User must be a member.
+    """
+    group = await validate_group_member(group_id, user_id)
     
-    stickers = await db.stickers.find({"album_id": album_id}, {"_id": 0}).to_list(1000)
+    stickers = await db.stickers.find({"album_id": group['album_id']}, {"_id": 0}).to_list(1000)
     
     inventory_items = await db.user_inventory.find({
         "user_id": user_id,
-        "sticker_id": {"$in": [s['id'] for s in stickers]}
+        "group_id": group_id
     }, {"_id": 0}).to_list(1000)
     
     inventory_map = {item['sticker_id']: item['owned_qty'] for item in inventory_items}
@@ -546,146 +494,107 @@ async def get_inventory(album_id: str, user_id: str = Depends(get_current_user))
     
     return stickers
 
-@api_router.put("/inventory")
-async def update_inventory(update: InventoryUpdate, user_id: str = Depends(get_current_user)):
+@api_router.put("/groups/{group_id}/inventory")
+async def update_inventory(group_id: str, update: InventoryUpdate, user_id: str = Depends(get_current_user)):
+    """
+    Update user's inventory for a group. User must be a member.
+    """
+    await validate_group_member(group_id, user_id)
+    
     existing = await db.user_inventory.find_one({
         "user_id": user_id,
+        "group_id": group_id,
         "sticker_id": update.sticker_id
     }, {"_id": 0})
     
     if existing:
         await db.user_inventory.update_one(
-            {"user_id": user_id, "sticker_id": update.sticker_id},
+            {"user_id": user_id, "group_id": group_id, "sticker_id": update.sticker_id},
             {"$set": {"owned_qty": update.owned_qty, "updated_at": datetime.now(timezone.utc).isoformat()}}
         )
     else:
-        inventory = UserInventory(user_id=user_id, sticker_id=update.sticker_id, owned_qty=update.owned_qty)
+        inventory = UserInventory(
+            user_id=user_id,
+            group_id=group_id,
+            sticker_id=update.sticker_id,
+            owned_qty=update.owned_qty
+        )
         doc = inventory.model_dump()
         doc['updated_at'] = doc['updated_at'].isoformat()
         await db.user_inventory.insert_one(doc)
     
     return {"message": "Inventory updated"}
 
-@api_router.get("/matches")
-async def get_matches(album_id: str, user_id: str = Depends(get_current_user)):
-    membership = await db.album_members.find_one({"album_id": album_id, "user_id": user_id}, {"_id": 0})
-    if not membership:
-        raise HTTPException(status_code=403, detail="Not a member of this album")
+# ============================================
+# MATCHES ENDPOINTS (scoped by group)
+# ============================================
+@api_router.get("/groups/{group_id}/matches")
+async def get_matches(group_id: str, user_id: str = Depends(get_current_user)):
+    """
+    Get potential exchange matches within the group.
+    Users from different groups NEVER see each other.
+    """
+    group = await validate_group_member(group_id, user_id)
     
-    stickers = await db.stickers.find({"album_id": album_id}, {"_id": 0}).to_list(1000)
+    stickers = await db.stickers.find({"album_id": group['album_id']}, {"_id": 0}).to_list(1000)
     sticker_ids = [s['id'] for s in stickers]
-    sticker_map = {s['id']: s for s in stickers}
     
     my_inventory = await db.user_inventory.find({
         "user_id": user_id,
-        "sticker_id": {"$in": sticker_ids}
+        "group_id": group_id
     }, {"_id": 0}).to_list(1000)
     
     my_inv_map = {item['sticker_id']: item['owned_qty'] for item in my_inventory}
     
-    members_list, _ = await get_members_excluding_owner(album_id)
-    other_user_ids = [m['id'] for m in members_list]
+    # Get other members (ONLY from this group)
+    members, _ = await get_group_members_excluding_user(group_id, user_id)
     
     matches = []
     
-    for other_user_id in other_user_ids:
-        if other_user_id == user_id:
-            continue
-            
+    for member in members:
+        other_user_id = member['id']
+        
         other_inventory = await db.user_inventory.find({
             "user_id": other_user_id,
-            "sticker_id": {"$in": sticker_ids}
+            "group_id": group_id  # IMPORTANT: Same group only
         }, {"_id": 0}).to_list(1000)
         
         other_inv_map = {item['sticker_id']: item['owned_qty'] for item in other_inventory}
         
-        user = await db.users.find_one({"id": other_user_id}, {"_id": 0})
-        
+        # Calculate what can be exchanged (but don't expose numbers in response)
         my_duplicates = [sid for sid in sticker_ids if my_inv_map.get(sid, 0) >= 2]
         my_missing = [sid for sid in sticker_ids if my_inv_map.get(sid, 0) == 0]
         other_duplicates = [sid for sid in sticker_ids if other_inv_map.get(sid, 0) >= 2]
         other_missing = [sid for sid in sticker_ids if other_inv_map.get(sid, 0) == 0]
         
-        can_give = [sid for sid in my_duplicates if sid in other_missing]
-        can_get = [sid for sid in other_duplicates if sid in my_missing]
+        i_can_give = [sid for sid in my_duplicates if sid in other_missing]
+        i_can_get = [sid for sid in other_duplicates if sid in my_missing]
         
-        if can_give and can_get:
+        if i_can_give or i_can_get:
             matches.append({
-                "type": "direct",
-                "user": user,
-                "give_stickers": [sticker_map[sid] for sid in can_give[:3]],
-                "get_stickers": [sticker_map[sid] for sid in can_get[:3]],
-                "net_gain": len(can_get)
+                "user": {
+                    "id": member['id'],
+                    "email": member['email'],
+                    "display_name": member.get('display_name'),
+                    "full_name": member.get('full_name')
+                },
+                "has_stickers_i_need": len(i_can_get) > 0,
+                "needs_stickers_i_have": len(i_can_give) > 0,
+                "can_exchange": len(i_can_give) > 0 and len(i_can_get) > 0
             })
     
-    matches.sort(key=lambda x: -x['net_gain'])
     return matches
 
-@api_router.post("/offers")
-async def create_offer(offer_input: OfferCreate, user_id: str = Depends(get_current_user)):
-    membership = await db.album_members.find_one({"album_id": offer_input.album_id, "user_id": user_id}, {"_id": 0})
-    if not membership:
-        raise HTTPException(status_code=403, detail="Not a member of this album")
-    
-    offer = Offer(
-        album_id=offer_input.album_id,
-        from_user_id=user_id,
-        to_user_id=offer_input.to_user_id,
-        status='sent'
-    )
-    doc = offer.model_dump()
-    doc['created_at'] = doc['created_at'].isoformat()
-    doc['updated_at'] = doc['updated_at'].isoformat()
-    await db.offers.insert_one(doc)
-    
-    for item in offer_input.give_items:
-        offer_item = OfferItem(offer_id=offer.id, sticker_id=item['sticker_id'], direction='give', qty=item['qty'])
-        await db.offer_items.insert_one(offer_item.model_dump())
-    
-    for item in offer_input.get_items:
-        offer_item = OfferItem(offer_id=offer.id, sticker_id=item['sticker_id'], direction='get', qty=item['qty'])
-        await db.offer_items.insert_one(offer_item.model_dump())
-    
-    return offer
-
-@api_router.get("/offers")
-async def get_offers(album_id: str, user_id: str = Depends(get_current_user)):
-    sent_offers = await db.offers.find({
-        "album_id": album_id,
-        "from_user_id": user_id
-    }, {"_id": 0}).to_list(100)
-    
-    received_offers = await db.offers.find({
-        "album_id": album_id,
-        "to_user_id": user_id
-    }, {"_id": 0}).to_list(100)
-    
-    for offer in sent_offers + received_offers:
-        items = await db.offer_items.find({"offer_id": offer['id']}, {"_id": 0}).to_list(100)
-        offer['items'] = items
-        
-        from_user = await db.users.find_one({"id": offer['from_user_id']}, {"_id": 0})
-        to_user = await db.users.find_one({"id": offer['to_user_id']}, {"_id": 0})
-        offer['from_user'] = from_user
-        offer['to_user'] = to_user
-    
-    return {"sent": sent_offers, "received": received_offers}
-
-@api_router.patch("/offers/{offer_id}")
-async def update_offer_status(offer_id: str, update: OfferUpdate, user_id: str = Depends(get_current_user)):
-    offer = await db.offers.find_one({"id": offer_id}, {"_id": 0})
-    if not offer:
-        raise HTTPException(status_code=404, detail="Offer not found")
-    
-    if offer['to_user_id'] != user_id:
-        raise HTTPException(status_code=403, detail="Not authorized")
-    
-    await db.offers.update_one(
-        {"id": offer_id},
-        {"$set": {"status": update.status, "updated_at": datetime.now(timezone.utc).isoformat()}}
-    )
-    
-    return {"message": "Offer updated"}
+# ============================================
+# DEV ENDPOINTS (only when DEV_MODE=true)
+# ============================================
+if DEV_MODE:
+    @api_router.get("/dev/status")
+    async def dev_status():
+        return {
+            "DEV_MODE": DEV_MODE,
+            "message": "Dev endpoints enabled"
+        }
 
 app.include_router(api_router)
 
