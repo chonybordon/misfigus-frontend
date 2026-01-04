@@ -1,0 +1,73 @@
+{
+  "timestamp": "2026-01-04T01:09:38.524233",
+  "test_type": "MisFigus Production Member Count Consistency",
+  "base_url": "https://sticker-exchange.preview.emergentagent.com",
+  "test_email": "verifytest@gmail.com",
+  "qatar_album_id": "bc32fecb-f640-4d00-880d-5043bc112d4b",
+  "tests_run": 10,
+  "tests_passed": 10,
+  "success_rate": 100.0,
+  "overall_success": true,
+  "results": [
+    {
+      "test": "DEV_OTP_MODE - dev_otp field present",
+      "success": true,
+      "details": "Response: {'message': 'OTP sent', 'email': 'verifytest@gmail.com', 'dev_otp': '784826'}",
+      "timestamp": "2026-01-04T01:09:38.321214"
+    },
+    {
+      "test": "Login Flow",
+      "success": true,
+      "details": "Got token and user_id: 386c4974-d885-45cf-bb47-406f913628f6",
+      "timestamp": "2026-01-04T01:09:38.399072"
+    },
+    {
+      "test": "Activate Qatar 2022",
+      "success": true,
+      "details": "Album activated successfully",
+      "timestamp": "2026-01-04T01:09:38.438648"
+    },
+    {
+      "test": "Albums List - Qatar 2022 found",
+      "success": true,
+      "details": "member_count: 4, is_member: True",
+      "timestamp": "2026-01-04T01:09:38.479498"
+    },
+    {
+      "test": "Album Details - Qatar 2022 retrieved",
+      "success": true,
+      "details": "member_count: 4, members array length: 4",
+      "timestamp": "2026-01-04T01:09:38.523590"
+    },
+    {
+      "test": "Current user NOT in members array",
+      "success": true,
+      "details": "Current user (verifytest@gmail.com) found in members: False",
+      "timestamp": "2026-01-04T01:09:38.523619"
+    },
+    {
+      "test": "No test users (@example.com) in members",
+      "success": true,
+      "details": "Found 0 test users: []",
+      "timestamp": "2026-01-04T01:09:38.523627"
+    },
+    {
+      "test": "Albums list count == Album details count",
+      "success": true,
+      "details": "List: 4, Details: 4",
+      "timestamp": "2026-01-04T01:09:38.523651"
+    },
+    {
+      "test": "Album details count == Members array length",
+      "success": true,
+      "details": "Count: 4, Array length: 4",
+      "timestamp": "2026-01-04T01:09:38.523655"
+    },
+    {
+      "test": "Overall member count consistency",
+      "success": true,
+      "details": "All counts consistent: True",
+      "timestamp": "2026-01-04T01:09:38.523659"
+    }
+  ]
+}
