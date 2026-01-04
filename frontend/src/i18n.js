@@ -995,6 +995,7 @@ const resources = {
         subtitle: 'Scambia figurine con il tuo album',
         emailPlaceholder: 'La tua email',
         sendOTP: 'Invia codice',
+        otpSent: 'Codice inviato con successo. Controlla la tua email.',
         otpPlaceholder: 'Codice a 6 cifre',
         verify: 'Verifica',
         resend: 'Reinvia codice',
