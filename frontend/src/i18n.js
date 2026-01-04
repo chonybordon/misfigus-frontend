@@ -754,7 +754,8 @@ const resources = {
         verify: 'Verifica',
         resend: 'Reinvia codice',
         devMode: 'MODALITÀ DEV - Codice OTP',
-        devNote: 'Solo per test. Controlla i log del backend per i dettagli.'
+        devNote: 'Solo per test. Controlla i log del backend per i dettagli.',
+        checkEmail: 'Controlla la tua email per il codice'
       },
       albums: {
         title: 'I Miei Album',
