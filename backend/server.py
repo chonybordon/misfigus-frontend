@@ -271,6 +271,40 @@ async def activate_album(album_id: str, user_id: str = Depends(get_current_user)
     
     return {"message": "Album activated", "album_id": album_id}
 
+@api_router.delete("/albums/{album_id}/deactivate")
+async def deactivate_album(album_id: str, user_id: str = Depends(get_current_user)):
+    """
+    Deactivate an album for the user.
+    Removes activation record but preserves inventory.
+    """
+    # Check album exists
+    album = await db.albums.find_one({"id": album_id}, {"_id": 0})
+    if not album:
+        raise HTTPException(status_code=404, detail="Album not found")
+    
+    # Check if user has activated this album
+    activation = await db.user_album_activations.find_one({
+        "user_id": user_id,
+        "album_id": album_id
+    })
+    
+    if not activation:
+        raise HTTPException(status_code=400, detail="Album not activated")
+    
+    # Remove activation record (but keep inventory for future reactivation)
+    await db.user_album_activations.delete_one({
+        "user_id": user_id,
+        "album_id": album_id
+    })
+    
+    # Remove user from album members
+    await db.album_members.delete_one({
+        "user_id": user_id,
+        "album_id": album_id
+    })
+    
+    return {"message": "Album deactivated", "album_id": album_id}
+
 @api_router.get("/albums/{album_id}")
 async def get_album(album_id: str, user_id: str = Depends(get_current_user)):
     """Get album template details."""
