@@ -184,9 +184,9 @@ export const AlbumHome = () => {
         <div className="mb-8">
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm font-semibold">{t('albumHome.progress')}</span>
-            <span className="text-sm font-bold text-primary">{album?.progress}%</span>
+            <span className="text-sm font-bold text-primary">{album?.progress ?? 0}%</span>
           </div>
-          <Progress value={album?.progress || 0} className="h-3" />
+          <Progress value={album?.progress ?? 0} className="h-3" />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
