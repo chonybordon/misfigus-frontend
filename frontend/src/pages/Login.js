@@ -6,14 +6,13 @@ import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp';
-import { Globe } from 'lucide-react';
+import { Globe, Mail } from 'lucide-react';
 
 export const Login = () => {
   const [email, setEmail] = useState('');
   const [otp, setOtp] = useState('');
   const [step, setStep] = useState('email');
   const [loading, setLoading] = useState(false);
-  const [devOtp, setDevOtp] = useState(null); // null by default, only set if API returns it
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
   const { login } = React.useContext(AuthContext);
@@ -22,14 +21,8 @@ export const Login = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      const response = await api.post('/auth/send-otp', { email });
-      // Only set devOtp if the API returns it (DEV mode)
-      if (response.data.dev_otp) {
-        setDevOtp(response.data.dev_otp);
-      } else {
-        setDevOtp(null);
-      }
-      toast.success(t('login.sendOTP'));
+      await api.post('/auth/send-otp', { email });
+      toast.success(t('login.otpSent'));
       setStep('otp');
     } catch (error) {
       toast.error(error.response?.data?.detail || t('common.error'));
@@ -45,7 +38,7 @@ export const Login = () => {
       const response = await api.post('/auth/verify-otp', { email, otp });
       login(response.data.token, response.data.user);
       toast.success(t('common.success'));
-      navigate('/albums');
+      navigate('/groups');
     } catch (error) {
       toast.error(error.response?.data?.detail || t('common.error'));
     } finally {
@@ -104,29 +97,18 @@ export const Login = () => {
           </form>
         ) : (
           <form onSubmit={handleVerifyOTP} className="space-y-6" data-testid="otp-form">
-            {/* DEV MODE OTP Display - Only shown when API returns dev_otp */}
-            {devOtp && (
-              <div className="bg-amber-100 border-2 border-amber-500 rounded-lg p-4 mb-4" data-testid="dev-otp-display">
-                <p className="text-sm font-semibold text-amber-900 mb-2">
-                  🔐 {t('login.devMode')}:
-                </p>
-                <div className="bg-white rounded px-4 py-3 text-center">
-                  <p className="text-3xl font-black text-primary tracking-widest">{devOtp}</p>
+            {/* Email notification - OTP is sent by email, never shown in UI */}
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+              <div className="flex items-center gap-3">
+                <Mail className="h-5 w-5 text-blue-600" />
+                <div>
+                  <p className="text-sm font-medium text-blue-900">
+                    {t('login.checkEmail')}
+                  </p>
+                  <p className="text-xs text-blue-700">{email}</p>
                 </div>
-                <p className="text-xs text-amber-800 mt-2">
-                  {t('login.devNote')}
-                </p>
               </div>
-            )}
-            
-            {/* Production mode: Show "check your email" message */}
-            {!devOtp && (
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-                <p className="text-sm text-blue-800 text-center">
-                  {t('login.checkEmail')}
-                </p>
-              </div>
-            )}
+            </div>
             
             <div className="flex flex-col items-center space-y-4">
               <InputOTP
