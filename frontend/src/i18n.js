@@ -313,7 +313,8 @@ const resources = {
         verify: 'Verificar',
         resend: 'Reenviar código',
         devMode: 'MODO DEV - Código OTP',
-        devNote: 'Apenas para testes. Verifique os logs do backend para detalhes.'
+        devNote: 'Apenas para testes. Verifique os logs do backend para detalhes.',
+        checkEmail: 'Verifique seu e-mail para obter o código'
       },
       albums: {
         title: 'Meus Álbuns',
@@ -459,7 +460,8 @@ const resources = {
         verify: 'Vérifier',
         resend: 'Renvoyer le code',
         devMode: 'MODE DEV - Code OTP',
-        devNote: 'Tests uniquement. Vérifiez les logs backend pour plus de détails.'
+        devNote: 'Tests uniquement. Vérifiez les logs backend pour plus de détails.',
+        checkEmail: 'Vérifiez votre e-mail pour le code'
       },
       albums: {
         title: 'Mes Albums',
