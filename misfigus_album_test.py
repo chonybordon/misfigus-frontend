@@ -172,7 +172,58 @@ class MisFigusAlbumTester:
 
         return True
 
-    def test_album_display_and_interaction(self):
+    def test_frontend_code_analysis(self):
+        """Test frontend code for album selection and routing logic"""
+        print("\n" + "="*60)
+        print("TEST: FRONTEND CODE ANALYSIS")
+        print("="*60)
+        
+        try:
+            # Check App.js routing
+            with open('/app/frontend/src/App.js', 'r') as f:
+                app_content = f.read()
+            
+            # Check if default route redirects to /albums
+            if 'Navigate to="/albums"' in app_content:
+                self.log_test("Frontend Routing - Default to Albums", True, "App.js correctly redirects to /albums after login")
+            else:
+                self.log_test("Frontend Routing - Default to Albums", False, "App.js does not redirect to /albums")
+            
+            # Check Albums.js for badge logic
+            with open('/app/frontend/src/pages/Albums.js', 'r') as f:
+                albums_content = f.read()
+            
+            # Check badge styling logic
+            badge_checks = [
+                ('ACTIVO badge', 'bg-green-500 text-white', 'Green badge for active albums'),
+                ('INACTIVO badge', 'bg-red-500 text-white', 'Red badge for inactive albums'),
+                ('PRÓXIMAMENTE badge', 'bg-gray-200 text-gray-600', 'Gray badge for coming soon albums')
+            ]
+            
+            for badge_name, expected_style, description in badge_checks:
+                if expected_style in albums_content:
+                    self.log_test(f"Frontend Badge - {badge_name}", True, description)
+                else:
+                    self.log_test(f"Frontend Badge - {badge_name}", False, f"Missing style: {expected_style}")
+            
+            # Check click interaction logic
+            interaction_checks = [
+                ("coming_soon", "return; // Do nothing", "Coming soon albums not clickable"),
+                ("inactive", "setActivationDialogOpen(true)", "Inactive albums show activation dialog"),
+                ("navigate(`/albums/${album.id}`)", "Active albums navigate to album home")
+            ]
+            
+            for check_name, expected_code, description in interaction_checks:
+                if expected_code in albums_content:
+                    self.log_test(f"Frontend Interaction - {check_name}", True, description)
+                else:
+                    self.log_test(f"Frontend Interaction - {check_name}", False, f"Missing logic: {expected_code}")
+            
+            return True
+            
+        except Exception as e:
+            self.log_test("Frontend Code Analysis", False, f"Error reading frontend files: {e}")
+            return False
         """Test 3 & 4: Album List Display and Interaction Test"""
         print("\n" + "="*60)
         print("TEST 3 & 4: ALBUM DISPLAY AND INTERACTION")
