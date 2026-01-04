@@ -118,35 +118,22 @@ export const Matches = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
-                    <div>
-                      <p className="text-sm font-semibold text-muted-foreground mb-2">{t('matches.youGive')}</p>
-                      <div className="space-y-1">
-                        {match.give_stickers.map((s) => (
-                          <div key={s.id} className="text-sm bg-amber-100 dark:bg-amber-900/30 p-2 rounded">
-                            #{s.number} {s.name}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                    <div className="flex justify-center">
-                      <ArrowRight className="h-8 w-8 text-primary" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-semibold text-muted-foreground mb-2">{t('matches.youGet')}</p>
-                      <div className="space-y-1">
-                        {match.get_stickers.map((s) => (
-                          <div key={s.id} className="text-sm bg-emerald-100 dark:bg-emerald-900/30 p-2 rounded">
-                            #{s.number} {s.name}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="mt-4 p-3 bg-blue-50 rounded-lg text-sm">
-                    <p className="font-semibold text-blue-900">
-                      {t('matches.netGain')}: +{match.net_gain}
-                    </p>
+                  <div className="flex flex-wrap gap-2">
+                    {match.has_stickers_i_need && (
+                      <span className="text-sm bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-200 px-3 py-1 rounded-full">
+                        {t('matches.hasStickersINeed')}
+                      </span>
+                    )}
+                    {match.needs_stickers_i_have && (
+                      <span className="text-sm bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-200 px-3 py-1 rounded-full">
+                        {t('matches.needsStickersIHave')}
+                      </span>
+                    )}
+                    {match.can_exchange && (
+                      <span className="text-sm bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 px-3 py-1 rounded-full font-semibold">
+                        {t('matches.canExchange')}
+                      </span>
+                    )}
                   </div>
                 </CardContent>
               </Card>
