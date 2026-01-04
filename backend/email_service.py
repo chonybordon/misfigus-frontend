@@ -11,9 +11,25 @@ logger = logging.getLogger(__name__)
 try:
     import resend
     RESEND_AVAILABLE = True
+    logger.info("Resend package imported successfully")
 except ImportError:
     RESEND_AVAILABLE = False
     logger.warning("Resend package not installed. Email will be logged only.")
+
+def check_resend_config():
+    """Log Resend configuration status on startup (called from server.py)."""
+    api_key = os.environ.get('RESEND_API_KEY', '').strip()
+    has_key = bool(api_key)
+    logger.info("="*50)
+    logger.info("EMAIL SERVICE CONFIGURATION")
+    logger.info(f"  RESEND_API_KEY present: {has_key}")
+    logger.info(f"  Resend package available: {RESEND_AVAILABLE}")
+    if has_key and RESEND_AVAILABLE:
+        logger.info("  Status: PRODUCTION MODE - Emails will be sent via Resend")
+    else:
+        logger.info("  Status: FALLBACK MODE - OTP/codes logged to console only")
+    logger.info("="*50)
+    return has_key and RESEND_AVAILABLE
 
 def get_resend_client():
     """Get Resend client if API key is configured."""
@@ -46,12 +62,17 @@ def send_otp_email(email: str, otp: str) -> bool:
     
     IMPORTANT: OTP is NEVER returned to the caller or shown in UI.
     """
+    logger.info(f"[OTP] Attempting to send OTP email to: {email}")
+    
     client = get_resend_client()
     
     if client:
+        logger.info(f"[OTP] Resend client available, attempting to send...")
         try:
+            # Use Resend's approved test sender for development
+            # For production, use a verified domain
             params = {
-                "from": "MisFigus <noreply@misfigus.app>",
+                "from": "MisFigus <onboarding@resend.dev>",
                 "to": [email],
                 "subject": "Tu código de verificación - MisFigus",
                 "html": f"""
@@ -66,18 +87,29 @@ def send_otp_email(email: str, otp: str) -> bool:
                 </div>
                 """
             }
-            client.emails.send(params)
-            logger.info(f"OTP email sent to {email}")
+            
+            logger.info(f"[OTP] Calling Resend API...")
+            response = client.emails.send(params)
+            logger.info(f"[OTP] Resend API response: {response}")
+            logger.info(f"[OTP] Email successfully sent to {email}")
             return True
+            
         except Exception as e:
-            logger.error(f"Failed to send OTP email: {e}")
-            # Fall through to console logging
+            logger.error(f"[OTP] Resend API error: {type(e).__name__}: {e}")
+            # Log more details if available
+            if hasattr(e, 'response'):
+                logger.error(f"[OTP] Resend response body: {getattr(e, 'response', 'N/A')}")
+            if hasattr(e, 'status_code'):
+                logger.error(f"[OTP] Resend status code: {getattr(e, 'status_code', 'N/A')}")
+            logger.warning(f"[OTP] Falling back to console logging due to error")
+    else:
+        logger.info(f"[OTP] No Resend client (API key missing or package unavailable)")
     
     # Fallback: Log to console only (NEVER return to frontend)
     logger.warning("="*50)
-    logger.warning(f"EMAIL FALLBACK (Resend not configured)")
-    logger.warning(f"To: {email}")
-    logger.warning(f"OTP: {otp}")
+    logger.warning(f"[OTP] EMAIL FALLBACK (Resend not configured or failed)")
+    logger.warning(f"[OTP] To: {email}")
+    logger.warning(f"[OTP] OTP: {otp}")
     logger.warning("="*50)
     return True
 
@@ -88,12 +120,16 @@ def send_invite_email(email: str, invite_code: str, group_name: str, inviter_nam
     
     IMPORTANT: Invite code is NEVER returned to the caller or shown in UI.
     """
+    logger.info(f"[INVITE] Attempting to send invite email to: {email}")
+    
     client = get_resend_client()
     
     if client:
+        logger.info(f"[INVITE] Resend client available, attempting to send...")
         try:
+            # Use Resend's approved test sender for development
             params = {
-                "from": "MisFigus <noreply@misfigus.app>",
+                "from": "MisFigus <onboarding@resend.dev>",
                 "to": [email],
                 "subject": f"{inviter_name} te invitó a {group_name} - MisFigus",
                 "html": f"""
@@ -109,19 +145,29 @@ def send_invite_email(email: str, invite_code: str, group_name: str, inviter_nam
                 </div>
                 """
             }
-            client.emails.send(params)
-            logger.info(f"Invite email sent to {email} for group {group_name}")
+            
+            logger.info(f"[INVITE] Calling Resend API...")
+            response = client.emails.send(params)
+            logger.info(f"[INVITE] Resend API response: {response}")
+            logger.info(f"[INVITE] Email successfully sent to {email} for group {group_name}")
             return True
+            
         except Exception as e:
-            logger.error(f"Failed to send invite email: {e}")
-            # Fall through to console logging
+            logger.error(f"[INVITE] Resend API error: {type(e).__name__}: {e}")
+            if hasattr(e, 'response'):
+                logger.error(f"[INVITE] Resend response body: {getattr(e, 'response', 'N/A')}")
+            if hasattr(e, 'status_code'):
+                logger.error(f"[INVITE] Resend status code: {getattr(e, 'status_code', 'N/A')}")
+            logger.warning(f"[INVITE] Falling back to console logging due to error")
+    else:
+        logger.info(f"[INVITE] No Resend client (API key missing or package unavailable)")
     
     # Fallback: Log to console only (NEVER return to frontend)
     logger.warning("="*50)
-    logger.warning(f"EMAIL FALLBACK (Resend not configured)")
-    logger.warning(f"To: {email}")
-    logger.warning(f"Invite Code: {invite_code}")
-    logger.warning(f"Group: {group_name}")
-    logger.warning(f"Invited by: {inviter_name}")
+    logger.warning(f"[INVITE] EMAIL FALLBACK (Resend not configured or failed)")
+    logger.warning(f"[INVITE] To: {email}")
+    logger.warning(f"[INVITE] Invite Code: {invite_code}")
+    logger.warning(f"[INVITE] Group: {group_name}")
+    logger.warning(f"[INVITE] Invited by: {inviter_name}")
     logger.warning("="*50)
     return True
