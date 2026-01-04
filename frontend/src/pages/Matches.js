@@ -116,7 +116,7 @@ export const Matches = () => {
             <p className="text-muted-foreground mb-6">{t('matches.updateInventory')}</p>
             <Button
               className="btn-primary"
-              onClick={() => navigate(`/groups/${groupId}/inventory`)}
+              onClick={() => navigate(getInventoryPath())}
             >
               {t('inventory.title')}
             </Button>
