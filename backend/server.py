@@ -215,25 +215,32 @@ async def get_my_groups(user_id: str = Depends(get_current_user)):
     
     # Enrich with album info and member count
     for group in groups:
-        album = await db.albums.find_one({"id": group['album_id']}, {"_id": 0})
-        group['album'] = album
+        album_id = group.get('album_id')
+        if album_id:
+            album = await db.albums.find_one({"id": album_id}, {"_id": 0})
+            group['album'] = album
+        else:
+            group['album'] = None
         
         # Get member count excluding current user
         _, member_count = await get_group_members_excluding_user(group['id'], user_id)
         group['member_count'] = member_count
         
         # Check if user is owner
-        group['is_owner'] = (group['owner_id'] == user_id)
+        group['is_owner'] = (group.get('owner_id') == user_id)
         
         # Calculate progress
-        sticker_count = await db.stickers.count_documents({"album_id": group['album_id']})
-        if sticker_count > 0:
-            inventory_count = await db.user_inventory.count_documents({
-                "user_id": user_id,
-                "group_id": group['id'],
-                "owned_qty": {"$gte": 1}
-            })
-            group['progress'] = round((inventory_count / sticker_count * 100), 1)
+        if album_id:
+            sticker_count = await db.stickers.count_documents({"album_id": album_id})
+            if sticker_count > 0:
+                inventory_count = await db.user_inventory.count_documents({
+                    "user_id": user_id,
+                    "group_id": group['id'],
+                    "owned_qty": {"$gte": 1}
+                })
+                group['progress'] = round((inventory_count / sticker_count * 100), 1)
+            else:
+                group['progress'] = 0
         else:
             group['progress'] = 0
     
