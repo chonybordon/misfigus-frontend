@@ -1,0 +1,20 @@
+{
+  "timestamp": "2026-01-04T23:17:21.257175",
+  "tests_run": 2,
+  "tests_passed": 1,
+  "success_rate": 50.0,
+  "results": [
+    {
+      "test": "Send OTP",
+      "success": true,
+      "details": ""
+    },
+    {
+      "test": "Extract OTP from logs",
+      "success": false,
+      "details": "OTP not found in logs"
+    }
+  ],
+  "qatar_album_id": "bc32fecb-f640-4d00-880d-5043bc112d4b",
+  "token_obtained": false
+}
