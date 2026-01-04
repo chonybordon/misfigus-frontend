@@ -116,6 +116,9 @@ backend:
       - working: true
         agent: "main"
         comment: "Added get_other_members_count() and get_other_members_list() helpers. Both album list and album details use these for consistent counting."
+      - working: true
+        agent: "testing"
+        comment: "TESTED: Member count consistency verified. Albums list shows 4 members, album details shows 4 members, members array has 4 entries. Current user (verifytest@gmail.com) correctly excluded from members array. Helper functions working as expected."
 
   - task: "DEV_OTP_MODE flag"
     implemented: true
@@ -128,6 +131,9 @@ backend:
       - working: true
         agent: "main"
         comment: "Added DEV_OTP_MODE env variable. OTP only returned in response when DEV_OTP_MODE=true."
+      - working: true
+        agent: "testing"
+        comment: "TESTED: DEV_OTP_MODE working correctly. Send-otp API returns dev_otp field when DEV_OTP_MODE=true in .env. Successfully used dev_otp (784826) for authentication."
 
   - task: "Database cleanup script"
     implemented: true
@@ -140,6 +146,9 @@ backend:
       - working: true
         agent: "main"
         comment: "Created cleanup_db.py script. Executed and removed 21 test users and related data."
+      - working: true
+        agent: "testing"
+        comment: "TESTED: Database cleanup verified. No @example.com test users found in Qatar 2022 album members. All members are real users: chonybordon@gmail.com, CHONYBORDON@GMAIL.COM, realuser@gmail.com, newreal@gmail.com."
 
 frontend:
   - task: "Consistent member count display"
