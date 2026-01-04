@@ -266,6 +266,8 @@ async def create_group(group_input: GroupCreate, user_id: str = Depends(get_curr
     member_doc['joined_at'] = member_doc['joined_at'].isoformat()
     await db.group_members.insert_one(member_doc)
     
+    # Remove _id before returning (MongoDB adds it after insert)
+    group_doc.pop('_id', None)
     return {"message": "Group created", "group": group_doc}
 
 @api_router.get("/groups/{group_id}")
