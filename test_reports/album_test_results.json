@@ -1,54 +1,96 @@
 {
   "test_type": "album_selection_and_routing",
-  "timestamp": "2026-01-04T22:51:58.462505",
+  "timestamp": "2026-01-04T22:53:40.635515",
   "base_url": "https://groupfigu.preview.emergentagent.com",
-  "test_email": "albumtest_20260104_225158@example.com",
-  "tests_run": 7,
-  "tests_passed": 3,
-  "success_rate": 42.857142857142854,
+  "test_email": "albumtest_20260104_225340@example.com",
+  "tests_run": 14,
+  "tests_passed": 9,
+  "success_rate": 64.28571428571429,
   "authenticated": false,
   "results": [
     {
       "test": "Connectivity",
       "success": true,
       "details": "Base URL accessible",
-      "timestamp": "2026-01-04T22:51:58.161634"
+      "timestamp": "2026-01-04T22:53:40.256413"
     },
     {
       "test": "Real Authentication",
       "success": false,
       "details": "Could not authenticate with real OTP",
-      "timestamp": "2026-01-04T22:51:58.167749"
+      "timestamp": "2026-01-04T22:53:40.261926"
     },
     {
-      "test": "Albums API - No Auth",
+      "test": "Albums API - Request Failed",
       "success": false,
-      "details": "No authentication token available",
-      "timestamp": "2026-01-04T22:51:58.167763"
+      "details": "Request failed",
+      "timestamp": "2026-01-04T22:53:40.304650"
     },
     {
       "test": "Send OTP",
       "success": true,
       "details": "OTP sent successfully",
-      "timestamp": "2026-01-04T22:51:58.422099"
+      "timestamp": "2026-01-04T22:53:40.594727"
     },
     {
       "test": "OTP Verification (Mock)",
       "success": false,
       "details": "Should have rejected invalid OTP",
-      "timestamp": "2026-01-04T22:51:58.460906"
+      "timestamp": "2026-01-04T22:53:40.633815"
     },
     {
       "test": "Login Redirect Logic",
       "success": true,
       "details": "Frontend configured to redirect to /albums (verified in App.js)",
-      "timestamp": "2026-01-04T22:51:58.460920"
+      "timestamp": "2026-01-04T22:53:40.633829"
+    },
+    {
+      "test": "Frontend Routing - Default to Albums",
+      "success": true,
+      "details": "App.js correctly redirects to /albums after login",
+      "timestamp": "2026-01-04T22:53:40.634608"
+    },
+    {
+      "test": "Frontend Badge - ACTIVO badge",
+      "success": true,
+      "details": "Green badge for active albums",
+      "timestamp": "2026-01-04T22:53:40.634653"
+    },
+    {
+      "test": "Frontend Badge - INACTIVO badge",
+      "success": true,
+      "details": "Red badge for inactive albums",
+      "timestamp": "2026-01-04T22:53:40.634659"
+    },
+    {
+      "test": "Frontend Badge - PR\u00d3XIMAMENTE badge",
+      "success": true,
+      "details": "Gray badge for coming soon albums",
+      "timestamp": "2026-01-04T22:53:40.634663"
+    },
+    {
+      "test": "Frontend Interaction - coming_soon",
+      "success": true,
+      "details": "Coming soon albums not clickable",
+      "timestamp": "2026-01-04T22:53:40.634668"
+    },
+    {
+      "test": "Frontend Interaction - inactive",
+      "success": true,
+      "details": "Inactive albums show activation dialog",
+      "timestamp": "2026-01-04T22:53:40.634671"
+    },
+    {
+      "test": "Frontend Code Analysis",
+      "success": false,
+      "details": "Error reading frontend files: not enough values to unpack (expected 3, got 2)",
+      "timestamp": "2026-01-04T22:53:40.634679"
     },
     {
       "test": "Album Interaction - No Auth",
       "success": false,
       "details": "No authentication token",
-      "timestamp": "2026-01-04T22:51:58.461536"
+      "timestamp": "2026-01-04T22:53:40.634692"
     }
   ]
 }
