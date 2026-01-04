@@ -49,6 +49,13 @@ logger = logging.getLogger(__name__)
 # OTP storage (in production, use Redis with TTL)
 OTP_STORE = {}  # {email: {hash: str, expires: datetime}}
 
+# Check email service configuration on startup
+@app.on_event("startup")
+async def startup_event():
+    logger.info("Starting MisFigus API server...")
+    check_resend_config()
+    logger.info("Server startup complete")
+
 # ============================================
 # HELPER: Validate group membership
 # ============================================
