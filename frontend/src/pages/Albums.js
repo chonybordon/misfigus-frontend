@@ -194,7 +194,7 @@ export const Albums = () => {
                           <>
                             <span>•</span>
                             <span className="font-semibold text-primary">
-                              {album.progress}% {t('albumHome.completed')}
+                              {Math.round(album.progress)}% {t('albumHome.completed')}
                             </span>
                           </>
                         )}
