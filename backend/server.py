@@ -20,7 +20,7 @@ from models import (
 )
 from email_service import (
     generate_otp_code, generate_invite_code, hash_otp, verify_otp_hash,
-    send_otp_email, send_invite_email
+    send_otp_email, send_invite_email, check_resend_config
 )
 from auth import create_token, get_current_user
 
