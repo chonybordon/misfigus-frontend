@@ -210,7 +210,7 @@ class MisFigusAlbumTester:
             interaction_checks = [
                 ("coming_soon", "return; // Do nothing", "Coming soon albums not clickable"),
                 ("inactive", "setActivationDialogOpen(true)", "Inactive albums show activation dialog"),
-                ("navigate(`/albums/${album.id}`)", "Active albums navigate to album home")
+                ("active_navigation", "navigate(`/albums/${album.id}`)", "Active albums navigate to album home")
             ]
             
             for check_name, expected_code, description in interaction_checks:
