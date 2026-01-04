@@ -607,7 +607,8 @@ const resources = {
         verify: 'Überprüfen',
         resend: 'Code erneut senden',
         devMode: 'DEV-MODUS - OTP-Code',
-        devNote: 'Nur zum Testen. Überprüfe die Backend-Logs für Details.'
+        devNote: 'Nur zum Testen. Überprüfe die Backend-Logs für Details.',
+        checkEmail: 'Überprüfe deine E-Mail für den Code'
       },
       albums: {
         title: 'Meine Alben',
