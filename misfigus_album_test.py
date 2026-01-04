@@ -355,6 +355,7 @@ class MisFigusAlbumTester:
         # Run all tests
         self.test_backend_albums_api()
         self.test_login_flow_and_routing()
+        self.test_frontend_code_analysis()
         self.test_album_display_and_interaction()
 
         # Print summary
