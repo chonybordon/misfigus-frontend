@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import List
 from datetime import datetime, timedelta, timezone
 import json
+import re
 
 from models import (
     User, UserCreate, UserUpdate, OTPVerify, Album, AlbumMember, Sticker, 
@@ -26,8 +27,15 @@ mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
 
-# DEV MODE flag - only show OTP when explicitly enabled (default: false for production)
+# ============================================
+# ENVIRONMENT FLAGS (SOURCE OF TRUTH)
+# ============================================
+# DEV_MODE: Enables dev-only endpoints like /api/dev/purge_test_data
+# DEV_OTP_MODE: Shows OTP on screen (for testing without email)
+# DEV_SEED: Allows seeding test data on startup
+DEV_MODE = os.environ.get('DEV_MODE', 'false').lower() == 'true'
 DEV_OTP_MODE = os.environ.get('DEV_OTP_MODE', 'false').lower() == 'true'
+DEV_SEED = os.environ.get('DEV_SEED', 'false').lower() == 'true'
 
 app = FastAPI()
 api_router = APIRouter(prefix="/api")
@@ -39,7 +47,35 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # ============================================
-# HELPER: Get album owner (first member who joined without invite)
+# TEST USER PATTERNS (for purging)
+# ============================================
+TEST_EMAIL_PATTERNS = [
+    r'@example\.com$',
+    r'owner_test',
+    r'friend[0-9]',
+    r'^test',
+    r'testuser',
+    r'testbackend',
+    r'frontendtest',
+    r'smoketest',
+    r'verifytest',
+    r'lonelyuser',
+    r'uniquealone',
+    r'loner@',
+    r'newreal@',
+    r'realuser@',
+]
+
+def is_test_email(email: str) -> bool:
+    """Check if email matches any test pattern."""
+    email_lower = email.lower()
+    for pattern in TEST_EMAIL_PATTERNS:
+        if re.search(pattern, email_lower):
+            return True
+    return False
+
+# ============================================
+# HELPER: Get album owner (first member who activated)
 # ============================================
 async def get_album_owner_id(album_id: str) -> str:
     """
@@ -49,16 +85,15 @@ async def get_album_owner_id(album_id: str) -> str:
     owner_membership = await db.album_members.find_one(
         {
             "album_id": album_id,
-            "invited_by_user_id": None  # Self-joined (activated), not invited
+            "invited_by_user_id": None
         },
         {"_id": 0, "user_id": 1, "created_at": 1},
-        sort=[("created_at", 1)]  # Get the earliest one
+        sort=[("created_at", 1)]
     )
     
     if owner_membership:
         return owner_membership['user_id']
     
-    # Fallback: if no self-joined member, get the first member overall
     first_member = await db.album_members.find_one(
         {"album_id": album_id},
         {"_id": 0, "user_id": 1},
@@ -68,7 +103,7 @@ async def get_album_owner_id(album_id: str) -> str:
     return first_member['user_id'] if first_member else None
 
 # ============================================
-# HELPER: Get members EXCLUDING owner (source of truth)
+# HELPER: Get members EXCLUDING owner
 # ============================================
 async def get_members_excluding_owner(album_id: str) -> tuple:
     """
@@ -80,7 +115,6 @@ async def get_members_excluding_owner(album_id: str) -> tuple:
     if not owner_id:
         return [], 0
     
-    # Get all members except owner
     other_memberships = await db.album_members.find(
         {
             "album_id": album_id,
@@ -94,13 +128,92 @@ async def get_members_excluding_owner(album_id: str) -> tuple:
     if not other_user_ids:
         return [], 0
     
-    # Get user details for other members
     other_users = await db.users.find(
         {"id": {"$in": other_user_ids}},
         {"_id": 0}
     ).to_list(100)
     
     return other_users, len(other_users)
+
+# ============================================
+# DEV ENDPOINTS (only active when DEV_MODE=true)
+# ============================================
+@api_router.post("/dev/purge_test_data")
+async def purge_test_data():
+    """Purge all test/seed users and their data. Only works when DEV_MODE=true."""
+    if not DEV_MODE:
+        raise HTTPException(status_code=403, detail="Dev endpoints disabled in production")
+    
+    # Find test users
+    all_users = await db.users.find({}, {"_id": 0, "id": 1, "email": 1}).to_list(10000)
+    test_users = [u for u in all_users if is_test_email(u['email'])]
+    test_user_ids = [u['id'] for u in test_users]
+    
+    if not test_users:
+        return {"message": "No test users found", "deleted_count": 0}
+    
+    deleted = {
+        "users": 0,
+        "memberships": 0,
+        "activations": 0,
+        "inventories": 0,
+        "invites": 0,
+        "offers": 0
+    }
+    
+    # Delete memberships
+    r = await db.album_members.delete_many({"user_id": {"$in": test_user_ids}})
+    deleted["memberships"] = r.deleted_count
+    
+    # Delete activations
+    r = await db.user_album_activations.delete_many({"user_id": {"$in": test_user_ids}})
+    deleted["activations"] = r.deleted_count
+    
+    # Delete inventories
+    r = await db.user_inventory.delete_many({"user_id": {"$in": test_user_ids}})
+    deleted["inventories"] = r.deleted_count
+    
+    # Delete invites
+    r = await db.invite_tokens.delete_many({"created_by_user_id": {"$in": test_user_ids}})
+    deleted["invites"] = r.deleted_count
+    
+    # Delete offers
+    r = await db.offers.delete_many({
+        "$or": [
+            {"from_user_id": {"$in": test_user_ids}},
+            {"to_user_id": {"$in": test_user_ids}}
+        ]
+    })
+    deleted["offers"] = r.deleted_count
+    
+    # Delete users
+    r = await db.users.delete_many({"id": {"$in": test_user_ids}})
+    deleted["users"] = r.deleted_count
+    
+    return {
+        "message": "Test data purged",
+        "purged_emails": [u['email'] for u in test_users],
+        "deleted": deleted
+    }
+
+@api_router.get("/dev/status")
+async def dev_status():
+    """Get dev mode status. Only works when DEV_MODE=true."""
+    if not DEV_MODE:
+        raise HTTPException(status_code=403, detail="Dev endpoints disabled in production")
+    
+    user_count = await db.users.count_documents({})
+    all_users = await db.users.find({}, {"_id": 0, "email": 1}).to_list(1000)
+    test_users = [u for u in all_users if is_test_email(u['email'])]
+    
+    return {
+        "DEV_MODE": DEV_MODE,
+        "DEV_OTP_MODE": DEV_OTP_MODE,
+        "DEV_SEED": DEV_SEED,
+        "total_users": user_count,
+        "test_users_count": len(test_users),
+        "test_users": [u['email'] for u in test_users]
+    }
 
 # ============================================
 # AUTH ENDPOINTS
@@ -163,22 +276,19 @@ async def update_me(user_update: UserUpdate, user_id: str = Depends(get_current_
     return user
 
 # ============================================
-# ALBUM ENDPOINTS - Owner NEVER appears as member
+# ALBUM ENDPOINTS
 # ============================================
 @api_router.get("/albums")
 async def get_albums(user_id: str = Depends(get_current_user)):
     all_albums = await db.albums.find({}, {"_id": 0}).to_list(100)
     
-    # Get user's album activations
     activations = await db.user_album_activations.find({"user_id": user_id}, {"_id": 0}).to_list(100)
     activated_album_ids = [a['album_id'] for a in activations]
     
-    # Get user's memberships
     memberships = await db.album_members.find({"user_id": user_id}, {"_id": 0}).to_list(100)
     member_album_ids = [m['album_id'] for m in memberships]
     
     for album in all_albums:
-        # Determine state per user
         if album['id'] in activated_album_ids:
             album['user_state'] = 'active'
             album['is_member'] = album['id'] in member_album_ids
@@ -190,7 +300,6 @@ async def get_albums(user_id: str = Depends(get_current_user)):
             album['is_member'] = False
         
         if album['is_member']:
-            # Get members EXCLUDING owner (source of truth)
             _, member_count = await get_members_excluding_owner(album['id'])
             album['member_count'] = member_count
             
@@ -214,12 +323,10 @@ async def get_album(album_id: str, user_id: str = Depends(get_current_user)):
     if not album:
         raise HTTPException(status_code=404, detail="Album not found")
     
-    # Get members EXCLUDING owner (source of truth)
     members_list, member_count = await get_members_excluding_owner(album_id)
     album['members'] = members_list
     album['member_count'] = member_count
     
-    # Get owner info for UI if needed
     owner_id = await get_album_owner_id(album_id)
     album['owner_id'] = owner_id
     album['is_owner'] = (user_id == owner_id)
@@ -260,14 +367,12 @@ async def activate_album(album_id: str, user_id: str = Depends(get_current_user)
     if album['status'] != 'active':
         raise HTTPException(status_code=400, detail="Album cannot be activated")
     
-    # Check if already activated
     existing_activation = await db.user_album_activations.find_one({
         "user_id": user_id,
         "album_id": album_id
     }, {"_id": 0})
     
     if existing_activation:
-        # Already activated, just ensure membership
         existing_member = await db.album_members.find_one({
             "album_id": album_id,
             "user_id": user_id
@@ -277,7 +382,7 @@ async def activate_album(album_id: str, user_id: str = Depends(get_current_user)
             member = AlbumMember(
                 album_id=album_id,
                 user_id=user_id,
-                invited_by_user_id=None  # Self-activated = owner
+                invited_by_user_id=None
             )
             member_doc = member.model_dump()
             member_doc['created_at'] = member_doc['created_at'].isoformat()
@@ -285,7 +390,6 @@ async def activate_album(album_id: str, user_id: str = Depends(get_current_user)
         
         return {"message": "Album already activated"}
     
-    # Create activation record
     activation = {
         "user_id": user_id,
         "album_id": album_id,
@@ -293,7 +397,6 @@ async def activate_album(album_id: str, user_id: str = Depends(get_current_user)
     }
     await db.user_album_activations.insert_one(activation)
     
-    # Auto-create membership (self-activated = owner, invited_by_user_id=None)
     existing_member = await db.album_members.find_one({
         "album_id": album_id,
         "user_id": user_id
@@ -303,7 +406,7 @@ async def activate_album(album_id: str, user_id: str = Depends(get_current_user)
         member = AlbumMember(
             album_id=album_id,
             user_id=user_id,
-            invited_by_user_id=None  # Self-activated = owner
+            invited_by_user_id=None
         )
         member_doc = member.model_dump()
         member_doc['created_at'] = member_doc['created_at'].isoformat()
@@ -313,7 +416,6 @@ async def activate_album(album_id: str, user_id: str = Depends(get_current_user)
 
 @api_router.delete("/albums/{album_id}/deactivate")
 async def deactivate_album(album_id: str, user_id: str = Depends(get_current_user)):
-    # Remove activation record (inventory is preserved)
     result = await db.user_album_activations.delete_one({
         "user_id": user_id,
         "album_id": album_id
@@ -340,7 +442,7 @@ async def join_album(album_id: str, user_id: str = Depends(get_current_user)):
     member = AlbumMember(
         album_id=album_id,
         user_id=user_id,
-        invited_by_user_id=None  # Self-joined
+        invited_by_user_id=None
     )
     member_doc = member.model_dump()
     member_doc['created_at'] = member_doc['created_at'].isoformat()
@@ -384,17 +486,15 @@ async def accept_invite(token: str, user_id: str = Depends(get_current_user)):
     if existing:
         raise HTTPException(status_code=400, detail="Already a member")
     
-    # INVITED member (not owner) - has invited_by_user_id set
     member = AlbumMember(
         album_id=invite['album_id'],
         user_id=user_id,
-        invited_by_user_id=invite['created_by_user_id']  # Invited by someone = NOT owner
+        invited_by_user_id=invite['created_by_user_id']
     )
     member_doc = member.model_dump()
     member_doc['created_at'] = member_doc['created_at'].isoformat()
     await db.album_members.insert_one(member_doc)
     
-    # Also create activation for the invited user
     existing_activation = await db.user_album_activations.find_one({
         "user_id": user_id,
         "album_id": invite['album_id']
@@ -483,21 +583,14 @@ async def get_matches(album_id: str, user_id: str = Depends(get_current_user)):
     
     my_inv_map = {item['sticker_id']: item['owned_qty'] for item in my_inventory}
     
-    # Get other members EXCLUDING owner for matches
     members_list, _ = await get_members_excluding_owner(album_id)
     other_user_ids = [m['id'] for m in members_list]
-    
-    # Also include current user's potential matches with non-owner members
-    owner_id = await get_album_owner_id(album_id)
-    if user_id != owner_id:
-        # Current user is not owner, so they can trade with others (not owner)
-        pass
     
     matches = []
     
     for other_user_id in other_user_ids:
         if other_user_id == user_id:
-            continue  # Skip self
+            continue
             
         other_inventory = await db.user_inventory.find({
             "user_id": other_user_id,
