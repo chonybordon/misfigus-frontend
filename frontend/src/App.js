@@ -8,14 +8,12 @@ import { Toaster } from '@/components/ui/sonner';
 import { toast } from 'sonner';
 
 import Login from './pages/Login';
-import Albums from './pages/Albums';
-import AlbumHome from './pages/AlbumHome';
+import Groups from './pages/Groups';
+import GroupHome from './pages/GroupHome';
 import Inventory from './pages/Inventory';
 import Matches from './pages/Matches';
-import Offers from './pages/Offers';
 import Settings from './pages/Settings';
 import Profile from './pages/Profile';
-import JoinAlbum from './pages/JoinAlbum';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -89,15 +87,16 @@ function App() {
     <AuthContext.Provider value={{ user, login, logout }}>
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={user ? <Navigate to="/albums" /> : <Login />} />
-          <Route path="/albums" element={<PrivateRoute><Albums /></PrivateRoute>} />
-          <Route path="/albums/:albumId" element={<PrivateRoute><AlbumHome /></PrivateRoute>} />
-          <Route path="/albums/:albumId/inventory" element={<PrivateRoute><Inventory /></PrivateRoute>} />
-          <Route path="/albums/:albumId/matches" element={<PrivateRoute><Matches /></PrivateRoute>} />
-          <Route path="/albums/:albumId/offers" element={<PrivateRoute><Offers /></PrivateRoute>} />
+          <Route path="/" element={user ? <Navigate to="/groups" /> : <Login />} />
+          <Route path="/groups" element={<PrivateRoute><Groups /></PrivateRoute>} />
+          <Route path="/groups/:groupId" element={<PrivateRoute><GroupHome /></PrivateRoute>} />
+          <Route path="/groups/:groupId/inventory" element={<PrivateRoute><Inventory /></PrivateRoute>} />
+          <Route path="/groups/:groupId/matches" element={<PrivateRoute><Matches /></PrivateRoute>} />
           <Route path="/settings" element={<PrivateRoute><Settings /></PrivateRoute>} />
           <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
-          <Route path="/join/:token" element={<JoinAlbum />} />
+          {/* Legacy routes redirect to groups */}
+          <Route path="/albums" element={<Navigate to="/groups" />} />
+          <Route path="/albums/*" element={<Navigate to="/groups" />} />
         </Routes>
         <Toaster position="top-center" richColors />
       </BrowserRouter>
