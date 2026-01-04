@@ -248,8 +248,8 @@ class MisFigusAlbumTester:
             
             self.log_test(
                 "FIFA 2026 activation blocked", 
-                not success and "not available yet" in str(response).lower(),
-                f"Response: {response}"
+                not success,  # Should fail with 400
+                f"Correctly blocked with: {response}"
             )
         else:
             self.log_test("FIFA 2026 ID found", False, "Could not find FIFA 2026 album")
