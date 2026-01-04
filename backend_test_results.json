@@ -1,8 +1,8 @@
 {
-  "timestamp": "2026-01-04T23:19:55.551902",
+  "timestamp": "2026-01-04T23:20:21.771785",
   "tests_run": 18,
-  "tests_passed": 15,
-  "success_rate": 83.33333333333334,
+  "tests_passed": 18,
+  "success_rate": 100.0,
   "results": [
     {
       "test": "Send OTP",
@@ -41,7 +41,7 @@
     },
     {
       "test": "FIFA 2026 activation blocked",
-      "success": false,
+      "success": true,
       "details": "Correctly blocked with: {'detail': 'Album not available yet'}"
     },
     {
@@ -51,7 +51,7 @@
     },
     {
       "test": "Duplicate activation blocked",
-      "success": false,
+      "success": true,
       "details": "Correctly blocked with: {'detail': 'Album already activated'}"
     },
     {
@@ -91,7 +91,7 @@
     },
     {
       "test": "Invalid album ID returns 404",
-      "success": false,
+      "success": true,
       "details": "Correctly returned error: {'detail': 'Album not found'}"
     }
   ],
