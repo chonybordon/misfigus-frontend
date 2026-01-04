@@ -177,6 +177,9 @@ frontend:
       - working: true
         agent: "main"
         comment: "OTP box only renders when API returns dev_otp. Shows 'check your email' message in production mode."
+      - working: true
+        agent: "testing"
+        comment: "SMOKE TEST VERIFIED: DEV OTP box appears correctly in yellow/amber styling when DEV_OTP_MODE=true. Login flow with smoketest@gmail.com successful. Spanish UI confirmed as default."
 
 metadata:
   created_by: "main_agent"
