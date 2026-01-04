@@ -224,6 +224,7 @@ class MisFigusAlbumTester:
         except Exception as e:
             self.log_test("Frontend Code Analysis", False, f"Error reading frontend files: {e}")
             return False
+    def test_album_display_and_interaction(self):
         """Test 3 & 4: Album List Display and Interaction Test"""
         print("\n" + "="*60)
         print("TEST 3 & 4: ALBUM DISPLAY AND INTERACTION")
