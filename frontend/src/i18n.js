@@ -605,6 +605,7 @@ const resources = {
         subtitle: 'Échangez des autocollants avec votre album',
         emailPlaceholder: 'Votre e-mail',
         sendOTP: 'Envoyer le code',
+        otpSent: 'Code envoyé avec succès. Vérifiez votre e-mail.',
         otpPlaceholder: 'Code à 6 chiffres',
         verify: 'Vérifier',
         resend: 'Renvoyer le code',
