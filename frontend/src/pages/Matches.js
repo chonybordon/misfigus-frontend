@@ -49,7 +49,7 @@ const getDisplayName = (user, t) => {
 };
 
 export const Matches = () => {
-  const { albumId } = useParams();
+  const { groupId } = useParams();
   const [matches, setMatches] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
@@ -57,11 +57,11 @@ export const Matches = () => {
 
   useEffect(() => {
     fetchMatches();
-  }, [albumId]);
+  }, [groupId]);
 
   const fetchMatches = async () => {
     try {
-      const response = await api.get(`/matches?album_id=${albumId}`);
+      const response = await api.get(`/groups/${groupId}/matches`);
       setMatches(response.data);
     } catch (error) {
       toast.error(error.response?.data?.detail || t('common.error'));
@@ -83,10 +83,10 @@ export const Matches = () => {
       <div className="max-w-4xl mx-auto p-6">
         <div className="flex items-center gap-4 mb-8">
           <Button
-            data-testid="back-to-album-btn"
+            data-testid="back-to-group-btn"
             variant="outline"
             size="icon"
-            onClick={() => navigate(`/albums/${albumId}`)}
+            onClick={() => navigate(`/groups/${groupId}`)}
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
@@ -100,7 +100,7 @@ export const Matches = () => {
             <p className="text-muted-foreground mb-6">{t('matches.updateInventory')}</p>
             <Button
               className="btn-primary"
-              onClick={() => navigate(`/albums/${albumId}/inventory`)}
+              onClick={() => navigate(`/groups/${groupId}/inventory`)}
             >
               {t('inventory.title')}
             </Button>
