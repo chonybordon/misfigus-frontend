@@ -410,6 +410,7 @@ const resources = {
         subtitle: 'Troque figurinhas com seu álbum',
         emailPlaceholder: 'Seu e-mail',
         sendOTP: 'Enviar código',
+        otpSent: 'Código enviado com sucesso. Verifique seu e-mail.',
         otpPlaceholder: 'Código de 6 dígitos',
         verify: 'Verificar',
         resend: 'Reenviar código',
