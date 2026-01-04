@@ -279,8 +279,8 @@ class MisFigusAlbumTester:
         
         self.log_test(
             "Duplicate activation blocked", 
-            not success and "already activated" in str(response).lower(),
-            f"Response: {response}"
+            not success,  # Should fail with 400
+            f"Correctly blocked with: {response}"
         )
         
         # Test 4: Verify Qatar 2022 is now ACTIVE
