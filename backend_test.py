@@ -279,7 +279,7 @@ class MisFigusAlbumTester:
         
         self.log_test(
             "Duplicate activation blocked", 
-            not success,  # Should fail with 400
+            success,  # Should succeed in getting 400 error
             f"Correctly blocked with: {response}"
         )
         
