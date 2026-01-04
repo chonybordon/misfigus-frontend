@@ -176,9 +176,9 @@ export const Inventory = () => {
               className={`p-4 transition-all duration-300 ${getStickerClass(sticker)}`}
             >
               <div className="text-center mb-2">
-                <div className="text-2xl font-black text-primary mb-1">#{sticker.number}</div>
+                <div className="text-lg font-bold text-primary mb-1">N° {sticker.number}</div>
+                <div className="text-xs text-muted-foreground mb-1">{sticker.team}</div>
                 <div className="text-sm font-semibold line-clamp-2 h-10">{sticker.name}</div>
-                <div className="text-xs text-muted-foreground mt-1">{sticker.team}</div>
               </div>
               <div className="flex items-center justify-between gap-2 mt-3">
                 <Button
