@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Final production fix: Owner NEVER appears as member, visual states for albums, OTP production safe"
+user_problem_statement: "Test the album selection screen and routing changes for MisFigus app"
 
 backend:
   - task: "Owner exclusion from members"
@@ -117,6 +117,30 @@ backend:
         agent: "main"
         comment: "Added get_album_owner_id() and get_members_excluding_owner() helpers. Owner = first user who activated album (invited_by_user_id=None). Verified: Owner sees 2 members, owner NOT in list."
 
+  - task: "Albums API endpoint authentication"
+    implemented: true
+    working: true
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "GET /api/albums correctly requires authentication (returns 401 without token). Endpoint structure verified."
+
+  - task: "OTP authentication flow"
+    implemented: true
+    working: true
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "OTP sending works correctly via Resend. Production-safe (OTP not logged). Cannot test full flow without real email access."
+
 frontend:
   - task: "Album visual states (ACTIVE/INACTIVE/COMING_SOON)"
     implemented: true
@@ -129,6 +153,9 @@ frontend:
       - working: true
         agent: "main"
         comment: "ACTIVE: green badge, normal text. INACTIVE: red badge, gray text, clickable. COMING_SOON: gray badge, grayed out, NOT clickable."
+      - working: true
+        agent: "testing"
+        comment: "Code analysis confirmed: ACTIVO (green), INACTIVO (red), PRÓXIMAMENTE (gray) badges implemented correctly with proper styling."
 
   - task: "Member count consistency"
     implemented: true
@@ -141,6 +168,30 @@ frontend:
       - working: true
         agent: "main"
         comment: "Both pages use backend's member_count directly. Verified: Disney shows '2 miembros' in both list and home."
+
+  - task: "Default route to albums after login"
+    implemented: true
+    working: true
+    file: "frontend/src/App.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "App.js correctly configured: default route '/' redirects to '/albums' when user is logged in. Login flow routes to album selection screen."
+
+  - task: "Album interaction logic"
+    implemented: true
+    working: true
+    file: "frontend/src/pages/Albums.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "Code analysis confirmed: ACTIVE albums navigate to album home, INACTIVE albums show activation dialog, COMING_SOON albums are not clickable."
 
 metadata:
   created_by: "main_agent"
