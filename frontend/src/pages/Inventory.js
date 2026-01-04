@@ -131,10 +131,10 @@ export const Inventory = () => {
       <div className="max-w-7xl mx-auto p-6">
         <div className="flex items-center gap-4 mb-6">
           <Button
-            data-testid="back-to-group-btn"
+            data-testid="back-btn"
             variant="outline"
             size="icon"
-            onClick={() => navigate(`/groups/${groupId}`)}
+            onClick={() => navigate(getBackPath())}
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
