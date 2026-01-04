@@ -1,8 +1,8 @@
 {
-  "timestamp": "2026-01-04T23:18:58.363778",
-  "tests_run": 2,
-  "tests_passed": 1,
-  "success_rate": 50.0,
+  "timestamp": "2026-01-04T23:19:24.492393",
+  "tests_run": 18,
+  "tests_passed": 15,
+  "success_rate": 83.33333333333334,
   "results": [
     {
       "test": "Send OTP",
@@ -10,11 +10,91 @@
       "details": ""
     },
     {
-      "test": "Extract OTP from logs",
+      "test": "Verify OTP",
+      "success": true,
+      "details": ""
+    },
+    {
+      "test": "GET /api/albums",
+      "success": true,
+      "details": "Retrieved 6 albums"
+    },
+    {
+      "test": "All albums have user_state field",
+      "success": true,
+      "details": ""
+    },
+    {
+      "test": "New user sees albums as INACTIVE",
+      "success": true,
+      "details": "Found 5 inactive albums"
+    },
+    {
+      "test": "FIFA 2026 is coming_soon",
+      "success": true,
+      "details": "FIFA 2026 state: coming_soon"
+    },
+    {
+      "test": "Qatar 2022 initially inactive",
+      "success": true,
+      "details": "Qatar 2022 state: inactive"
+    },
+    {
+      "test": "FIFA 2026 activation blocked",
       "success": false,
-      "details": "OTP not found in logs"
+      "details": "Response: {'detail': 'Album not available yet'}"
+    },
+    {
+      "test": "Qatar 2022 activation success",
+      "success": true,
+      "details": "Album activated successfully"
+    },
+    {
+      "test": "Duplicate activation blocked",
+      "success": false,
+      "details": "Response: {'detail': 'Album already activated'}"
+    },
+    {
+      "test": "Qatar 2022 now ACTIVE",
+      "success": true,
+      "details": "Qatar 2022 state after activation: active"
+    },
+    {
+      "test": "Qatar 2022 has 100 stickers",
+      "success": true,
+      "details": "Found 100 stickers, expected 100"
+    },
+    {
+      "test": "All stickers have required fields",
+      "success": true,
+      "details": "Some stickers missing required fields (number, name, team, category)"
+    },
+    {
+      "test": "Sticker #61 is Lionel Messi from Argentina",
+      "success": true,
+      "details": "Sticker #61: Lionel Messi from Argentina"
+    },
+    {
+      "test": "Sticker numbers are sequential 1-100",
+      "success": true,
+      "details": "Number range: 1-100, gaps: set()"
+    },
+    {
+      "test": "Contains real team names",
+      "success": true,
+      "details": "Found teams: ['Argentina', 'Denmark', 'Ecuador', 'England', 'FIFA', 'France', 'Iran', 'Mexico', 'Netherlands', 'Poland', 'Qatar', 'Saudi Arabia', 'Senegal', 'Tunisia', 'USA']"
+    },
+    {
+      "test": "All stickers have owned_qty field",
+      "success": true,
+      "details": "Some stickers missing owned_qty field"
+    },
+    {
+      "test": "Invalid album ID returns 404",
+      "success": false,
+      "details": "Response: {'detail': 'Album not found'}"
     }
   ],
   "qatar_album_id": "bc32fecb-f640-4d00-880d-5043bc112d4b",
-  "token_obtained": false
+  "token_obtained": true
 }
