@@ -248,7 +248,7 @@ class MisFigusAlbumTester:
             
             self.log_test(
                 "FIFA 2026 activation blocked", 
-                not success,  # Should fail with 400
+                success,  # Should succeed in getting 400 error
                 f"Correctly blocked with: {response}"
             )
         else:
