@@ -13,7 +13,7 @@ export const Login = () => {
   const [otp, setOtp] = useState('');
   const [step, setStep] = useState('email');
   const [loading, setLoading] = useState(false);
-  const [devOtp, setDevOtp] = useState('');
+  const [devOtp, setDevOtp] = useState(null); // null by default, only set if API returns it
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
   const { login } = React.useContext(AuthContext);
@@ -23,7 +23,12 @@ export const Login = () => {
     setLoading(true);
     try {
       const response = await api.post('/auth/send-otp', { email });
-      setDevOtp(response.data.dev_otp);
+      // Only set devOtp if the API returns it (DEV mode)
+      if (response.data.dev_otp) {
+        setDevOtp(response.data.dev_otp);
+      } else {
+        setDevOtp(null);
+      }
       toast.success(t('login.sendOTP'));
       setStep('otp');
     } catch (error) {
@@ -99,6 +104,7 @@ export const Login = () => {
           </form>
         ) : (
           <form onSubmit={handleVerifyOTP} className="space-y-6" data-testid="otp-form">
+            {/* DEV MODE OTP Display - Only shown when API returns dev_otp */}
             {devOtp && (
               <div className="bg-amber-100 border-2 border-amber-500 rounded-lg p-4 mb-4" data-testid="dev-otp-display">
                 <p className="text-sm font-semibold text-amber-900 mb-2">
@@ -112,6 +118,16 @@ export const Login = () => {
                 </p>
               </div>
             )}
+            
+            {/* Production mode: Show "check your email" message */}
+            {!devOtp && (
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                <p className="text-sm text-blue-800 text-center">
+                  {t('login.checkEmail')}
+                </p>
+              </div>
+            )}
+            
             <div className="flex flex-col items-center space-y-4">
               <InputOTP
                 data-testid="otp-input"

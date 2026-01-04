@@ -1,22 +1,22 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { api, AuthContext } from '../App';
+import { api } from '../App';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
-import { Settings as SettingsIcon, ChevronRight } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Settings, BookOpen } from 'lucide-react';
 
 export const Albums = () => {
   const [albums, setAlbums] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [activationDialogOpen, setActivationDialogOpen] = useState(false);
   const [selectedAlbum, setSelectedAlbum] = useState(null);
+  const [activationDialogOpen, setActivationDialogOpen] = useState(false);
   const [activating, setActivating] = useState(false);
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const { user } = useContext(AuthContext);
 
   useEffect(() => {
     fetchAlbums();
@@ -35,15 +35,18 @@ export const Albums = () => {
 
   const handleAlbumClick = (album) => {
     if (album.user_state === 'coming_soon') {
+      toast.info(t('albums.comingSoon'));
       return;
     }
     
-    if (album.user_state === 'active') {
-      navigate(`/albums/${album.id}`);
-    } else if (album.user_state === 'inactive') {
+    if (album.user_state === 'inactive') {
       setSelectedAlbum(album);
       setActivationDialogOpen(true);
+      return;
     }
+    
+    // Active album - navigate to it
+    navigate(`/albums/${album.id}`);
   };
 
   const handleActivateAlbum = async () => {
@@ -54,45 +57,30 @@ export const Albums = () => {
       await api.post(`/albums/${selectedAlbum.id}/activate`);
       toast.success(t('albums.activateSuccess'));
       setActivationDialogOpen(false);
-      fetchAlbums(); // Refresh albums list
       navigate(`/albums/${selectedAlbum.id}`);
     } catch (error) {
-      toast.error(error.response?.data?.detail || t('albums.activateError'));
+      toast.error(error.response?.data?.detail || t('common.error'));
     } finally {
       setActivating(false);
     }
   };
 
-  const getAlbumBadge = (userState) => {
-    if (userState === 'active') {
-      return (
-        <Badge className="bg-green-500 text-white">
-          {t('albums.active')}
-        </Badge>
-      );
-    } else if (userState === 'inactive') {
-      return (
-        <Badge variant="secondary" className="bg-gray-400 text-white">
-          {t('albums.inactive')}
-        </Badge>
-      );
-    } else {
-      return (
-        <Badge variant="secondary" className="bg-gray-400 text-white">
-          {t('albums.comingSoon')}
-        </Badge>
-      );
+  const getStateBadge = (album) => {
+    if (album.user_state === 'coming_soon') {
+      return <Badge variant="secondary" className="bg-gray-100 text-gray-600">{t('albums.comingSoonBadge')}</Badge>;
     }
+    if (album.user_state === 'inactive') {
+      return <Badge variant="outline" className="border-orange-300 text-orange-600">{t('albums.inactiveBadge')}</Badge>;
+    }
+    return <Badge className="bg-green-100 text-green-700">{t('albums.activeBadge')}</Badge>;
   };
 
-  const getAlbumStyles = (userState) => {
-    if (userState === 'active') {
-      return 'hover:shadow-md cursor-pointer border-2 hover:border-primary';
-    } else if (userState === 'inactive') {
-      return 'hover:shadow-md cursor-pointer border-2 border-dashed opacity-75 hover:opacity-100';
-    } else {
-      return 'opacity-50 cursor-not-allowed border-2 border-dashed';
-    }
+  // Helper for consistent member count display
+  const getMemberCountDisplay = (album) => {
+    const count = album.member_count ?? 0;
+    if (count === 0) return `0 ${t('albumHome.memberPlural')}`;
+    if (count === 1) return `1 ${t('albumHome.member')}`;
+    return `${count} ${t('albumHome.memberPlural')}`;
   };
 
   if (loading) {
@@ -108,10 +96,8 @@ export const Albums = () => {
       <div className="max-w-4xl mx-auto p-6">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-4xl font-black tracking-tight text-primary mb-1">
-              {t('app.name')}
-            </h1>
-            <p className="text-muted-foreground">{user?.email}</p>
+            <h1 className="text-3xl font-black tracking-tight text-primary">{t('albums.title')}</h1>
+            <p className="text-muted-foreground">{t('albums.subtitle')}</p>
           </div>
           <Button
             data-testid="settings-btn"
@@ -119,83 +105,79 @@ export const Albums = () => {
             size="icon"
             onClick={() => navigate('/settings')}
           >
-            <SettingsIcon className="h-5 w-5" />
+            <Settings className="h-5 w-5" />
           </Button>
         </div>
 
-        <h2 className="text-2xl font-bold mb-4">{t('albums.select')}</h2>
-
-        {albums.length === 0 ? (
-          <div className="text-center py-20" data-testid="no-albums-message">
-            <p className="text-muted-foreground">{t('albums.noAlbums')}</p>
-          </div>
-        ) : (
-          <div className="space-y-2" data-testid="albums-list">
-            {albums.map((album) => (
-              <div
-                key={album.id}
-                data-testid={`album-item-${album.id}`}
-                className={`bg-white rounded-lg p-4 flex items-center justify-between transition-all ${getAlbumStyles(album.user_state)}`}
-                onClick={() => handleAlbumClick(album)}
-              >
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-1">
-                    <h3 className="text-lg font-bold">{album.name}</h3>
-                    {getAlbumBadge(album.user_state)}
-                  </div>
-                  <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                    <span>{album.year}</span>
-                    <span>•</span>
-                    <span>{album.category}</span>
-                    {album.is_member && album.member_count !== undefined && (
-                      <>
+        <div className="space-y-4">
+          {albums.map((album) => (
+            <Card
+              key={album.id}
+              data-testid={`album-item-${album.id}`}
+              className={`cursor-pointer transition-all hover:shadow-lg border-2 ${
+                album.user_state === 'coming_soon' 
+                  ? 'opacity-60 hover:border-gray-300' 
+                  : album.user_state === 'active'
+                    ? 'hover:border-primary'
+                    : 'hover:border-orange-300'
+              }`}
+              onClick={() => handleAlbumClick(album)}
+            >
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="h-16 w-16 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
+                      <BookOpen className="h-8 w-8 text-primary" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold">{album.name}</h3>
+                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                        <span>{album.year}</span>
                         <span>•</span>
-                        <span>
-                          {album.member_count === 0 
-                            ? `0 ${t('albumHome.memberPlural')}`
-                            : album.member_count === 1 
-                              ? `1 ${t('albumHome.member')}`
-                              : `${album.member_count} ${t('albumHome.memberPlural')}`
-                          }
-                        </span>
-                      </>
-                    )}
-                    {album.is_member && album.progress !== undefined && (
-                      <>
-                        <span>•</span>
-                        <span className="font-semibold text-primary">
-                          {album.progress}% {t('albumHome.completed')}
-                        </span>
-                      </>
-                    )}
+                        <span>{album.category}</span>
+                        {/* SINGLE SOURCE: Use member_count from backend (already excludes current user) */}
+                        {album.is_member && album.member_count !== undefined && (
+                          <>
+                            <span>•</span>
+                            <span>{getMemberCountDisplay(album)}</span>
+                          </>
+                        )}
+                        {album.is_member && album.progress !== undefined && (
+                          <>
+                            <span>•</span>
+                            <span className="font-semibold text-primary">
+                              {album.progress}% {t('albumHome.completed')}
+                            </span>
+                          </>
+                        )}
+                      </div>
+                    </div>
                   </div>
+                  {getStateBadge(album)}
                 </div>
-                {album.user_state === 'active' && (
-                  <ChevronRight className="h-5 w-5 text-muted-foreground" />
-                )}
-              </div>
-            ))}
-          </div>
-        )}
+              </CardContent>
+            </Card>
+          ))}
+        </div>
 
+        {/* Activation Dialog */}
         <Dialog open={activationDialogOpen} onOpenChange={setActivationDialogOpen}>
           <DialogContent data-testid="activation-dialog">
             <DialogHeader>
-              <DialogTitle>{t('albums.activate')}</DialogTitle>
+              <DialogTitle>{t('albums.activateTitle')}</DialogTitle>
+              <DialogDescription>
+                {t('albums.activateQuestion')}
+              </DialogDescription>
             </DialogHeader>
             <div className="py-4">
-              <p className="text-lg mb-4">{t('albums.activateQuestion')}</p>
-              {selectedAlbum && (
-                <div className="bg-muted p-4 rounded-lg">
-                  <p className="font-bold text-lg">{selectedAlbum.name}</p>
-                  <p className="text-sm text-muted-foreground">
-                    {selectedAlbum.year} • {selectedAlbum.category}
-                  </p>
-                </div>
-              )}
+              <p className="font-semibold text-lg">{selectedAlbum?.name}</p>
+              <p className="text-sm text-muted-foreground">
+                {selectedAlbum?.year} • {selectedAlbum?.category}
+              </p>
             </div>
-            <DialogFooter>
+            <DialogFooter className="gap-2 sm:gap-0">
               <Button
+                data-testid="cancel-activate-btn"
                 variant="outline"
                 onClick={() => setActivationDialogOpen(false)}
                 disabled={activating}
@@ -208,7 +190,7 @@ export const Albums = () => {
                 disabled={activating}
                 className="btn-primary"
               >
-                {activating ? t('common.loading') : t('albums.activateConfirm')}
+                {activating ? t('common.loading') : t('albums.activate')}
               </Button>
             </DialogFooter>
           </DialogContent>

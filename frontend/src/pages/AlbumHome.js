@@ -28,24 +28,8 @@ const getDisplayName = (user, t) => {
     return user.display_name.trim();
   }
   
-  // Priority 2: Check for test/demo accounts
+  // Priority 2: Masked email
   if (user.email) {
-    const prefix = user.email.split('@')[0].trim().toLowerCase();
-    
-    const testMappings = {
-      'user': t('members.testUser'),
-      'newuser': t('members.newTestUser'),
-      'testuser': t('members.testUser'),
-      'test': t('members.testUser'),
-      'demo': t('members.testUser'),
-      'testactivation': t('members.technicalAccount')
-    };
-    
-    if (testMappings[prefix]) {
-      return testMappings[prefix];
-    }
-    
-    // Priority 3: Masked email
     return maskEmail(user.email);
   }
   
@@ -125,8 +109,8 @@ export const AlbumHome = () => {
     }
   };
 
-  // Backend now returns only OTHER members (excluding current user)
-  // So we can use the count directly
+  // SINGLE SOURCE OF TRUTH: Use member_count from backend directly
+  // Backend already excludes current user from this count
   const otherMembersCount = album?.member_count ?? 0;
 
   // Get member count display string with proper singular/plural
@@ -266,6 +250,7 @@ export const AlbumHome = () => {
               </div>
             ) : (
               <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                {/* SINGLE SOURCE: Use album.members from backend (already excludes current user) */}
                 {album?.members?.slice(0, 6).map((member) => (
                   <div key={member.id} className="flex items-center gap-2 p-2 rounded-lg bg-muted">
                     <div className="h-8 w-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-sm">
@@ -352,6 +337,7 @@ export const AlbumHome = () => {
           </DialogContent>
         </Dialog>
 
+        {/* Members Modal - Uses album.members from backend (already excludes current user) */}
         <Dialog open={membersDialogOpen} onOpenChange={setMembersDialogOpen}>
           <DialogContent data-testid="members-dialog" className="max-w-2xl">
             <DialogHeader>

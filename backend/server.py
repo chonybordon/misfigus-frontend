@@ -26,6 +26,9 @@ mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
 
+# DEV MODE flag - only show OTP when explicitly enabled
+DEV_OTP_MODE = os.environ.get('DEV_OTP_MODE', 'false').lower() == 'true'
+
 app = FastAPI()
 api_router = APIRouter(prefix="/api")
 
@@ -35,6 +38,38 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+# ============================================
+# HELPER: Get other members count (excluding current user)
+# ============================================
+async def get_other_members_count(album_id: str, current_user_id: str) -> int:
+    """Returns count of members EXCLUDING the current user."""
+    return await db.album_members.count_documents({
+        "album_id": album_id,
+        "user_id": {"$ne": current_user_id}
+    })
+
+async def get_other_members_list(album_id: str, current_user_id: str) -> list:
+    """Returns list of members EXCLUDING the current user."""
+    other_memberships = await db.album_members.find({
+        "album_id": album_id,
+        "user_id": {"$ne": current_user_id}
+    }, {"_id": 0}).to_list(100)
+    
+    other_user_ids = [m['user_id'] for m in other_memberships]
+    
+    if not other_user_ids:
+        return []
+    
+    other_users = await db.users.find(
+        {"id": {"$in": other_user_ids}},
+        {"_id": 0}
+    ).to_list(100)
+    
+    return other_users
+
+# ============================================
+# AUTH ENDPOINTS
+# ============================================
 @api_router.post("/auth/send-otp")
 async def send_otp(user_input: UserCreate):
     otp = generate_otp()
@@ -48,7 +83,12 @@ async def send_otp(user_input: UserCreate):
         doc['created_at'] = doc['created_at'].isoformat()
         await db.users.insert_one(doc)
     
-    return {"message": "OTP sent", "email": user_input.email, "dev_otp": otp}
+    # Only return dev_otp in DEV mode
+    response = {"message": "OTP sent", "email": user_input.email}
+    if DEV_OTP_MODE:
+        response["dev_otp"] = otp
+    
+    return response
 
 @api_router.post("/auth/verify-otp")
 async def verify_otp_endpoint(otp_data: OTPVerify):
@@ -87,6 +127,9 @@ async def update_me(user_update: UserUpdate, user_id: str = Depends(get_current_
     user = await db.users.find_one({"id": user_id}, {"_id": 0})
     return user
 
+# ============================================
+# ALBUM ENDPOINTS - Using consistent member counting
+# ============================================
 @api_router.get("/albums")
 async def get_albums(user_id: str = Depends(get_current_user)):
     all_albums = await db.albums.find({}, {"_id": 0}).to_list(100)
@@ -105,21 +148,15 @@ async def get_albums(user_id: str = Depends(get_current_user)):
             album['user_state'] = 'active'
             album['is_member'] = album['id'] in member_album_ids
         elif album['status'] == 'active':
-            # FIFA Qatar 2022 or other albums marked as 'active' in DB are INACTIVE by default
             album['user_state'] = 'inactive'
             album['is_member'] = False
         else:
-            # Albums with status 'coming_soon' remain coming_soon
             album['user_state'] = 'coming_soon'
             album['is_member'] = False
         
         if album['is_member']:
-            # Count OTHER members only (excluding current user)
-            other_member_count = await db.album_members.count_documents({
-                "album_id": album['id'],
-                "user_id": {"$ne": user_id}
-            })
-            album['member_count'] = other_member_count
+            # Use helper for consistent counting (EXCLUDING current user)
+            album['member_count'] = await get_other_members_count(album['id'], user_id)
             
             sticker_count = await db.stickers.count_documents({"album_id": album['id']})
             inventory_count = await db.user_inventory.count_documents({
@@ -141,18 +178,9 @@ async def get_album(album_id: str, user_id: str = Depends(get_current_user)):
     if not album:
         raise HTTPException(status_code=404, detail="Album not found")
     
-    # Get OTHER members only (excluding current user)
-    other_members = await db.album_members.find({
-        "album_id": album_id,
-        "user_id": {"$ne": user_id}
-    }, {"_id": 0}).to_list(100)
-    other_member_ids = [m['user_id'] for m in other_members]
-    
-    # Get user details for other members only
-    other_users = await db.users.find({"id": {"$in": other_member_ids}}, {"_id": 0}).to_list(100)
-    
-    album['members'] = other_users
-    album['member_count'] = len(other_users)
+    # Use helpers for consistent member list (EXCLUDING current user)
+    album['members'] = await get_other_members_list(album_id, user_id)
+    album['member_count'] = len(album['members'])
     
     sticker_count = await db.stickers.count_documents({"album_id": album_id})
     inventory_count = await db.user_inventory.count_documents({
