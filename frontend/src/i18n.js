@@ -166,7 +166,8 @@ const resources = {
         verify: 'Verify',
         resend: 'Resend Code',
         devMode: 'DEV MODE - OTP Code',
-        devNote: 'Testing only. Check backend logs for details.'
+        devNote: 'Testing only. Check backend logs for details.',
+        checkEmail: 'Check your email for the code'
       },
       albums: {
         title: 'My Albums',
