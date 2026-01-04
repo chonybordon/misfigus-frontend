@@ -209,11 +209,10 @@ async def get_albums(user_id: str = Depends(get_current_user)):
         elif album['id'] in activated_album_ids:
             album['user_state'] = 'active'
             album['is_member'] = True
-            # Get member count for active albums
+            # Get member count for active albums (excluding current user)
             member_count = await db.album_members.count_documents({"album_id": album['id']})
-            # Exclude current user from count
-            album['member_count'] = max(0, member_count - 1)
-            # Calculate progress
+            album['member_count'] = max(0, member_count - 1)  # Exclude current user
+            # Calculate progress (rounded to integer - no decimals)
             sticker_count = await db.stickers.count_documents({"album_id": album['id']})
             if sticker_count > 0:
                 inventory_count = await db.user_inventory.count_documents({
@@ -221,7 +220,7 @@ async def get_albums(user_id: str = Depends(get_current_user)):
                     "album_id": album['id'],
                     "owned_qty": {"$gte": 1}
                 })
-                album['progress'] = round((inventory_count / sticker_count * 100), 1)
+                album['progress'] = round(inventory_count / sticker_count * 100)  # Integer
             else:
                 album['progress'] = 0
         else:
