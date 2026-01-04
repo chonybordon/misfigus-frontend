@@ -8,6 +8,8 @@ import { Toaster } from '@/components/ui/sonner';
 import { toast } from 'sonner';
 
 import Login from './pages/Login';
+import Albums from './pages/Albums';
+import AlbumHome from './pages/AlbumHome';
 import Groups from './pages/Groups';
 import GroupHome from './pages/GroupHome';
 import Inventory from './pages/Inventory';
