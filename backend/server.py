@@ -26,7 +26,7 @@ mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
 
-# DEV MODE flag - only show OTP when explicitly enabled
+# DEV MODE flag - only show OTP when explicitly enabled (default: false for production)
 DEV_OTP_MODE = os.environ.get('DEV_OTP_MODE', 'false').lower() == 'true'
 
 app = FastAPI()
@@ -39,33 +39,68 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # ============================================
-# HELPER: Get other members count (excluding current user)
+# HELPER: Get album owner (first member who joined without invite)
 # ============================================
-async def get_other_members_count(album_id: str, current_user_id: str) -> int:
-    """Returns count of members EXCLUDING the current user."""
-    return await db.album_members.count_documents({
-        "album_id": album_id,
-        "user_id": {"$ne": current_user_id}
-    })
+async def get_album_owner_id(album_id: str) -> str:
+    """
+    Returns the owner of an album.
+    Owner = first user who joined the album (earliest created_at with invited_by_user_id=None)
+    """
+    owner_membership = await db.album_members.find_one(
+        {
+            "album_id": album_id,
+            "invited_by_user_id": None  # Self-joined (activated), not invited
+        },
+        {"_id": 0, "user_id": 1, "created_at": 1},
+        sort=[("created_at", 1)]  # Get the earliest one
+    )
+    
+    if owner_membership:
+        return owner_membership['user_id']
+    
+    # Fallback: if no self-joined member, get the first member overall
+    first_member = await db.album_members.find_one(
+        {"album_id": album_id},
+        {"_id": 0, "user_id": 1},
+        sort=[("created_at", 1)]
+    )
+    
+    return first_member['user_id'] if first_member else None
 
-async def get_other_members_list(album_id: str, current_user_id: str) -> list:
-    """Returns list of members EXCLUDING the current user."""
-    other_memberships = await db.album_members.find({
-        "album_id": album_id,
-        "user_id": {"$ne": current_user_id}
-    }, {"_id": 0}).to_list(100)
+# ============================================
+# HELPER: Get members EXCLUDING owner (source of truth)
+# ============================================
+async def get_members_excluding_owner(album_id: str) -> tuple:
+    """
+    Returns (members_list, member_count) EXCLUDING the album owner.
+    This is the SINGLE SOURCE OF TRUTH for member data.
+    """
+    owner_id = await get_album_owner_id(album_id)
+    
+    if not owner_id:
+        return [], 0
+    
+    # Get all members except owner
+    other_memberships = await db.album_members.find(
+        {
+            "album_id": album_id,
+            "user_id": {"$ne": owner_id}
+        },
+        {"_id": 0}
+    ).to_list(100)
     
     other_user_ids = [m['user_id'] for m in other_memberships]
     
     if not other_user_ids:
-        return []
+        return [], 0
     
+    # Get user details for other members
     other_users = await db.users.find(
         {"id": {"$in": other_user_ids}},
         {"_id": 0}
     ).to_list(100)
     
-    return other_users
+    return other_users, len(other_users)
 
 # ============================================
 # AUTH ENDPOINTS
@@ -83,7 +118,7 @@ async def send_otp(user_input: UserCreate):
         doc['created_at'] = doc['created_at'].isoformat()
         await db.users.insert_one(doc)
     
-    # Only return dev_otp in DEV mode
+    # Only return dev_otp when DEV_OTP_MODE is explicitly true
     response = {"message": "OTP sent", "email": user_input.email}
     if DEV_OTP_MODE:
         response["dev_otp"] = otp
@@ -128,7 +163,7 @@ async def update_me(user_update: UserUpdate, user_id: str = Depends(get_current_
     return user
 
 # ============================================
-# ALBUM ENDPOINTS - Using consistent member counting
+# ALBUM ENDPOINTS - Owner NEVER appears as member
 # ============================================
 @api_router.get("/albums")
 async def get_albums(user_id: str = Depends(get_current_user)):
@@ -155,8 +190,9 @@ async def get_albums(user_id: str = Depends(get_current_user)):
             album['is_member'] = False
         
         if album['is_member']:
-            # Use helper for consistent counting (EXCLUDING current user)
-            album['member_count'] = await get_other_members_count(album['id'], user_id)
+            # Get members EXCLUDING owner (source of truth)
+            _, member_count = await get_members_excluding_owner(album['id'])
+            album['member_count'] = member_count
             
             sticker_count = await db.stickers.count_documents({"album_id": album['id']})
             inventory_count = await db.user_inventory.count_documents({
@@ -178,9 +214,15 @@ async def get_album(album_id: str, user_id: str = Depends(get_current_user)):
     if not album:
         raise HTTPException(status_code=404, detail="Album not found")
     
-    # Use helpers for consistent member list (EXCLUDING current user)
-    album['members'] = await get_other_members_list(album_id, user_id)
-    album['member_count'] = len(album['members'])
+    # Get members EXCLUDING owner (source of truth)
+    members_list, member_count = await get_members_excluding_owner(album_id)
+    album['members'] = members_list
+    album['member_count'] = member_count
+    
+    # Get owner info for UI if needed
+    owner_id = await get_album_owner_id(album_id)
+    album['owner_id'] = owner_id
+    album['is_owner'] = (user_id == owner_id)
     
     sticker_count = await db.stickers.count_documents({"album_id": album_id})
     inventory_count = await db.user_inventory.count_documents({
@@ -235,7 +277,7 @@ async def activate_album(album_id: str, user_id: str = Depends(get_current_user)
             member = AlbumMember(
                 album_id=album_id,
                 user_id=user_id,
-                invited_by_user_id=None
+                invited_by_user_id=None  # Self-activated = owner
             )
             member_doc = member.model_dump()
             member_doc['created_at'] = member_doc['created_at'].isoformat()
@@ -251,7 +293,7 @@ async def activate_album(album_id: str, user_id: str = Depends(get_current_user)
     }
     await db.user_album_activations.insert_one(activation)
     
-    # Auto-create membership
+    # Auto-create membership (self-activated = owner, invited_by_user_id=None)
     existing_member = await db.album_members.find_one({
         "album_id": album_id,
         "user_id": user_id
@@ -261,7 +303,7 @@ async def activate_album(album_id: str, user_id: str = Depends(get_current_user)
         member = AlbumMember(
             album_id=album_id,
             user_id=user_id,
-            invited_by_user_id=None
+            invited_by_user_id=None  # Self-activated = owner
         )
         member_doc = member.model_dump()
         member_doc['created_at'] = member_doc['created_at'].isoformat()
@@ -298,7 +340,7 @@ async def join_album(album_id: str, user_id: str = Depends(get_current_user)):
     member = AlbumMember(
         album_id=album_id,
         user_id=user_id,
-        invited_by_user_id=None
+        invited_by_user_id=None  # Self-joined
     )
     member_doc = member.model_dump()
     member_doc['created_at'] = member_doc['created_at'].isoformat()
@@ -342,14 +384,29 @@ async def accept_invite(token: str, user_id: str = Depends(get_current_user)):
     if existing:
         raise HTTPException(status_code=400, detail="Already a member")
     
+    # INVITED member (not owner) - has invited_by_user_id set
     member = AlbumMember(
         album_id=invite['album_id'],
         user_id=user_id,
-        invited_by_user_id=invite['created_by_user_id']
+        invited_by_user_id=invite['created_by_user_id']  # Invited by someone = NOT owner
     )
     member_doc = member.model_dump()
     member_doc['created_at'] = member_doc['created_at'].isoformat()
     await db.album_members.insert_one(member_doc)
+    
+    # Also create activation for the invited user
+    existing_activation = await db.user_album_activations.find_one({
+        "user_id": user_id,
+        "album_id": invite['album_id']
+    }, {"_id": 0})
+    
+    if not existing_activation:
+        activation = {
+            "user_id": user_id,
+            "album_id": invite['album_id'],
+            "activated_at": datetime.now(timezone.utc).isoformat()
+        }
+        await db.user_album_activations.insert_one(activation)
     
     await db.invite_tokens.update_one(
         {"token": token},
@@ -426,12 +483,22 @@ async def get_matches(album_id: str, user_id: str = Depends(get_current_user)):
     
     my_inv_map = {item['sticker_id']: item['owned_qty'] for item in my_inventory}
     
-    members = await db.album_members.find({"album_id": album_id}, {"_id": 0}).to_list(100)
-    other_user_ids = [m['user_id'] for m in members if m['user_id'] != user_id]
+    # Get other members EXCLUDING owner for matches
+    members_list, _ = await get_members_excluding_owner(album_id)
+    other_user_ids = [m['id'] for m in members_list]
+    
+    # Also include current user's potential matches with non-owner members
+    owner_id = await get_album_owner_id(album_id)
+    if user_id != owner_id:
+        # Current user is not owner, so they can trade with others (not owner)
+        pass
     
     matches = []
     
     for other_user_id in other_user_ids:
+        if other_user_id == user_id:
+            continue  # Skip self
+            
         other_inventory = await db.user_inventory.find({
             "user_id": other_user_id,
             "sticker_id": {"$in": sticker_ids}

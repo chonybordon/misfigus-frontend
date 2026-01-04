@@ -110,17 +110,17 @@ export const AlbumHome = () => {
   };
 
   // SINGLE SOURCE OF TRUTH: Use member_count from backend directly
-  // Backend already excludes current user from this count
-  const otherMembersCount = album?.member_count ?? 0;
+  // Backend EXCLUDES owner from this count - owner is NEVER a member
+  const memberCount = album?.member_count ?? 0;
 
   // Get member count display string with proper singular/plural
   const getMemberCountDisplay = () => {
-    if (otherMembersCount === 0) {
+    if (memberCount === 0) {
       return `0 ${t('albumHome.memberPlural')}`;
-    } else if (otherMembersCount === 1) {
+    } else if (memberCount === 1) {
       return `1 ${t('albumHome.member')}`;
     } else {
-      return `${otherMembersCount} ${t('albumHome.memberPlural')}`;
+      return `${memberCount} ${t('albumHome.memberPlural')}`;
     }
   };
 
@@ -231,7 +231,7 @@ export const AlbumHome = () => {
                 <Users className="h-5 w-5" />
                 {t('albumHome.members')}
               </div>
-              {otherMembersCount > 0 && (
+              {memberCount > 0 && (
                 <Button
                   data-testid="view-all-members-btn"
                   variant="outline"
@@ -244,13 +244,14 @@ export const AlbumHome = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            {otherMembersCount === 0 ? (
+            {/* EMPTY STATE: 0 members (owner is NEVER a member) */}
+            {memberCount === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
                 <p>{t('albumHome.noOtherMembers')}</p>
               </div>
             ) : (
               <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                {/* SINGLE SOURCE: Use album.members from backend (already excludes current user) */}
+                {/* SINGLE SOURCE: Use album.members from backend (excludes owner) */}
                 {album?.members?.slice(0, 6).map((member) => (
                   <div key={member.id} className="flex items-center gap-2 p-2 rounded-lg bg-muted">
                     <div className="h-8 w-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-sm">
@@ -337,7 +338,7 @@ export const AlbumHome = () => {
           </DialogContent>
         </Dialog>
 
-        {/* Members Modal - Uses album.members from backend (already excludes current user) */}
+        {/* Members Modal - Uses album.members from backend (excludes owner) */}
         <Dialog open={membersDialogOpen} onOpenChange={setMembersDialogOpen}>
           <DialogContent data-testid="members-dialog" className="max-w-2xl">
             <DialogHeader>
