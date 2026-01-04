@@ -69,15 +69,34 @@ export const Albums = () => {
   // VISUAL STATE BADGES
   const getStateBadge = (album) => {
     if (album.user_state === 'coming_soon') {
-      // COMING_SOON: Gray badge
-      return <Badge variant="secondary" className="bg-gray-200 text-gray-600">{t('albums.comingSoonBadge')}</Badge>;
+      // COMING_SOON: Gray badge (unchanged)
+      return (
+        <Badge 
+          variant="secondary" 
+          className="bg-gray-200 text-gray-600 px-3 py-1 text-xs font-semibold"
+        >
+          {t('albums.comingSoonBadge')}
+        </Badge>
+      );
     }
     if (album.user_state === 'inactive') {
-      // INACTIVE: Red badge
-      return <Badge variant="destructive" className="bg-red-100 text-red-700 border-red-300">{t('albums.inactiveBadge')}</Badge>;
+      // INACTIVE: RED pill badge with WHITE text
+      return (
+        <Badge 
+          className="bg-red-500 text-white px-3 py-1 text-xs font-semibold hover:bg-red-500"
+        >
+          {t('albums.inactiveBadge')}
+        </Badge>
+      );
     }
-    // ACTIVE: Green badge
-    return <Badge className="bg-green-100 text-green-700 border-green-300">{t('albums.activeBadge')}</Badge>;
+    // ACTIVE: Green pill badge (unchanged)
+    return (
+      <Badge 
+        className="bg-green-500 text-white px-3 py-1 text-xs font-semibold hover:bg-green-500"
+      >
+        {t('albums.activeBadge')}
+      </Badge>
+    );
   };
 
   // Helper for consistent member count display
