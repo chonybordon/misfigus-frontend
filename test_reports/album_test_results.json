@@ -1,8 +1,8 @@
 {
   "test_type": "album_selection_and_routing",
-  "timestamp": "2026-01-04T22:54:16.637980",
+  "timestamp": "2026-01-04T22:54:38.988756",
   "base_url": "https://groupfigu.preview.emergentagent.com",
-  "test_email": "albumtest_20260104_225416@example.com",
+  "test_email": "albumtest_20260104_225438@example.com",
   "tests_run": 14,
   "tests_passed": 10,
   "success_rate": 71.42857142857143,
@@ -12,85 +12,85 @@
       "test": "Connectivity",
       "success": true,
       "details": "Base URL accessible",
-      "timestamp": "2026-01-04T22:54:16.297720"
+      "timestamp": "2026-01-04T22:54:38.657057"
     },
     {
       "test": "Real Authentication",
       "success": false,
       "details": "Could not authenticate with real OTP",
-      "timestamp": "2026-01-04T22:54:16.302878"
+      "timestamp": "2026-01-04T22:54:38.662492"
     },
     {
       "test": "Albums API - Request Failed",
       "success": false,
       "details": "Request failed",
-      "timestamp": "2026-01-04T22:54:16.339313"
+      "timestamp": "2026-01-04T22:54:38.699688"
     },
     {
       "test": "Send OTP",
       "success": true,
       "details": "OTP sent successfully",
-      "timestamp": "2026-01-04T22:54:16.597648"
+      "timestamp": "2026-01-04T22:54:38.909189"
     },
     {
       "test": "OTP Verification (Mock)",
       "success": false,
       "details": "Should have rejected invalid OTP",
-      "timestamp": "2026-01-04T22:54:16.636279"
+      "timestamp": "2026-01-04T22:54:38.986948"
     },
     {
       "test": "Login Redirect Logic",
       "success": true,
       "details": "Frontend configured to redirect to /albums (verified in App.js)",
-      "timestamp": "2026-01-04T22:54:16.636299"
+      "timestamp": "2026-01-04T22:54:38.986961"
     },
     {
       "test": "Frontend Routing - Default to Albums",
       "success": true,
       "details": "App.js correctly redirects to /albums after login",
-      "timestamp": "2026-01-04T22:54:16.637073"
+      "timestamp": "2026-01-04T22:54:38.987820"
     },
     {
       "test": "Frontend Badge - ACTIVO badge",
       "success": true,
       "details": "Green badge for active albums",
-      "timestamp": "2026-01-04T22:54:16.637119"
+      "timestamp": "2026-01-04T22:54:38.987863"
     },
     {
       "test": "Frontend Badge - INACTIVO badge",
       "success": true,
       "details": "Red badge for inactive albums",
-      "timestamp": "2026-01-04T22:54:16.637125"
+      "timestamp": "2026-01-04T22:54:38.987870"
     },
     {
       "test": "Frontend Badge - PR\u00d3XIMAMENTE badge",
       "success": true,
       "details": "Gray badge for coming soon albums",
-      "timestamp": "2026-01-04T22:54:16.637129"
+      "timestamp": "2026-01-04T22:54:38.987874"
     },
     {
       "test": "Frontend Interaction - coming_soon",
       "success": true,
       "details": "Coming soon albums not clickable",
-      "timestamp": "2026-01-04T22:54:16.637133"
+      "timestamp": "2026-01-04T22:54:38.987879"
     },
     {
       "test": "Frontend Interaction - inactive",
       "success": true,
       "details": "Inactive albums show activation dialog",
-      "timestamp": "2026-01-04T22:54:16.637137"
+      "timestamp": "2026-01-04T22:54:38.987883"
     },
     {
       "test": "Frontend Interaction - active_navigation",
       "success": true,
       "details": "Active albums navigate to album home",
-      "timestamp": "2026-01-04T22:54:16.637140"
+      "timestamp": "2026-01-04T22:54:38.987886"
     },
     {
       "test": "Album Interaction - No Auth",
       "success": false,
       "details": "No authentication token",
-      "timestamp": "2026-01-04T22:54:16.637151"
+      "timestamp": "2026-01-04T22:54:38.987898"
     }
   ]
 }
