@@ -185,17 +185,91 @@ async def update_me(user_update: UserUpdate, user_id: str = Depends(get_current_
 # ============================================
 @api_router.get("/albums")
 async def get_albums(user_id: str = Depends(get_current_user)):
-    """Get all album templates (catalog)."""
+    """
+    Get all album templates (catalog) with user-specific state.
+    
+    user_state logic:
+    - 'coming_soon': album.status == 'coming_soon' (not activatable)
+    - 'active': user has activated this album
+    - 'inactive': available but user hasn't activated yet
+    """
     all_albums = await db.albums.find({}, {"_id": 0}).to_list(100)
+    
+    # Get user's activated albums
+    user_activations = await db.user_album_activations.find(
+        {"user_id": user_id}, 
+        {"_id": 0, "album_id": 1}
+    ).to_list(100)
+    activated_album_ids = {a['album_id'] for a in user_activations}
+    
+    # Compute user_state for each album
+    for album in all_albums:
+        if album.get('status') == 'coming_soon':
+            album['user_state'] = 'coming_soon'
+        elif album['id'] in activated_album_ids:
+            album['user_state'] = 'active'
+            album['is_member'] = True
+            # Get member count for active albums
+            member_count = await db.album_members.count_documents({"album_id": album['id']})
+            # Exclude current user from count
+            album['member_count'] = max(0, member_count - 1)
+            # Calculate progress
+            sticker_count = await db.stickers.count_documents({"album_id": album['id']})
+            if sticker_count > 0:
+                inventory_count = await db.user_inventory.count_documents({
+                    "user_id": user_id,
+                    "album_id": album['id'],
+                    "owned_qty": {"$gte": 1}
+                })
+                album['progress'] = round((inventory_count / sticker_count * 100), 1)
+            else:
+                album['progress'] = 0
+        else:
+            album['user_state'] = 'inactive'
+            album['is_member'] = False
+    
     return all_albums
 
-@api_router.get("/albums/{album_id}")
-async def get_album(album_id: str, user_id: str = Depends(get_current_user)):
-    """Get album template details."""
+@api_router.post("/albums/{album_id}/activate")
+async def activate_album(album_id: str, user_id: str = Depends(get_current_user)):
+    """
+    Activate an album for the user.
+    Creates activation record and adds user as album member.
+    """
+    # Check album exists and is available
     album = await db.albums.find_one({"id": album_id}, {"_id": 0})
     if not album:
         raise HTTPException(status_code=404, detail="Album not found")
-    return album
+    
+    if album.get('status') == 'coming_soon':
+        raise HTTPException(status_code=400, detail="Album not available yet")
+    
+    # Check if already activated
+    existing = await db.user_album_activations.find_one({
+        "user_id": user_id,
+        "album_id": album_id
+    })
+    if existing:
+        raise HTTPException(status_code=400, detail="Album already activated")
+    
+    # Create activation record
+    activation = {
+        "user_id": user_id,
+        "album_id": album_id,
+        "activated_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.user_album_activations.insert_one(activation)
+    
+    # Add user as album member
+    member = {
+        "album_id": album_id,
+        "user_id": user_id,
+        "invited_by_user_id": None,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.album_members.insert_one(member)
+    
+    return {"message": "Album activated", "album_id": album_id}
 
 # ============================================
 # GROUP ENDPOINTS (private album instances)
