@@ -73,10 +73,11 @@ class MisFigusAlbumTester:
         print("="*60)
         
         # Test without authentication first to verify endpoint exists
+        print("🔍 Testing albums endpoint without authentication...")
         response = self.make_request('GET', 'albums')
         
-        if not response:
-            self.log_test("Albums API - Request Failed", False, "Request failed")
+        if response is None:
+            self.log_test("Albums API - Request Failed", False, "Request failed completely")
             return False
 
         if response.status_code == 401:
@@ -90,9 +91,10 @@ class MisFigusAlbumTester:
             return False
 
         # Test with authentication
+        print("🔍 Testing albums endpoint with authentication...")
         response = self.make_request('GET', 'albums')
         
-        if not response:
+        if response is None:
             self.log_test("Albums API - Authenticated Request Failed", False, "Authenticated request failed")
             return False
 
