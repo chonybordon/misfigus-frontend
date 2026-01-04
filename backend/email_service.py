@@ -10,6 +10,7 @@ logger = logging.getLogger(__name__)
 # Try to import resend
 try:
     import resend
+    from resend import Emails
     RESEND_AVAILABLE = True
     logger.info("Resend package imported successfully")
 except ImportError:
@@ -31,13 +32,10 @@ def check_resend_config():
     logger.info("="*50)
     return has_key and RESEND_AVAILABLE
 
-def get_resend_client():
-    """Get Resend client if API key is configured."""
+def get_resend_configured() -> bool:
+    """Check if Resend is properly configured."""
     api_key = os.environ.get('RESEND_API_KEY', '').strip()
-    if api_key and RESEND_AVAILABLE:
-        resend.api_key = api_key
-        return resend
-    return None
+    return bool(api_key) and RESEND_AVAILABLE
 
 def generate_otp_code() -> str:
     """Generate a 6-digit OTP code."""
@@ -64,14 +62,15 @@ def send_otp_email(email: str, otp: str) -> bool:
     """
     logger.info(f"[OTP] Attempting to send OTP email to: {email}")
     
-    client = get_resend_client()
-    
-    if client:
-        logger.info(f"[OTP] Resend client available, attempting to send...")
+    if get_resend_configured():
+        logger.info(f"[OTP] Resend configured, attempting to send...")
         try:
+            # Set API key
+            resend.api_key = os.environ.get('RESEND_API_KEY', '').strip()
+            
             # Use Resend's approved test sender for development
             # For production, use a verified domain
-            params = {
+            params: resend.Emails.SendParams = {
                 "from": "MisFigus <onboarding@resend.dev>",
                 "to": [email],
                 "subject": "Tu código de verificación - MisFigus",
@@ -89,7 +88,8 @@ def send_otp_email(email: str, otp: str) -> bool:
             }
             
             logger.info(f"[OTP] Calling Resend API...")
-            response = client.emails.send(params)
+            emails = Emails()
+            response = emails.send(params)
             logger.info(f"[OTP] Resend API response: {response}")
             logger.info(f"[OTP] Email successfully sent to {email}")
             return True
@@ -97,13 +97,13 @@ def send_otp_email(email: str, otp: str) -> bool:
         except Exception as e:
             logger.error(f"[OTP] Resend API error: {type(e).__name__}: {e}")
             # Log more details if available
-            if hasattr(e, 'response'):
-                logger.error(f"[OTP] Resend response body: {getattr(e, 'response', 'N/A')}")
+            if hasattr(e, 'message'):
+                logger.error(f"[OTP] Error message: {getattr(e, 'message', 'N/A')}")
             if hasattr(e, 'status_code'):
-                logger.error(f"[OTP] Resend status code: {getattr(e, 'status_code', 'N/A')}")
+                logger.error(f"[OTP] Status code: {getattr(e, 'status_code', 'N/A')}")
             logger.warning(f"[OTP] Falling back to console logging due to error")
     else:
-        logger.info(f"[OTP] No Resend client (API key missing or package unavailable)")
+        logger.info(f"[OTP] Resend not configured (API key missing or package unavailable)")
     
     # Fallback: Log to console only (NEVER return to frontend)
     logger.warning("="*50)
@@ -122,13 +122,14 @@ def send_invite_email(email: str, invite_code: str, group_name: str, inviter_nam
     """
     logger.info(f"[INVITE] Attempting to send invite email to: {email}")
     
-    client = get_resend_client()
-    
-    if client:
-        logger.info(f"[INVITE] Resend client available, attempting to send...")
+    if get_resend_configured():
+        logger.info(f"[INVITE] Resend configured, attempting to send...")
         try:
+            # Set API key
+            resend.api_key = os.environ.get('RESEND_API_KEY', '').strip()
+            
             # Use Resend's approved test sender for development
-            params = {
+            params: resend.Emails.SendParams = {
                 "from": "MisFigus <onboarding@resend.dev>",
                 "to": [email],
                 "subject": f"{inviter_name} te invitó a {group_name} - MisFigus",
@@ -147,20 +148,21 @@ def send_invite_email(email: str, invite_code: str, group_name: str, inviter_nam
             }
             
             logger.info(f"[INVITE] Calling Resend API...")
-            response = client.emails.send(params)
+            emails = Emails()
+            response = emails.send(params)
             logger.info(f"[INVITE] Resend API response: {response}")
             logger.info(f"[INVITE] Email successfully sent to {email} for group {group_name}")
             return True
             
         except Exception as e:
             logger.error(f"[INVITE] Resend API error: {type(e).__name__}: {e}")
-            if hasattr(e, 'response'):
-                logger.error(f"[INVITE] Resend response body: {getattr(e, 'response', 'N/A')}")
+            if hasattr(e, 'message'):
+                logger.error(f"[INVITE] Error message: {getattr(e, 'message', 'N/A')}")
             if hasattr(e, 'status_code'):
-                logger.error(f"[INVITE] Resend status code: {getattr(e, 'status_code', 'N/A')}")
+                logger.error(f"[INVITE] Status code: {getattr(e, 'status_code', 'N/A')}")
             logger.warning(f"[INVITE] Falling back to console logging due to error")
     else:
-        logger.info(f"[INVITE] No Resend client (API key missing or package unavailable)")
+        logger.info(f"[INVITE] Resend not configured (API key missing or package unavailable)")
     
     # Fallback: Log to console only (NEVER return to frontend)
     logger.warning("="*50)
