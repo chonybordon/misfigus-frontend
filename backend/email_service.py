@@ -17,13 +17,23 @@ except ImportError:
     RESEND_AVAILABLE = False
     logger.warning("Resend package not installed. Email will be logged only.")
 
+# Default sender (fallback if RESEND_FROM not set)
+DEFAULT_SENDER = "MisFigus <no-reply@misfigus.com>"
+
+def get_sender_address() -> str:
+    """Get the FROM address from environment variable."""
+    return os.environ.get('RESEND_FROM', DEFAULT_SENDER).strip()
+
 def check_resend_config():
     """Log Resend configuration status on startup (called from server.py)."""
     api_key = os.environ.get('RESEND_API_KEY', '').strip()
     has_key = bool(api_key)
+    sender = get_sender_address()
+    
     logger.info("="*50)
     logger.info("EMAIL SERVICE CONFIGURATION")
     logger.info(f"  RESEND_API_KEY present: {has_key}")
+    logger.info(f"  RESEND_FROM: {sender}")
     logger.info(f"  Resend package available: {RESEND_AVAILABLE}")
     if has_key and RESEND_AVAILABLE:
         logger.info("  Status: PRODUCTION MODE - Emails will be sent via Resend")
@@ -60,7 +70,9 @@ def send_otp_email(email: str, otp: str) -> bool:
     
     IMPORTANT: OTP is NEVER returned to the caller or shown in UI.
     """
+    sender = get_sender_address()
     logger.info(f"[OTP] Attempting to send OTP email to: {email}")
+    logger.info(f"[OTP] From: {sender}")
     
     if get_resend_configured():
         logger.info(f"[OTP] Resend configured, attempting to send...")
@@ -68,10 +80,9 @@ def send_otp_email(email: str, otp: str) -> bool:
             # Set API key
             resend.api_key = os.environ.get('RESEND_API_KEY', '').strip()
             
-            # Use Resend's approved test sender for development
-            # For production, use a verified domain
+            # Build email params using verified domain sender from env
             params: resend.Emails.SendParams = {
-                "from": "MisFigus <onboarding@resend.dev>",
+                "from": sender,
                 "to": [email],
                 "subject": "Tu código de verificación - MisFigus",
                 "html": f"""
@@ -87,7 +98,7 @@ def send_otp_email(email: str, otp: str) -> bool:
                 """
             }
             
-            logger.info(f"[OTP] Calling Resend API...")
+            logger.info(f"[OTP] Calling Resend API with params: to={email}, from={sender}")
             emails = Emails()
             response = emails.send(params)
             logger.info(f"[OTP] Resend API response: {response}")
@@ -120,7 +131,9 @@ def send_invite_email(email: str, invite_code: str, group_name: str, inviter_nam
     
     IMPORTANT: Invite code is NEVER returned to the caller or shown in UI.
     """
+    sender = get_sender_address()
     logger.info(f"[INVITE] Attempting to send invite email to: {email}")
+    logger.info(f"[INVITE] From: {sender}")
     
     if get_resend_configured():
         logger.info(f"[INVITE] Resend configured, attempting to send...")
@@ -128,9 +141,9 @@ def send_invite_email(email: str, invite_code: str, group_name: str, inviter_nam
             # Set API key
             resend.api_key = os.environ.get('RESEND_API_KEY', '').strip()
             
-            # Use Resend's approved test sender for development
+            # Build email params using verified domain sender from env
             params: resend.Emails.SendParams = {
-                "from": "MisFigus <onboarding@resend.dev>",
+                "from": sender,
                 "to": [email],
                 "subject": f"{inviter_name} te invitó a {group_name} - MisFigus",
                 "html": f"""
@@ -147,7 +160,7 @@ def send_invite_email(email: str, invite_code: str, group_name: str, inviter_nam
                 """
             }
             
-            logger.info(f"[INVITE] Calling Resend API...")
+            logger.info(f"[INVITE] Calling Resend API with params: to={email}, from={sender}")
             emails = Emails()
             response = emails.send(params)
             logger.info(f"[INVITE] Resend API response: {response}")
