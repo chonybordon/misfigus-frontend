@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-01-04T23:19:24.492393",
+  "timestamp": "2026-01-04T23:19:55.551902",
   "tests_run": 18,
   "tests_passed": 15,
   "success_rate": 83.33333333333334,
@@ -42,7 +42,7 @@
     {
       "test": "FIFA 2026 activation blocked",
       "success": false,
-      "details": "Response: {'detail': 'Album not available yet'}"
+      "details": "Correctly blocked with: {'detail': 'Album not available yet'}"
     },
     {
       "test": "Qatar 2022 activation success",
@@ -52,7 +52,7 @@
     {
       "test": "Duplicate activation blocked",
       "success": false,
-      "details": "Response: {'detail': 'Album already activated'}"
+      "details": "Correctly blocked with: {'detail': 'Album already activated'}"
     },
     {
       "test": "Qatar 2022 now ACTIVE",
@@ -92,7 +92,7 @@
     {
       "test": "Invalid album ID returns 404",
       "success": false,
-      "details": "Response: {'detail': 'Album not found'}"
+      "details": "Correctly returned error: {'detail': 'Album not found'}"
     }
   ],
   "qatar_album_id": "bc32fecb-f640-4d00-880d-5043bc112d4b",
