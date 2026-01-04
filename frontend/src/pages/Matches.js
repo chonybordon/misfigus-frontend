@@ -5,7 +5,7 @@ import { api } from '../App';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, ArrowRight, TrendingUp } from 'lucide-react';
+import { ArrowLeft, TrendingUp } from 'lucide-react';
 
 const maskEmail = (email) => {
   if (!email) return '';
