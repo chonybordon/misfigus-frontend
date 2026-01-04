@@ -1,96 +1,102 @@
 {
   "test_type": "album_selection_and_routing",
-  "timestamp": "2026-01-04T22:54:38.988756",
+  "timestamp": "2026-01-04T22:55:12.776682",
   "base_url": "https://groupfigu.preview.emergentagent.com",
-  "test_email": "albumtest_20260104_225438@example.com",
-  "tests_run": 14,
-  "tests_passed": 10,
-  "success_rate": 71.42857142857143,
+  "test_email": "albumtest_20260104_225512@example.com",
+  "tests_run": 15,
+  "tests_passed": 11,
+  "success_rate": 73.33333333333333,
   "authenticated": false,
   "results": [
     {
       "test": "Connectivity",
       "success": true,
       "details": "Base URL accessible",
-      "timestamp": "2026-01-04T22:54:38.657057"
+      "timestamp": "2026-01-04T22:55:12.448573"
     },
     {
       "test": "Real Authentication",
       "success": false,
       "details": "Could not authenticate with real OTP",
-      "timestamp": "2026-01-04T22:54:38.662492"
+      "timestamp": "2026-01-04T22:55:12.454479"
     },
     {
-      "test": "Albums API - Request Failed",
+      "test": "Albums API - Auth Required",
+      "success": true,
+      "details": "Endpoint correctly requires authentication",
+      "timestamp": "2026-01-04T22:55:12.492058"
+    },
+    {
+      "test": "Albums API - No Auth Token",
       "success": false,
-      "details": "Request failed",
-      "timestamp": "2026-01-04T22:54:38.699688"
+      "details": "No authentication token available for full test",
+      "timestamp": "2026-01-04T22:55:12.492068"
     },
     {
       "test": "Send OTP",
       "success": true,
       "details": "OTP sent successfully",
-      "timestamp": "2026-01-04T22:54:38.909189"
+      "timestamp": "2026-01-04T22:55:12.737985"
     },
     {
       "test": "OTP Verification (Mock)",
       "success": false,
       "details": "Should have rejected invalid OTP",
-      "timestamp": "2026-01-04T22:54:38.986948"
+      "timestamp": "2026-01-04T22:55:12.774889"
     },
     {
       "test": "Login Redirect Logic",
       "success": true,
       "details": "Frontend configured to redirect to /albums (verified in App.js)",
-      "timestamp": "2026-01-04T22:54:38.986961"
+      "timestamp": "2026-01-04T22:55:12.774903"
     },
     {
       "test": "Frontend Routing - Default to Albums",
       "success": true,
       "details": "App.js correctly redirects to /albums after login",
-      "timestamp": "2026-01-04T22:54:38.987820"
+      "timestamp": "2026-01-04T22:55:12.775749"
     },
     {
       "test": "Frontend Badge - ACTIVO badge",
       "success": true,
       "details": "Green badge for active albums",
-      "timestamp": "2026-01-04T22:54:38.987863"
+      "timestamp": "2026-01-04T22:55:12.775792"
     },
     {
       "test": "Frontend Badge - INACTIVO badge",
       "success": true,
       "details": "Red badge for inactive albums",
-      "timestamp": "2026-01-04T22:54:38.987870"
+      "timestamp": "2026-01-04T22:55:12.775797"
     },
     {
       "test": "Frontend Badge - PR\u00d3XIMAMENTE badge",
       "success": true,
       "details": "Gray badge for coming soon albums",
-      "timestamp": "2026-01-04T22:54:38.987874"
+      "timestamp": "2026-01-04T22:55:12.775802"
     },
     {
       "test": "Frontend Interaction - coming_soon",
       "success": true,
       "details": "Coming soon albums not clickable",
-      "timestamp": "2026-01-04T22:54:38.987879"
+      "timestamp": "2026-01-04T22:55:12.775806"
     },
     {
       "test": "Frontend Interaction - inactive",
       "success": true,
       "details": "Inactive albums show activation dialog",
-      "timestamp": "2026-01-04T22:54:38.987883"
+      "timestamp": "2026-01-04T22:55:12.775810"
     },
     {
       "test": "Frontend Interaction - active_navigation",
       "success": true,
       "details": "Active albums navigate to album home",
-      "timestamp": "2026-01-04T22:54:38.987886"
+      "timestamp": "2026-01-04T22:55:12.775813"
     },
     {
       "test": "Album Interaction - No Auth",
       "success": false,
       "details": "No authentication token",
-      "timestamp": "2026-01-04T22:54:38.987898"
+      "timestamp": "2026-01-04T22:55:12.775826"
     }
   ]
 }
