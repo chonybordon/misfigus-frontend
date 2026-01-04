@@ -102,12 +102,16 @@ class MisFigusAlbumTester:
             otp_code = None
             
             for line in reversed(log_lines):
-                if "OTP Code:" in line and test_email.split('@')[0] in line:
-                    # Extract OTP from log line
-                    parts = line.split("OTP Code:")
-                    if len(parts) > 1:
-                        otp_code = parts[1].strip().split()[0]
-                        break
+                if "DEV MODE" in line and "OTP for testing" in line:
+                    # Look for the OTP in the next few lines
+                    idx = log_lines.index(line)
+                    for i in range(idx, min(idx + 5, len(log_lines))):
+                        if "[OTP] OTP:" in log_lines[i]:
+                            parts = log_lines[i].split("[OTP] OTP:")
+                            if len(parts) > 1:
+                                otp_code = parts[1].strip()
+                                break
+                    break
             
             if otp_code:
                 print(f"✅ Found OTP in logs: {otp_code}")
