@@ -70,14 +70,27 @@ class MisFigusAlbumTester:
         print("TEST 1: BACKEND ALBUMS API")
         print("="*60)
         
-        if not self.token:
-            self.log_test("Albums API - No Auth", False, "No authentication token available")
-            return False
-
+        # Test without authentication first to verify endpoint exists
         response = self.make_request('GET', 'albums')
         
         if not response:
             self.log_test("Albums API - Request Failed", False, "Request failed")
+            return False
+
+        if response.status_code == 401:
+            self.log_test("Albums API - Auth Required", True, "Endpoint correctly requires authentication")
+        else:
+            self.log_test("Albums API - Auth Required", False, f"Expected 401, got {response.status_code}")
+
+        if not self.token:
+            self.log_test("Albums API - No Auth Token", False, "No authentication token available for full test")
+            return False
+
+        # Test with authentication
+        response = self.make_request('GET', 'albums')
+        
+        if not response:
+            self.log_test("Albums API - Authenticated Request Failed", False, "Authenticated request failed")
             return False
 
         if response.status_code != 200:
