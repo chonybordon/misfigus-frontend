@@ -58,6 +58,8 @@ class MisFigusAlbumTester:
                 response = requests.patch(url, json=data, headers=headers, timeout=10)
             elif method == 'DELETE':
                 response = requests.delete(url, headers=headers, timeout=10)
+            else:
+                return None
 
             return response
         except Exception as e:
