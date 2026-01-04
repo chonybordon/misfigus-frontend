@@ -10,7 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ArrowLeft, Search, Plus, Minus } from 'lucide-react';
 
 export const Inventory = () => {
-  const { albumId } = useParams();
+  const { groupId } = useParams();
   const [stickers, setStickers] = useState([]);
   const [filteredStickers, setFilteredStickers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -21,7 +21,7 @@ export const Inventory = () => {
 
   useEffect(() => {
     fetchInventory();
-  }, [albumId]);
+  }, [groupId]);
 
   useEffect(() => {
     applyFilters();
@@ -29,7 +29,7 @@ export const Inventory = () => {
 
   const fetchInventory = async () => {
     try {
-      const response = await api.get(`/inventory?album_id=${albumId}`);
+      const response = await api.get(`/groups/${groupId}/inventory`);
       setStickers(response.data);
     } catch (error) {
       toast.error(error.response?.data?.detail || t('common.error'));
@@ -64,7 +64,7 @@ export const Inventory = () => {
 
   const updateQuantity = async (stickerId, newQty) => {
     try {
-      await api.put('/inventory', {
+      await api.put(`/groups/${groupId}/inventory`, {
         sticker_id: stickerId,
         owned_qty: Math.max(0, newQty),
       });
@@ -116,10 +116,10 @@ export const Inventory = () => {
       <div className="max-w-7xl mx-auto p-6">
         <div className="flex items-center gap-4 mb-6">
           <Button
-            data-testid="back-to-album-btn"
+            data-testid="back-to-group-btn"
             variant="outline"
             size="icon"
-            onClick={() => navigate(`/albums/${albumId}`)}
+            onClick={() => navigate(`/groups/${groupId}`)}
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
