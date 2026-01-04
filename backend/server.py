@@ -271,6 +271,87 @@ async def activate_album(album_id: str, user_id: str = Depends(get_current_user)
     
     return {"message": "Album activated", "album_id": album_id}
 
+@api_router.get("/albums/{album_id}")
+async def get_album(album_id: str, user_id: str = Depends(get_current_user)):
+    """Get album template details."""
+    album = await db.albums.find_one({"id": album_id}, {"_id": 0})
+    if not album:
+        raise HTTPException(status_code=404, detail="Album not found")
+    
+    # Check if user has activated this album
+    activation = await db.user_album_activations.find_one({
+        "user_id": user_id,
+        "album_id": album_id
+    })
+    
+    if album.get('status') == 'coming_soon':
+        album['user_state'] = 'coming_soon'
+    elif activation:
+        album['user_state'] = 'active'
+        album['is_member'] = True
+    else:
+        album['user_state'] = 'inactive'
+        album['is_member'] = False
+    
+    return album
+
+@api_router.get("/inventory")
+async def get_inventory(album_id: str, user_id: str = Depends(get_current_user)):
+    """
+    Get full sticker catalog for an album with user's ownership overlay.
+    Returns ALL stickers in the album, with owned_qty for user's inventory.
+    """
+    # Check album exists
+    album = await db.albums.find_one({"id": album_id}, {"_id": 0})
+    if not album:
+        raise HTTPException(status_code=404, detail="Album not found")
+    
+    # Get all stickers for this album (full catalog from database)
+    stickers = await db.stickers.find(
+        {"album_id": album_id}, 
+        {"_id": 0}
+    ).sort("number", 1).to_list(1000)
+    
+    # Get user's inventory for this album
+    user_inventory = await db.user_inventory.find(
+        {"user_id": user_id, "album_id": album_id},
+        {"_id": 0}
+    ).to_list(1000)
+    
+    # Create lookup dict for user's owned quantities
+    inventory_map = {inv['sticker_id']: inv['owned_qty'] for inv in user_inventory}
+    
+    # Merge catalog with user's ownership
+    for sticker in stickers:
+        owned_qty = inventory_map.get(sticker['id'], 0)
+        sticker['owned_qty'] = owned_qty
+        sticker['duplicate_count'] = max(0, owned_qty - 1)
+    
+    return stickers
+
+@api_router.put("/inventory")
+async def update_inventory(
+    sticker_id: str = Body(...),
+    owned_qty: int = Body(...),
+    user_id: str = Depends(get_current_user)
+):
+    """Update user's inventory for a specific sticker."""
+    # Get sticker to find album_id
+    sticker = await db.stickers.find_one({"id": sticker_id}, {"_id": 0})
+    if not sticker:
+        raise HTTPException(status_code=404, detail="Sticker not found")
+    
+    album_id = sticker['album_id']
+    
+    # Upsert inventory record
+    await db.user_inventory.update_one(
+        {"user_id": user_id, "sticker_id": sticker_id, "album_id": album_id},
+        {"$set": {"owned_qty": max(0, owned_qty)}},
+        upsert=True
+    )
+    
+    return {"message": "Inventory updated"}
+
 # ============================================
 # GROUP ENDPOINTS (private album instances)
 # ============================================
