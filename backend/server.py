@@ -307,7 +307,7 @@ async def deactivate_album(album_id: str, user_id: str = Depends(get_current_use
 
 @api_router.get("/albums/{album_id}")
 async def get_album(album_id: str, user_id: str = Depends(get_current_user)):
-    """Get album template details."""
+    """Get album template details with member count and progress."""
     album = await db.albums.find_one({"id": album_id}, {"_id": 0})
     if not album:
         raise HTTPException(status_code=404, detail="Album not found")
@@ -320,12 +320,33 @@ async def get_album(album_id: str, user_id: str = Depends(get_current_user)):
     
     if album.get('status') == 'coming_soon':
         album['user_state'] = 'coming_soon'
+        album['is_member'] = False
+        album['member_count'] = 0
+        album['progress'] = 0
     elif activation:
         album['user_state'] = 'active'
         album['is_member'] = True
+        
+        # Get member count (excluding current user)
+        member_count = await db.album_members.count_documents({"album_id": album_id})
+        album['member_count'] = max(0, member_count - 1)  # Exclude current user
+        
+        # Calculate progress (rounded to integer)
+        sticker_count = await db.stickers.count_documents({"album_id": album_id})
+        if sticker_count > 0:
+            inventory_count = await db.user_inventory.count_documents({
+                "user_id": user_id,
+                "album_id": album_id,
+                "owned_qty": {"$gte": 1}
+            })
+            album['progress'] = round(inventory_count / sticker_count * 100)  # Integer
+        else:
+            album['progress'] = 0
     else:
         album['user_state'] = 'inactive'
         album['is_member'] = False
+        album['member_count'] = 0
+        album['progress'] = 0
     
     return album
 
