@@ -19,7 +19,8 @@ const resources = {
         verify: 'Verificar',
         resend: 'Reenviar código',
         devMode: 'MODO DEV - Código OTP',
-        devNote: 'Solo para pruebas. Revisa los logs del backend para más detalles.'
+        devNote: 'Solo para pruebas. Revisa los logs del backend para más detalles.',
+        checkEmail: 'Revisa tu correo electrónico para obtener el código'
       },
       albums: {
         title: 'Mis Álbumes',
