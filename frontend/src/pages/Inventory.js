@@ -70,10 +70,14 @@ export const Inventory = () => {
 
   const updateQuantity = async (stickerId, newQty) => {
     try {
-      await api.put(`/groups/${groupId}/inventory`, {
-        sticker_id: stickerId,
-        owned_qty: Math.max(0, newQty),
-      });
+      // Use group endpoint if groupId, otherwise album endpoint
+      const endpoint = isGroupContext 
+        ? `/groups/${contextId}/inventory`
+        : '/inventory';
+      const payload = isGroupContext
+        ? { sticker_id: stickerId, owned_qty: Math.max(0, newQty) }
+        : { sticker_id: stickerId, owned_qty: Math.max(0, newQty) };
+      await api.put(endpoint, payload);
       setStickers((prev) =>
         prev.map((s) => {
           if (s.id === stickerId) {
@@ -90,6 +94,11 @@ export const Inventory = () => {
     } catch (error) {
       toast.error(error.response?.data?.detail || t('common.error'));
     }
+  };
+
+  // Get back navigation path
+  const getBackPath = () => {
+    return isGroupContext ? `/groups/${contextId}` : `/albums/${contextId}`;
   };
 
   const getStickerClass = (sticker) => {
