@@ -800,6 +800,7 @@ const resources = {
         subtitle: 'Tausche Sticker mit deinem Album',
         emailPlaceholder: 'Deine E-Mail',
         sendOTP: 'Code senden',
+        otpSent: 'Code erfolgreich gesendet. Überprüfe deine E-Mail.',
         otpPlaceholder: '6-stelliger Code',
         verify: 'Überprüfen',
         resend: 'Code erneut senden',
