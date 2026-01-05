@@ -185,3 +185,78 @@ class ChatMessage(BaseModel):
     content: str
     is_system: bool = False
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+# ============================================
+# EXCHANGE MODELS (Local Exchange Lifecycle)
+# ============================================
+class Exchange(BaseModel):
+    """
+    A real exchange between two users with mutual sticker matches.
+    Exchange = the only context where chat is allowed.
+    """
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    album_id: str
+    user_a_id: str
+    user_b_id: str
+    # Stickers offered by each user (list of sticker IDs)
+    user_a_offers: List[str] = []  # Stickers A gives to B
+    user_b_offers: List[str] = []  # Stickers B gives to A
+    # Status: pending, completed, failed, expired
+    status: str = 'pending'
+    # Confirmation tracking
+    user_a_confirmed: Optional[bool] = None  # True=👍, False=👎, None=not yet
+    user_b_confirmed: Optional[bool] = None
+    user_a_confirmed_at: Optional[datetime] = None
+    user_b_confirmed_at: Optional[datetime] = None
+    # Failure reason (if 👎)
+    user_a_failure_reason: Optional[str] = None
+    user_b_failure_reason: Optional[str] = None
+    # Timestamps
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    completed_at: Optional[datetime] = None
+    expires_at: Optional[datetime] = None  # 7 days from creation
+
+class ExchangeCreate(BaseModel):
+    album_id: str
+    partner_user_id: str
+
+class ExchangeConfirm(BaseModel):
+    confirmed: bool  # True=👍, False=👎
+    failure_reason: Optional[str] = None  # Required if confirmed=False
+
+# Failure reasons for 👎
+EXCHANGE_FAILURE_REASONS = [
+    'no_show',           # Did not show up
+    'cancelled',         # Cancelled without notice
+    'attempted_sale',    # Attempted to sell
+    'inappropriate'      # Inappropriate behavior
+]
+
+# ============================================
+# REPUTATION MODELS (Automatic, Non-Social)
+# ============================================
+class UserReputation(BaseModel):
+    """
+    User reputation computed from exchange history.
+    Status: trusted, under_review, restricted
+    """
+    model_config = ConfigDict(extra="ignore")
+    user_id: str
+    # Counters
+    total_exchanges: int = 0
+    successful_exchanges: int = 0
+    failed_exchanges: int = 0
+    consecutive_failures: int = 0
+    # Status
+    status: str = 'trusted'  # trusted, under_review, restricted
+    # Restrictions
+    invisible_until: Optional[datetime] = None  # 48h invisibility
+    suspended_at: Optional[datetime] = None
+    # Last update
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+# Reputation thresholds
+REPUTATION_CONSECUTIVE_FAIL_THRESHOLD = 2   # 2 consecutive → 48h invisible
+REPUTATION_TOTAL_FAIL_THRESHOLD = 5          # 5 total → suspended
+
