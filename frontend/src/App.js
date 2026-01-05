@@ -65,8 +65,27 @@ const PrivateRoute = ({ children }) => {
   
   const checkTermsStatus = async () => {
     try {
+      // Check cached terms status first to avoid repeated API calls
+      const cachedTermsVersion = localStorage.getItem('termsAcceptedVersion');
+      const currentVersion = '1.0'; // Must match backend CURRENT_TERMS_VERSION
+      
+      if (cachedTermsVersion === currentVersion) {
+        // Already accepted current version
+        setNeedsTerms(false);
+        setCheckingTerms(false);
+        return;
+      }
+      
+      // Check with backend
       const response = await api.get('/user/terms-status');
-      setNeedsTerms(response.data.needs_acceptance);
+      const needsAcceptance = response.data.needs_acceptance;
+      
+      // Cache the result if accepted
+      if (!needsAcceptance && response.data.terms_version) {
+        localStorage.setItem('termsAcceptedVersion', response.data.terms_version);
+      }
+      
+      setNeedsTerms(needsAcceptance);
     } catch (error) {
       console.error('Failed to check terms status:', error);
       setNeedsTerms(false);
@@ -76,6 +95,8 @@ const PrivateRoute = ({ children }) => {
   };
   
   const handleTermsAccepted = () => {
+    // Cache the acceptance
+    localStorage.setItem('termsAcceptedVersion', '1.0');
     setNeedsTerms(false);
   };
   
