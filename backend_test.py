@@ -14,6 +14,7 @@ class MisFigusTestUserFilterTester:
         self.tests_passed = 0
         self.test_results = []
         self.qatar_album_id = "bc32fecb-f640-4d00-880d-5043bc112d4b"
+        self.test_user_id = "3b6734a6-4a17-437f-845f-ba265fcc4b7b"
 
     def log_test(self, name, success, details=""):
         """Log test result"""
