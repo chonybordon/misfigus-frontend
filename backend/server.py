@@ -473,26 +473,27 @@ async def update_structured_location(location_data: StructuredLocationUpdate, us
             detail=f"Invalid radius. Allowed values: {ALLOWED_RADIUS_VALUES}"
         )
     
-    # Check location cooldown
-    location_can_change, location_days = can_change_setting(user.get('location_change_allowed_at'))
+    # Check location cooldown (14 days)
+    location_can_change, location_days = can_change_location(user.get('location_change_allowed_at'))
     if not location_can_change:
         raise HTTPException(
             status_code=400,
-            detail=f"Location can only be changed once every 7 days. Try again in {location_days} days."
+            detail=f"LOCATION_COOLDOWN:{location_days}"
         )
     
-    # Check if radius is being changed and its cooldown
+    # Check if radius is being changed and its cooldown (7 days)
     current_radius = user.get('radius_km', 5)
     if location_data.radius_km != current_radius:
-        radius_can_change, radius_days = can_change_setting(user.get('radius_change_allowed_at'))
+        radius_can_change, radius_days = can_change_radius(user.get('radius_change_allowed_at'))
         if not radius_can_change:
             raise HTTPException(
                 status_code=400,
-                detail=f"Search radius can only be changed once every 7 days. Try again in {radius_days} days."
+                detail=f"RADIUS_COOLDOWN:{radius_days}"
             )
     
     now = datetime.now(timezone.utc)
-    next_change = (now + timedelta(days=SETTINGS_CHANGE_COOLDOWN_DAYS)).isoformat()
+    location_next_change = (now + timedelta(days=LOCATION_CHANGE_COOLDOWN_DAYS)).isoformat()
+    radius_next_change = (now + timedelta(days=RADIUS_CHANGE_COOLDOWN_DAYS)).isoformat()
     
     update_fields = {
         "country_code": location_data.country_code.upper(),
@@ -502,7 +503,7 @@ async def update_structured_location(location_data: StructuredLocationUpdate, us
         "latitude": location_data.latitude,
         "longitude": location_data.longitude,
         "neighborhood_text": location_data.neighborhood_text,
-        "location_change_allowed_at": next_change,
+        "location_change_allowed_at": location_next_change,
     }
     
     # Update radius if changed
