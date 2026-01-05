@@ -100,9 +100,13 @@ function App() {
           <Route path="/groups/:groupId" element={<PrivateRoute><GroupHome /></PrivateRoute>} />
           <Route path="/groups/:groupId/inventory" element={<PrivateRoute><Inventory /></PrivateRoute>} />
           <Route path="/groups/:groupId/matches" element={<PrivateRoute><Matches /></PrivateRoute>} />
-          {/* Album-based inventory/matches routes */}
+          {/* Album-based inventory/matches/exchanges routes */}
           <Route path="/albums/:albumId/inventory" element={<PrivateRoute><Inventory /></PrivateRoute>} />
           <Route path="/albums/:albumId/matches" element={<PrivateRoute><Matches /></PrivateRoute>} />
+          <Route path="/albums/:albumId/exchanges" element={<PrivateRoute><Exchanges /></PrivateRoute>} />
+          {/* Exchange routes */}
+          <Route path="/exchanges/:exchangeId" element={<PrivateRoute><ExchangeDetail /></PrivateRoute>} />
+          <Route path="/exchanges/:exchangeId/chat" element={<PrivateRoute><ExchangeChat /></PrivateRoute>} />
           <Route path="/settings" element={<PrivateRoute><Settings /></PrivateRoute>} />
           <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
         </Routes>
