@@ -16,8 +16,12 @@ from models import (
     EmailInvite, EmailInviteCreate, EmailInviteAccept,
     Sticker, UserInventory, InventoryUpdate,
     Offer, OfferCreate, OfferUpdate, OfferItem,
-    Chat, ChatMessage
+    Chat, ChatMessage,
+    Exchange, ExchangeCreate, ExchangeConfirm, 
+    UserReputation, EXCHANGE_FAILURE_REASONS,
+    REPUTATION_CONSECUTIVE_FAIL_THRESHOLD, REPUTATION_TOTAL_FAIL_THRESHOLD
 )
+from datetime import timedelta
 from email_service import (
     generate_otp_code, generate_invite_code, hash_otp, verify_otp_hash,
     send_otp_email, send_invite_email, check_resend_config
