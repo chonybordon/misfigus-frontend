@@ -167,13 +167,40 @@ export const AlbumHome = () => {
           </div>
         )}
 
-        <div className="mb-8">
+        <div className="mb-6">
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm font-semibold">{t('albumHome.progress')}</span>
             <span className="text-sm font-bold text-primary">{Math.round(album?.progress ?? 0)}%</span>
           </div>
           <Progress value={Math.round(album?.progress ?? 0)} className="h-3" />
         </div>
+
+        {/* Exchange Status Panel - Core value proposition */}
+        <Card 
+          data-testid="exchange-status-card" 
+          className={`mb-6 ${exchangeCount > 0 ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200'}`}
+        >
+          <CardContent className="py-4">
+            <div className="flex items-center gap-3">
+              <div className={`h-10 w-10 rounded-full flex items-center justify-center ${
+                exchangeCount > 0 ? 'bg-green-100' : 'bg-gray-100'
+              }`}>
+                <Package className={`h-5 w-5 ${exchangeCount > 0 ? 'text-green-600' : 'text-gray-400'}`} />
+              </div>
+              <div>
+                {exchangeCount > 0 ? (
+                  <p className="font-semibold text-green-800">
+                    {t('albumHome.exchangesAvailable', { count: exchangeCount })}
+                  </p>
+                ) : (
+                  <p className="font-medium text-gray-600">
+                    {t('albumHome.noExchangesAvailable')}
+                  </p>
+                )}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
           <Card
@@ -200,11 +227,11 @@ export const AlbumHome = () => {
             onClick={() => navigate(`/albums/${albumId}/matches`)}
           >
             <CardHeader>
-              <CardTitle>{t('albumHome.matches')}</CardTitle>
+              <CardTitle>{t('albumHome.exchanges')}</CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground">
-                {t('albumHome.findTrades')}
+                {t('albumHome.findExchanges')}
               </p>
             </CardContent>
           </Card>
