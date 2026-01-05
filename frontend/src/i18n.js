@@ -157,6 +157,7 @@ const resources = {
         myExchanges: 'Mis Intercambios',
         noExchanges: 'No tenés intercambios aún',
         noExchangesHint: 'Buscá coincidencias para iniciar un intercambio',
+        noExchangesInArea: 'No hay intercambios disponibles en tu zona por el momento.',
         findMatches: 'Buscar coincidencias',
         details: 'Detalles del intercambio',
         youGive: 'Vos das',
@@ -173,10 +174,17 @@ const resources = {
         confirmFailureDesc: 'Indicá el motivo por el cual el intercambio no se completó.',
         selectReasonLabel: 'Selecciona un motivo:',
         selectReason: 'Selecciona un motivo',
+        minorIssuesTitle: 'Imprevistos (sin penalización)',
+        seriousIssuesTitle: 'Problemas graves (afecta reputación)',
+        reasonScheduleConflict: 'No coincidimos en horarios',
+        reasonPersonalIssue: 'Surgió un imprevisto personal',
+        reasonMovedAway: 'Me mudé / cambié de zona',
+        reasonLostStickers: 'Perdí las figuritas',
         reasonNoShow: 'No se presentó',
-        reasonCancelled: 'Canceló sin aviso',
+        reasonCancelledNoNotice: 'Canceló sin aviso',
         reasonAttemptedSale: 'Intentó vender',
         reasonInappropriate: 'Comportamiento inadecuado',
+        reasonWrongStickers: 'Trajo figuritas incorrectas',
         confirmationSaved: 'Confirmación guardada',
         alreadyConfirmed: 'Ya confirmaste este intercambio',
         statusPending: 'Pendiente',
@@ -184,7 +192,15 @@ const resources = {
         statusFailed: 'Fallido',
         statusExpired: 'Expirado',
         coordinateExchange: 'Coordinar intercambio',
-        exchangeCreated: 'Intercambio creado'
+        exchangeCreated: 'Intercambio iniciado',
+        exchangeExists: 'Intercambio encontrado',
+        newExchange: 'Nuevo intercambio',
+        hasNewExchange: 'Tenés un nuevo intercambio pendiente'
+      },
+      system: {
+        exchangeStarted: 'Intercambio iniciado. Coordina tu encuentro presencial aquí.',
+        exchangeCompleted: '✅ ¡Intercambio completado exitosamente!',
+        exchangeFailed: '❌ El intercambio no se completó.'
       },
       reputation: {
         trusted: 'Confiable',
