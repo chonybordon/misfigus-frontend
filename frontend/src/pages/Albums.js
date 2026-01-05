@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
-import { Settings, BookOpen } from 'lucide-react';
+import { Settings, BookOpen, CheckCircle } from 'lucide-react';
 
 export const Albums = () => {
   const [albums, setAlbums] = useState([]);
