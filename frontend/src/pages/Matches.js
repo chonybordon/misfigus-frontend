@@ -66,7 +66,7 @@ export const Matches = () => {
       // Use group endpoint if groupId, otherwise album endpoint
       const endpoint = isGroupContext 
         ? `/groups/${contextId}/matches`
-        : `/matches?album_id=${contextId}`;
+        : `/albums/${contextId}/matches`;
       const response = await api.get(endpoint);
       setMatches(response.data);
     } catch (error) {
