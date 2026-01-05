@@ -80,8 +80,10 @@ class PlaceSearchResult(BaseModel):
 
 # Allowed search radius values
 ALLOWED_RADIUS_VALUES = [3, 5, 10]
-# Cooldown for location/radius changes (7 days)
-SETTINGS_CHANGE_COOLDOWN_DAYS = 7
+# Cooldown for location changes (14 days - anti-abuse)
+LOCATION_CHANGE_COOLDOWN_DAYS = 14
+# Cooldown for radius changes (7 days)
+RADIUS_CHANGE_COOLDOWN_DAYS = 7
 # Current terms version
 CURRENT_TERMS_VERSION = "1.0"
 
