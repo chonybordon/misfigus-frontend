@@ -5,46 +5,17 @@ import { api } from '../App';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Users, Package, UserPlus, ExternalLink, Settings, LogOut } from 'lucide-react';
+import { ArrowLeft, Package, Settings, LogOut } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
-
-const maskEmail = (email) => {
-  if (!email) return '';
-  const [local, domain] = email.split('@');
-  if (local.length <= 3) {
-    return `${local[0]}***@${domain}`;
-  }
-  return `${local.substring(0, 3)}***@${domain}`;
-};
-
-const getDisplayName = (user, t) => {
-  if (!user) return t('app.defaultUser');
-  
-  // Priority 1: Display name if exists
-  if (user.display_name && user.display_name.trim()) {
-    return user.display_name.trim();
-  }
-  
-  // Priority 2: Masked email
-  if (user.email) {
-    return maskEmail(user.email);
-  }
-  
-  return t('app.defaultUser');
-};
 
 export const AlbumHome = () => {
   const { albumId } = useParams();
   const [album, setAlbum] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
-  const [membersDialogOpen, setMembersDialogOpen] = useState(false);
   const [deactivateDialogOpen, setDeactivateDialogOpen] = useState(false);
   const [deactivating, setDeactivating] = useState(false);
-  const [inviteLink, setInviteLink] = useState('');
   const navigate = useNavigate();
   const { t } = useTranslation();
 
