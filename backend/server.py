@@ -590,12 +590,14 @@ async def get_structured_location_status(user_id: str = Depends(get_current_user
             "neighborhood_text": user.get('neighborhood_text'),
             "label": location_label,
             "can_change": location_can_change,
-            "days_until_change": location_days
+            "days_until_change": location_days,
+            "cooldown_days": LOCATION_CHANGE_COOLDOWN_DAYS  # 14 days
         },
         "radius": {
             "km": user.get('radius_km', 5),
             "can_change": radius_can_change,
-            "days_until_change": radius_days
+            "days_until_change": radius_days,
+            "cooldown_days": RADIUS_CHANGE_COOLDOWN_DAYS  # 7 days
         }
     }
 
@@ -605,7 +607,7 @@ async def legacy_update_location(location_data: dict = Body(...), user_id: str =
     """Legacy endpoint - redirects to new structured endpoint."""
     raise HTTPException(
         status_code=400,
-        detail="Please use the new location system. Select a city from the search results."
+        detail="USE_NEW_LOCATION_SYSTEM"
     )
 
 @api_router.put("/user/radius")
