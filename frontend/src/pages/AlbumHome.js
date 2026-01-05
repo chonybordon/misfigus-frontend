@@ -109,20 +109,8 @@ export const AlbumHome = () => {
     }
   };
 
-  // SINGLE SOURCE OF TRUTH: Use member_count from backend directly
-  // Backend EXCLUDES owner from this count - owner is NEVER a member
-  const memberCount = album?.member_count ?? 0;
-
-  // Get member count display string with proper singular/plural
-  const getMemberCountDisplay = () => {
-    if (memberCount === 0) {
-      return `0 ${t('albumHome.memberPlural')}`;
-    } else if (memberCount === 1) {
-      return `1 ${t('albumHome.member')}`;
-    } else {
-      return `${memberCount} ${t('albumHome.memberPlural')}`;
-    }
-  };
+  // Exchange count from backend (mutual matches only)
+  const exchangeCount = album?.exchange_count ?? 0;
 
   if (loading) {
     return (
@@ -146,9 +134,7 @@ export const AlbumHome = () => {
           </Button>
           <div className="flex-1">
             <h1 className="text-3xl font-black tracking-tight text-primary">{album?.name}</h1>
-            <p className="text-muted-foreground">
-              {getMemberCountDisplay()}
-            </p>
+            <p className="text-muted-foreground">{album?.year} • {album?.category}</p>
           </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
