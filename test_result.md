@@ -221,6 +221,10 @@ test_plan:
     - "Album Matches Filtering"
     - "Exchange Count Filtering"
     - "ExchangeChat.js useAuth Import Fix"
+    - "Profile Settings - Location Endpoints"
+    - "Profile Settings - Radius Endpoints"
+    - "Profile Settings - Terms & Conditions"
+    - "Profile Settings - Exchange Matching with Radius"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
