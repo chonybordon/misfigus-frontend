@@ -1,28 +1,58 @@
 {
-  "timestamp": "2026-01-05T00:51:24.161617",
-  "tests_run": 9,
-  "tests_passed": 0,
-  "success_rate": 0.0,
+  "timestamp": "2026-01-05T00:52:07.009261",
+  "tests_run": 22,
+  "tests_passed": 12,
+  "success_rate": 54.54545454545454,
   "results": [
     {
       "test": "Authenticate User 1",
-      "success": false,
-      "details": "Failed to authenticate user 1"
+      "success": true,
+      "details": "User ID: 676ee695-a0ac-42e2-8dd8-dec3bbbd34b1"
+    },
+    {
+      "test": "Authenticate User 2",
+      "success": true,
+      "details": "User ID: ac98a7d0-ab57-4c03-9448-e2c6ce8edb42"
+    },
+    {
+      "test": "Activate Qatar album for User 1",
+      "success": true,
+      "details": ""
+    },
+    {
+      "test": "Activate Qatar album for User 2",
+      "success": true,
+      "details": ""
     },
     {
       "test": "Get Qatar stickers",
-      "success": false,
-      "details": "Status: 401, Response: {'detail': 'Authorization header missing'}"
+      "success": true,
+      "details": "Found 100 stickers"
+    },
+    {
+      "test": "Setup mutual match inventory",
+      "success": true,
+      "details": "User 1 has 1-5 duplicates, User 2 has 6-10 duplicates"
     },
     {
       "test": "Create exchange",
       "success": false,
-      "details": "Status: 401, Response: {'detail': 'Authorization header missing'}"
+      "details": "Status: 520, Response: Internal Server Error"
     },
     {
       "test": "Get User 1 exchanges",
+      "success": true,
+      "details": "Found 0 exchanges"
+    },
+    {
+      "test": "Exchange found in User 1 list",
       "success": false,
-      "details": "Status: 401, Response: {'detail': 'Authorization header missing'}"
+      "details": "Exchange not found in list"
+    },
+    {
+      "test": "Get User 2 exchanges",
+      "success": true,
+      "details": "Found 0 exchanges"
     },
     {
       "test": "Exchange detail test",
@@ -41,16 +71,51 @@
     },
     {
       "test": "Get User 1 reputation",
+      "success": true,
+      "details": "Status: trusted"
+    },
+    {
+      "test": "Reputation fields present",
+      "success": true,
+      "details": "Missing: []"
+    },
+    {
+      "test": "Exchange recorded in reputation",
       "success": false,
-      "details": "Status: 401, Response: {'detail': 'Authorization header missing'}"
+      "details": "Total exchanges: 0"
+    },
+    {
+      "test": "Successful exchange recorded",
+      "success": false,
+      "details": "Successful exchanges: 0"
+    },
+    {
+      "test": "Reputation status is trusted",
+      "success": true,
+      "details": "Status: trusted"
+    },
+    {
+      "test": "Get User 2 reputation",
+      "success": true,
+      "details": "Status: trusted"
+    },
+    {
+      "test": "User 2 exchange recorded",
+      "success": false,
+      "details": "Total exchanges: 0"
+    },
+    {
+      "test": "User 2 successful exchange recorded",
+      "success": false,
+      "details": "Successful exchanges: 0"
     },
     {
       "test": "Create second exchange",
       "success": false,
-      "details": "Status: 401, Response: {'detail': 'Authorization header missing'}"
+      "details": "Status: 520, Response: Internal Server Error"
     }
   ],
   "exchange_id": null,
-  "user1_id": null,
-  "user2_id": null
+  "user1_id": "676ee695-a0ac-42e2-8dd8-dec3bbbd34b1",
+  "user2_id": "ac98a7d0-ab57-4c03-9448-e2c6ce8edb42"
 }
