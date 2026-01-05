@@ -370,6 +370,172 @@ async def update_me(user_update: UserUpdate, user_id: str = Depends(get_current_
     return user
 
 # ============================================
+# USER LOCATION & RADIUS ENDPOINTS
+# ============================================
+@api_router.put("/user/location")
+async def update_user_location(location_data: UserLocationUpdate, user_id: str = Depends(get_current_user)):
+    """
+    Update user's approximate location (zone).
+    Can only be changed once every 7 days.
+    """
+    user = await db.users.find_one({"id": user_id}, {"_id": 0})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Check cooldown
+    can_change, days_remaining = can_change_setting(user.get('location_updated_at'))
+    if not can_change:
+        raise HTTPException(
+            status_code=400, 
+            detail=f"Location can only be changed once every 7 days. Try again in {days_remaining} days."
+        )
+    
+    # Update location
+    await db.users.update_one(
+        {"id": user_id},
+        {"$set": {
+            "location_zone": location_data.zone,
+            "location_lat": location_data.lat,
+            "location_lng": location_data.lng,
+            "location_updated_at": datetime.now(timezone.utc).isoformat()
+        }}
+    )
+    
+    user = await db.users.find_one({"id": user_id}, {"_id": 0})
+    return {"message": "Location updated", "user": user}
+
+@api_router.put("/user/radius")
+async def update_user_radius(radius_data: UserRadiusUpdate, user_id: str = Depends(get_current_user)):
+    """
+    Update user's search radius.
+    Allowed values: 3, 5, 10 km.
+    Can only be changed once every 7 days.
+    """
+    user = await db.users.find_one({"id": user_id}, {"_id": 0})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Validate radius value
+    if radius_data.radius_km not in ALLOWED_RADIUS_VALUES:
+        raise HTTPException(
+            status_code=400, 
+            detail=f"Invalid radius. Allowed values: {ALLOWED_RADIUS_VALUES}"
+        )
+    
+    # Check cooldown
+    can_change, days_remaining = can_change_setting(user.get('search_radius_updated_at'))
+    if not can_change:
+        raise HTTPException(
+            status_code=400, 
+            detail=f"Search radius can only be changed once every 7 days. Try again in {days_remaining} days."
+        )
+    
+    # Update radius
+    await db.users.update_one(
+        {"id": user_id},
+        {"$set": {
+            "search_radius_km": radius_data.radius_km,
+            "search_radius_updated_at": datetime.now(timezone.utc).isoformat()
+        }}
+    )
+    
+    user = await db.users.find_one({"id": user_id}, {"_id": 0})
+    return {"message": "Search radius updated", "user": user}
+
+@api_router.get("/user/location-status")
+async def get_location_status(user_id: str = Depends(get_current_user)):
+    """
+    Get user's location and radius status including cooldown info.
+    """
+    user = await db.users.find_one({"id": user_id}, {"_id": 0})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    location_can_change, location_days = can_change_setting(user.get('location_updated_at'))
+    radius_can_change, radius_days = can_change_setting(user.get('search_radius_updated_at'))
+    
+    return {
+        "location": {
+            "zone": user.get('location_zone'),
+            "can_change": location_can_change,
+            "days_until_change": location_days
+        },
+        "radius": {
+            "km": user.get('search_radius_km', 5),
+            "can_change": radius_can_change,
+            "days_until_change": radius_days
+        }
+    }
+
+# ============================================
+# TERMS & CONDITIONS ENDPOINTS
+# ============================================
+@api_router.get("/terms")
+async def get_terms(language: str = 'es'):
+    """
+    Get current terms and conditions content.
+    """
+    return {
+        "version": CURRENT_TERMS_VERSION,
+        "content": get_terms_content(language)
+    }
+
+@api_router.post("/user/accept-terms")
+async def accept_terms(acceptance: TermsAcceptance, user_id: str = Depends(get_current_user)):
+    """
+    Accept terms and conditions.
+    """
+    user = await db.users.find_one({"id": user_id}, {"_id": 0})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Already accepted this version
+    if user.get('terms_accepted') and user.get('terms_version') == acceptance.version:
+        return {"message": "Terms already accepted", "user": user}
+    
+    acceptance_time = datetime.now(timezone.utc)
+    
+    # Update user with terms acceptance
+    await db.users.update_one(
+        {"id": user_id},
+        {"$set": {
+            "terms_accepted": True,
+            "terms_version": acceptance.version,
+            "terms_accepted_at": acceptance_time.isoformat()
+        }}
+    )
+    
+    # Send confirmation email (non-blocking)
+    try:
+        send_terms_acceptance_email(
+            user.get('email'),
+            acceptance.version,
+            acceptance_time
+        )
+    except Exception as e:
+        logger.warning(f"Failed to send terms acceptance email: {e}")
+    
+    user = await db.users.find_one({"id": user_id}, {"_id": 0})
+    return {"message": "Terms accepted", "user": user}
+
+@api_router.get("/user/terms-status")
+async def get_terms_status(user_id: str = Depends(get_current_user)):
+    """
+    Get user's terms acceptance status.
+    """
+    user = await db.users.find_one({"id": user_id}, {"_id": 0})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    return {
+        "terms_accepted": user.get('terms_accepted', False),
+        "terms_version": user.get('terms_version'),
+        "terms_accepted_at": user.get('terms_accepted_at'),
+        "current_version": CURRENT_TERMS_VERSION,
+        "needs_acceptance": not user.get('terms_accepted', False) or user.get('terms_version') != CURRENT_TERMS_VERSION
+    }
+
+# ============================================
 # ALBUM ENDPOINTS (album templates)
 # ============================================
 @api_router.get("/albums")
