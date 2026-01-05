@@ -462,6 +462,7 @@ async def get_album_matches(album_id: str, user_id: str = Depends(get_current_us
     Get potential exchange matches within the album.
     Only returns users with MUTUAL matches (both can exchange).
     Does not expose user lists/directories - only real exchange opportunities.
+    EXCLUDES test/seed users from results.
     """
     # Verify user has activated this album
     activation = await db.user_album_activations.find_one({
@@ -503,6 +504,10 @@ async def get_album_matches(album_id: str, user_id: str = Depends(get_current_us
         # Get user info
         other_user = await db.users.find_one({"id": other_user_id}, {"_id": 0})
         if not other_user:
+            continue
+        
+        # Skip test/seed users - they should not appear in exchange suggestions
+        if is_test_user(other_user):
             continue
         
         # Get their inventory
