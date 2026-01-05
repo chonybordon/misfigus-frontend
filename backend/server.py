@@ -955,6 +955,432 @@ async def get_matches(group_id: str, user_id: str = Depends(get_current_user)):
     return matches
 
 # ============================================
+# EXCHANGE ENDPOINTS (Real Exchange Lifecycle)
+# ============================================
+
+EXCHANGE_EXPIRY_DAYS = 7  # Exchanges expire after 7 days
+
+async def get_user_reputation(user_id: str) -> dict:
+    """Get or create user reputation record."""
+    rep = await db.user_reputation.find_one({"user_id": user_id}, {"_id": 0})
+    if not rep:
+        rep = {
+            "user_id": user_id,
+            "total_exchanges": 0,
+            "successful_exchanges": 0,
+            "failed_exchanges": 0,
+            "consecutive_failures": 0,
+            "status": "trusted",
+            "invisible_until": None,
+            "suspended_at": None,
+            "updated_at": datetime.now(timezone.utc).isoformat()
+        }
+        await db.user_reputation.insert_one(rep)
+    return rep
+
+async def update_reputation_after_exchange(user_id: str, was_successful: bool):
+    """Update user reputation after an exchange confirmation."""
+    rep = await get_user_reputation(user_id)
+    
+    rep['total_exchanges'] += 1
+    
+    if was_successful:
+        rep['successful_exchanges'] += 1
+        rep['consecutive_failures'] = 0  # Reset consecutive failures
+    else:
+        rep['failed_exchanges'] += 1
+        rep['consecutive_failures'] += 1
+    
+    # Determine new status based on thresholds
+    now = datetime.now(timezone.utc)
+    
+    if rep['consecutive_failures'] >= REPUTATION_CONSECUTIVE_FAIL_THRESHOLD:
+        # 2+ consecutive failures → 48h invisibility
+        rep['status'] = 'under_review'
+        rep['invisible_until'] = (now + timedelta(hours=48)).isoformat()
+    
+    if rep['failed_exchanges'] >= REPUTATION_TOTAL_FAIL_THRESHOLD:
+        # 5+ total failures → suspended
+        rep['status'] = 'restricted'
+        rep['suspended_at'] = now.isoformat()
+    
+    # If no issues and was successful, ensure trusted status
+    if was_successful and rep['consecutive_failures'] == 0 and rep['status'] == 'under_review':
+        # Check if invisibility period has passed
+        if rep['invisible_until']:
+            inv_until = datetime.fromisoformat(rep['invisible_until'].replace('Z', '+00:00'))
+            if now > inv_until:
+                rep['status'] = 'trusted'
+                rep['invisible_until'] = None
+    
+    rep['updated_at'] = now.isoformat()
+    
+    await db.user_reputation.update_one(
+        {"user_id": user_id},
+        {"$set": rep},
+        upsert=True
+    )
+    
+    return rep
+
+async def is_user_visible(user_id: str) -> bool:
+    """Check if user is visible (not restricted or invisible)."""
+    rep = await get_user_reputation(user_id)
+    
+    if rep['status'] == 'restricted':
+        return False
+    
+    if rep['invisible_until']:
+        inv_until = datetime.fromisoformat(rep['invisible_until'].replace('Z', '+00:00'))
+        if datetime.now(timezone.utc) < inv_until:
+            return False
+    
+    return True
+
+@api_router.post("/albums/{album_id}/exchanges")
+async def create_exchange(
+    album_id: str, 
+    exchange_input: ExchangeCreate,
+    user_id: str = Depends(get_current_user)
+):
+    """
+    Create an exchange with another user.
+    Only allowed if there is a MUTUAL sticker match.
+    Creates an exchange record and enables chat between users.
+    """
+    # Verify user has activated this album
+    activation = await db.user_album_activations.find_one({
+        "user_id": user_id,
+        "album_id": album_id
+    })
+    if not activation:
+        raise HTTPException(status_code=403, detail="Album not activated")
+    
+    partner_id = exchange_input.partner_user_id
+    
+    # Check partner exists and has activated the album
+    partner_activation = await db.user_album_activations.find_one({
+        "user_id": partner_id,
+        "album_id": album_id
+    })
+    if not partner_activation:
+        raise HTTPException(status_code=404, detail="Partner not found in this album")
+    
+    # Check both users are visible (reputation check)
+    if not await is_user_visible(user_id):
+        raise HTTPException(status_code=403, detail="Your account is currently restricted")
+    if not await is_user_visible(partner_id):
+        raise HTTPException(status_code=404, detail="Partner not available for exchanges")
+    
+    # Check for existing pending exchange between these users
+    existing = await db.exchanges.find_one({
+        "album_id": album_id,
+        "status": "pending",
+        "$or": [
+            {"user_a_id": user_id, "user_b_id": partner_id},
+            {"user_a_id": partner_id, "user_b_id": user_id}
+        ]
+    })
+    if existing:
+        raise HTTPException(status_code=400, detail="Exchange already exists")
+    
+    # Verify mutual match exists
+    stickers = await db.stickers.find({"album_id": album_id}, {"_id": 0, "id": 1}).to_list(1000)
+    sticker_ids = [s['id'] for s in stickers]
+    
+    my_inventory = await db.user_inventory.find({
+        "user_id": user_id,
+        "album_id": album_id
+    }, {"_id": 0}).to_list(1000)
+    my_inv_map = {item['sticker_id']: item['owned_qty'] for item in my_inventory}
+    
+    partner_inventory = await db.user_inventory.find({
+        "user_id": partner_id,
+        "album_id": album_id
+    }, {"_id": 0}).to_list(1000)
+    partner_inv_map = {item['sticker_id']: item['owned_qty'] for item in partner_inventory}
+    
+    my_duplicates = [sid for sid in sticker_ids if my_inv_map.get(sid, 0) >= 2]
+    my_missing = [sid for sid in sticker_ids if my_inv_map.get(sid, 0) == 0]
+    partner_duplicates = [sid for sid in sticker_ids if partner_inv_map.get(sid, 0) >= 2]
+    partner_missing = [sid for sid in sticker_ids if partner_inv_map.get(sid, 0) == 0]
+    
+    i_can_give = [sid for sid in my_duplicates if sid in partner_missing]
+    i_can_get = [sid for sid in partner_duplicates if sid in my_missing]
+    
+    if not i_can_give or not i_can_get:
+        raise HTTPException(status_code=400, detail="No mutual match exists")
+    
+    # Create exchange
+    now = datetime.now(timezone.utc)
+    exchange = {
+        "id": str(uuid4()),
+        "album_id": album_id,
+        "user_a_id": user_id,
+        "user_b_id": partner_id,
+        "user_a_offers": i_can_give,
+        "user_b_offers": i_can_get,
+        "status": "pending",
+        "user_a_confirmed": None,
+        "user_b_confirmed": None,
+        "user_a_confirmed_at": None,
+        "user_b_confirmed_at": None,
+        "user_a_failure_reason": None,
+        "user_b_failure_reason": None,
+        "created_at": now.isoformat(),
+        "completed_at": None,
+        "expires_at": (now + timedelta(days=EXCHANGE_EXPIRY_DAYS)).isoformat()
+    }
+    await db.exchanges.insert_one(exchange)
+    
+    # Create chat for this exchange
+    chat = {
+        "id": str(uuid4()),
+        "exchange_id": exchange['id'],
+        "user_a_id": user_id,
+        "user_b_id": partner_id,
+        "created_at": now.isoformat()
+    }
+    await db.chats.insert_one(chat)
+    
+    # Add system message
+    system_message = {
+        "id": str(uuid4()),
+        "chat_id": chat['id'],
+        "sender_id": "system",
+        "content": "Exchange started. Coordinate your in-person exchange here.",
+        "is_system": True,
+        "created_at": now.isoformat()
+    }
+    await db.chat_messages.insert_one(system_message)
+    
+    exchange.pop('_id', None)
+    return {"message": "Exchange created", "exchange": exchange}
+
+@api_router.get("/albums/{album_id}/exchanges")
+async def get_user_exchanges(album_id: str, user_id: str = Depends(get_current_user)):
+    """Get all exchanges for the current user in this album."""
+    exchanges = await db.exchanges.find({
+        "album_id": album_id,
+        "$or": [
+            {"user_a_id": user_id},
+            {"user_b_id": user_id}
+        ]
+    }, {"_id": 0}).sort("created_at", -1).to_list(100)
+    
+    # Enrich with partner info and reputation
+    for exchange in exchanges:
+        partner_id = exchange['user_b_id'] if exchange['user_a_id'] == user_id else exchange['user_a_id']
+        partner = await db.users.find_one({"id": partner_id}, {"_id": 0})
+        partner_rep = await get_user_reputation(partner_id)
+        
+        exchange['partner'] = {
+            "id": partner_id,
+            "display_name": partner.get('display_name') if partner else None,
+            "reputation_status": partner_rep['status']
+        }
+        
+        # Mark which user is "me"
+        exchange['is_user_a'] = exchange['user_a_id'] == user_id
+    
+    return exchanges
+
+@api_router.get("/exchanges/{exchange_id}")
+async def get_exchange(exchange_id: str, user_id: str = Depends(get_current_user)):
+    """Get exchange details. Only participants can view."""
+    exchange = await db.exchanges.find_one({"id": exchange_id}, {"_id": 0})
+    if not exchange:
+        raise HTTPException(status_code=404, detail="Exchange not found")
+    
+    if user_id not in [exchange['user_a_id'], exchange['user_b_id']]:
+        raise HTTPException(status_code=403, detail="Not authorized")
+    
+    # Enrich with partner info
+    partner_id = exchange['user_b_id'] if exchange['user_a_id'] == user_id else exchange['user_a_id']
+    partner = await db.users.find_one({"id": partner_id}, {"_id": 0})
+    partner_rep = await get_user_reputation(partner_id)
+    
+    exchange['partner'] = {
+        "id": partner_id,
+        "display_name": partner.get('display_name') if partner else None,
+        "reputation_status": partner_rep['status']
+    }
+    exchange['is_user_a'] = exchange['user_a_id'] == user_id
+    
+    # Enrich sticker info
+    for sticker_list_key in ['user_a_offers', 'user_b_offers']:
+        sticker_ids = exchange.get(sticker_list_key, [])
+        stickers = await db.stickers.find({"id": {"$in": sticker_ids}}, {"_id": 0}).to_list(100)
+        exchange[f'{sticker_list_key}_details'] = stickers
+    
+    return exchange
+
+@api_router.post("/exchanges/{exchange_id}/confirm")
+async def confirm_exchange(
+    exchange_id: str, 
+    confirmation: ExchangeConfirm,
+    user_id: str = Depends(get_current_user)
+):
+    """
+    Confirm an exchange result (👍 or 👎).
+    Exchange becomes completed when both confirm 👍.
+    Exchange becomes failed if either confirms 👎.
+    """
+    exchange = await db.exchanges.find_one({"id": exchange_id}, {"_id": 0})
+    if not exchange:
+        raise HTTPException(status_code=404, detail="Exchange not found")
+    
+    if user_id not in [exchange['user_a_id'], exchange['user_b_id']]:
+        raise HTTPException(status_code=403, detail="Not authorized")
+    
+    if exchange['status'] != 'pending':
+        raise HTTPException(status_code=400, detail="Exchange is no longer pending")
+    
+    # Validate failure reason if 👎
+    if not confirmation.confirmed:
+        if not confirmation.failure_reason or confirmation.failure_reason not in EXCHANGE_FAILURE_REASONS:
+            raise HTTPException(status_code=400, detail=f"Failure reason required. Options: {EXCHANGE_FAILURE_REASONS}")
+    
+    # Check if user already confirmed
+    is_user_a = exchange['user_a_id'] == user_id
+    confirmed_field = 'user_a_confirmed' if is_user_a else 'user_b_confirmed'
+    
+    if exchange[confirmed_field] is not None:
+        raise HTTPException(status_code=400, detail="Already confirmed")
+    
+    now = datetime.now(timezone.utc)
+    
+    # Update confirmation
+    update_data = {
+        confirmed_field: confirmation.confirmed,
+        f'{confirmed_field}_at': now.isoformat()
+    }
+    
+    if not confirmation.confirmed:
+        reason_field = 'user_a_failure_reason' if is_user_a else 'user_b_failure_reason'
+        update_data[reason_field] = confirmation.failure_reason
+    
+    await db.exchanges.update_one({"id": exchange_id}, {"$set": update_data})
+    
+    # Re-fetch to check if both have confirmed
+    exchange = await db.exchanges.find_one({"id": exchange_id}, {"_id": 0})
+    
+    # Determine final status
+    final_status = None
+    
+    if exchange['user_a_confirmed'] is not None and exchange['user_b_confirmed'] is not None:
+        # Both have confirmed
+        if exchange['user_a_confirmed'] and exchange['user_b_confirmed']:
+            final_status = 'completed'
+        else:
+            final_status = 'failed'
+    elif not confirmation.confirmed:
+        # One user said 👎 - exchange failed immediately
+        final_status = 'failed'
+    
+    if final_status:
+        await db.exchanges.update_one(
+            {"id": exchange_id},
+            {"$set": {"status": final_status, "completed_at": now.isoformat()}}
+        )
+        
+        # Update reputation for both users
+        await update_reputation_after_exchange(
+            exchange['user_a_id'], 
+            final_status == 'completed'
+        )
+        await update_reputation_after_exchange(
+            exchange['user_b_id'], 
+            final_status == 'completed'
+        )
+        
+        # Add system message to chat
+        chat = await db.chats.find_one({"exchange_id": exchange_id}, {"_id": 0})
+        if chat:
+            status_msg = "✅ Exchange completed successfully!" if final_status == 'completed' else "❌ Exchange was not completed."
+            system_message = {
+                "id": str(uuid4()),
+                "chat_id": chat['id'],
+                "sender_id": "system",
+                "content": status_msg,
+                "is_system": True,
+                "created_at": now.isoformat()
+            }
+            await db.chat_messages.insert_one(system_message)
+    
+    return {"message": "Confirmation recorded", "status": final_status or exchange['status']}
+
+@api_router.get("/user/reputation")
+async def get_my_reputation(user_id: str = Depends(get_current_user)):
+    """Get current user's reputation status."""
+    rep = await get_user_reputation(user_id)
+    return rep
+
+# ============================================
+# CHAT ENDPOINTS (Only for pending exchanges)
+# ============================================
+
+@api_router.get("/exchanges/{exchange_id}/chat")
+async def get_exchange_chat(exchange_id: str, user_id: str = Depends(get_current_user)):
+    """Get chat for an exchange. Only participants can view."""
+    exchange = await db.exchanges.find_one({"id": exchange_id}, {"_id": 0})
+    if not exchange:
+        raise HTTPException(status_code=404, detail="Exchange not found")
+    
+    if user_id not in [exchange['user_a_id'], exchange['user_b_id']]:
+        raise HTTPException(status_code=403, detail="Not authorized")
+    
+    chat = await db.chats.find_one({"exchange_id": exchange_id}, {"_id": 0})
+    if not chat:
+        raise HTTPException(status_code=404, detail="Chat not found")
+    
+    messages = await db.chat_messages.find(
+        {"chat_id": chat['id']},
+        {"_id": 0}
+    ).sort("created_at", 1).to_list(500)
+    
+    return {
+        "chat": chat,
+        "messages": messages,
+        "is_read_only": exchange['status'] != 'pending'
+    }
+
+@api_router.post("/exchanges/{exchange_id}/chat/messages")
+async def send_chat_message(
+    exchange_id: str,
+    content: str = Body(..., embed=True),
+    user_id: str = Depends(get_current_user)
+):
+    """Send a message in an exchange chat. Only allowed for pending exchanges."""
+    exchange = await db.exchanges.find_one({"id": exchange_id}, {"_id": 0})
+    if not exchange:
+        raise HTTPException(status_code=404, detail="Exchange not found")
+    
+    if user_id not in [exchange['user_a_id'], exchange['user_b_id']]:
+        raise HTTPException(status_code=403, detail="Not authorized")
+    
+    if exchange['status'] != 'pending':
+        raise HTTPException(status_code=400, detail="Chat is closed for this exchange")
+    
+    chat = await db.chats.find_one({"exchange_id": exchange_id}, {"_id": 0})
+    if not chat:
+        raise HTTPException(status_code=404, detail="Chat not found")
+    
+    now = datetime.now(timezone.utc)
+    message = {
+        "id": str(uuid4()),
+        "chat_id": chat['id'],
+        "sender_id": user_id,
+        "content": content,
+        "is_system": False,
+        "created_at": now.isoformat()
+    }
+    await db.chat_messages.insert_one(message)
+    
+    message.pop('_id', None)
+    return message
+
+# ============================================
 # DEV ENDPOINTS (only when DEV_MODE=true)
 # ============================================
 if DEV_MODE:
