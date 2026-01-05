@@ -239,6 +239,8 @@ const resources = {
         changeRadius: 'Cambiar radio',
         noLocationSet: 'No has establecido tu ubicación',
         cooldown: 'Esperar {{days}} días',
+        locationCooldown: 'Cambio en {{days}} días',
+        radiusCooldown: 'Cambio en {{days}} días',
         locationUpdated: 'Ubicación actualizada',
         radiusUpdated: 'Radio de búsqueda actualizado',
         changeRadiusDescription: 'Selecciona qué tan lejos quieres buscar intercambios. Solo puedes cambiarlo cada 7 días.',
