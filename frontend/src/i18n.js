@@ -253,21 +253,21 @@ const resources = {
         deactivateSuccess: 'Album deactivated successfully'
       },
       albumHome: {
-        members: 'Members',
-        member: 'member',
-        memberPlural: 'members',
         myInventory: 'My Inventory',
         duplicates: 'Duplicates',
         matches: 'Trades',
+        exchanges: 'Exchanges',
         offers: 'Offers',
         invite: 'Invite',
         progress: 'Progress',
         completed: 'completed',
         manageInventory: 'Manage your stickers, duplicates and missing',
         findTrades: 'Find trades with other collectors',
+        findExchanges: 'View available exchanges in your area',
+        exchangesAvailable: 'You have {{count}} possible exchanges in your area',
+        noExchangesAvailable: 'No exchanges available in your area at the moment',
         joinedSuccess: 'You joined the album',
         noStickersYet: 'Stickers coming soon',
-        noOtherMembers: 'No other members in this album yet',
         placeholderBanner: 'Collection in preparation: use numbering for now'
       },
       invite: {
