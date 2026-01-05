@@ -934,7 +934,7 @@ async def get_album_matches(album_id: str, user_id: str = Depends(get_current_us
     if not current_user:
         return []
     
-    user_radius = current_user.get('search_radius_km', 5)
+    user_radius = get_user_radius(current_user)
     
     # Get all stickers for this album
     stickers = await db.stickers.find({"album_id": album_id}, {"_id": 0}).to_list(1000)
