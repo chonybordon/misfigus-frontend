@@ -9,6 +9,7 @@ from typing import List, Optional
 from datetime import datetime, timedelta, timezone
 import json
 import re
+from uuid import uuid4
 
 from models import (
     User, UserCreate, UserUpdate, OTPVerify, 
