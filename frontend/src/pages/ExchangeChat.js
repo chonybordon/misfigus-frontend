@@ -36,7 +36,7 @@ export const ExchangeChat = () => {
   const messagesEndRef = useRef(null);
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const { user } = useAuth();
+  const { user } = useContext(AuthContext);
 
   useEffect(() => {
     fetchData();
