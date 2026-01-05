@@ -171,12 +171,15 @@ def haversine_distance(lat1: float, lng1: float, lat2: float, lng2: float) -> fl
 def is_within_radius(user1: dict, user2: dict, radius_km: int) -> bool:
     """
     Check if two users are within the specified radius of each other.
-    Returns True if either user has no location set (fallback to allow matching).
+    Uses new structured location fields (latitude/longitude).
+    Falls back to legacy location_lat/location_lng if needed.
+    Returns True if either user has no location set (backward compatibility).
     """
-    lat1 = user1.get('location_lat')
-    lng1 = user1.get('location_lng')
-    lat2 = user2.get('location_lat')
-    lng2 = user2.get('location_lng')
+    # Try new structured fields first, fall back to legacy
+    lat1 = user1.get('latitude') or user1.get('location_lat')
+    lng1 = user1.get('longitude') or user1.get('location_lng')
+    lat2 = user2.get('latitude') or user2.get('location_lat')
+    lng2 = user2.get('longitude') or user2.get('location_lng')
     
     # If either user has no location, allow matching (backward compatibility)
     if lat1 is None or lng1 is None or lat2 is None or lng2 is None:
@@ -184,6 +187,23 @@ def is_within_radius(user1: dict, user2: dict, radius_km: int) -> bool:
     
     distance = haversine_distance(lat1, lng1, lat2, lng2)
     return distance <= radius_km
+
+def user_has_valid_location(user: dict) -> bool:
+    """
+    Check if user has properly configured structured location.
+    Required for exchanges.
+    """
+    # Check for new structured location
+    if user.get('place_id') and user.get('latitude') and user.get('longitude'):
+        return True
+    # Legacy support: check old fields
+    if user.get('location_lat') and user.get('location_lng'):
+        return True
+    return False
+
+def get_user_radius(user: dict) -> int:
+    """Get user's search radius, preferring new field over legacy."""
+    return user.get('radius_km') or user.get('search_radius_km', 5)
 
 def can_change_setting(last_updated_at: datetime) -> tuple:
     """
