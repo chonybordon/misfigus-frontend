@@ -948,6 +948,7 @@ async def get_matches(group_id: str, user_id: str = Depends(get_current_user)):
     """
     Get potential exchange matches within the group.
     Users from different groups NEVER see each other.
+    EXCLUDES test/seed users from results.
     """
     group = await validate_group_member(group_id, user_id)
     
@@ -967,6 +968,10 @@ async def get_matches(group_id: str, user_id: str = Depends(get_current_user)):
     matches = []
     
     for member in members:
+        # Skip test/seed users
+        if is_test_user(member):
+            continue
+            
         other_user_id = member['id']
         
         other_inventory = await db.user_inventory.find({
