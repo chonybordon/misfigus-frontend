@@ -1,0 +1,241 @@
+{
+  "timestamp": "2026-01-05T01:58:41.577376",
+  "tests_run": 46,
+  "tests_passed": 46,
+  "success_rate": 100.0,
+  "results": [
+    {
+      "test": "GET /api/terms (default)",
+      "success": true,
+      "details": "Terms content retrieved"
+    },
+    {
+      "test": "Terms response has required fields",
+      "success": true,
+      "details": "Missing fields: []"
+    },
+    {
+      "test": "Terms version is 1.0",
+      "success": true,
+      "details": "Expected 1.0, got 1.0"
+    },
+    {
+      "test": "Terms content is not empty",
+      "success": true,
+      "details": "Terms content is empty"
+    },
+    {
+      "test": "GET /api/terms?language=es",
+      "success": true,
+      "details": "Spanish terms retrieved"
+    },
+    {
+      "test": "Spanish terms contain Spanish text",
+      "success": true,
+      "details": "Spanish terms don't contain expected Spanish words"
+    },
+    {
+      "test": "GET /api/terms?language=en",
+      "success": true,
+      "details": "English terms retrieved"
+    },
+    {
+      "test": "English terms contain English text",
+      "success": true,
+      "details": "English terms don't contain expected English words"
+    },
+    {
+      "test": "Location Status requires authentication",
+      "success": true,
+      "details": "Expected 401/403, got: {'detail': 'Authorization header missing'}"
+    },
+    {
+      "test": "Update Location requires authentication",
+      "success": true,
+      "details": "Expected 401/403, got: {'detail': 'Authorization header missing'}"
+    },
+    {
+      "test": "Update Radius requires authentication",
+      "success": true,
+      "details": "Expected 401/403, got: {'detail': 'Authorization header missing'}"
+    },
+    {
+      "test": "Terms Status requires authentication",
+      "success": true,
+      "details": "Expected 401/403, got: {'detail': 'Authorization header missing'}"
+    },
+    {
+      "test": "Accept Terms requires authentication",
+      "success": true,
+      "details": "Expected 401/403, got: {'detail': 'Authorization header missing'}"
+    },
+    {
+      "test": "Album Matches requires authentication",
+      "success": true,
+      "details": "Expected 401/403, got: {'detail': 'Authorization header missing'}"
+    },
+    {
+      "test": "Invalid radius 1km rejected",
+      "success": true,
+      "details": "Expected 400/401/403, got: {'detail': 'Authorization header missing'}"
+    },
+    {
+      "test": "Invalid radius 2km rejected",
+      "success": true,
+      "details": "Expected 400/401/403, got: {'detail': 'Authorization header missing'}"
+    },
+    {
+      "test": "Invalid radius 4km rejected",
+      "success": true,
+      "details": "Expected 400/401/403, got: {'detail': 'Authorization header missing'}"
+    },
+    {
+      "test": "Invalid radius 6km rejected",
+      "success": true,
+      "details": "Expected 400/401/403, got: {'detail': 'Authorization header missing'}"
+    },
+    {
+      "test": "Invalid radius 7km rejected",
+      "success": true,
+      "details": "Expected 400/401/403, got: {'detail': 'Authorization header missing'}"
+    },
+    {
+      "test": "Invalid radius 8km rejected",
+      "success": true,
+      "details": "Expected 400/401/403, got: {'detail': 'Authorization header missing'}"
+    },
+    {
+      "test": "Invalid radius 9km rejected",
+      "success": true,
+      "details": "Expected 400/401/403, got: {'detail': 'Authorization header missing'}"
+    },
+    {
+      "test": "Invalid radius 11km rejected",
+      "success": true,
+      "details": "Expected 400/401/403, got: {'detail': 'Authorization header missing'}"
+    },
+    {
+      "test": "Invalid radius 15km rejected",
+      "success": true,
+      "details": "Expected 400/401/403, got: {'detail': 'Authorization header missing'}"
+    },
+    {
+      "test": "Invalid radius 20km rejected",
+      "success": true,
+      "details": "Expected 400/401/403, got: {'detail': 'Authorization header missing'}"
+    },
+    {
+      "test": "Invalid radius 0km rejected",
+      "success": true,
+      "details": "Expected 400/401/403, got: {'detail': 'Authorization header missing'}"
+    },
+    {
+      "test": "Invalid radius -1km rejected",
+      "success": true,
+      "details": "Expected 400/401/403, got: {'detail': 'Authorization header missing'}"
+    },
+    {
+      "test": "Valid radius 3km structure accepted",
+      "success": true,
+      "details": "Expected 200/400/401/403, got: {'detail': 'Authorization header missing'}"
+    },
+    {
+      "test": "Valid radius 5km structure accepted",
+      "success": true,
+      "details": "Expected 200/400/401/403, got: {'detail': 'Authorization header missing'}"
+    },
+    {
+      "test": "Valid radius 10km structure accepted",
+      "success": true,
+      "details": "Expected 200/400/401/403, got: {'detail': 'Authorization header missing'}"
+    },
+    {
+      "test": "Location Buenos Aires, Argentina structure accepted",
+      "success": true,
+      "details": "Expected 200/400/401/403, got: {'detail': 'Authorization header missing'}"
+    },
+    {
+      "test": "Location Madrid, Spain structure accepted",
+      "success": true,
+      "details": "Expected 200/400/401/403, got: {'detail': 'Authorization header missing'}"
+    },
+    {
+      "test": "Location New York, USA structure accepted",
+      "success": true,
+      "details": "Expected 200/400/401/403, got: {'detail': 'Authorization header missing'}"
+    },
+    {
+      "test": "Invalid location structure rejected: {'zone': 'Test Zone'}",
+      "success": true,
+      "details": "Expected 400/401/403/422, got: {'detail': 'Authorization header missing'}"
+    },
+    {
+      "test": "Invalid location structure rejected: {'lat': -34.6037, 'lng': -58.3816}",
+      "success": true,
+      "details": "Expected 400/401/403/422, got: {'detail': 'Authorization header missing'}"
+    },
+    {
+      "test": "Invalid location structure rejected: {'zone': '', 'lat': -34.6037, 'lng': -58.3816}",
+      "success": true,
+      "details": "Expected 400/401/403/422, got: {'detail': 'Authorization header missing'}"
+    },
+    {
+      "test": "Invalid location structure rejected: {'zone': 'Test Zone', 'lat': 'invalid', 'lng': -58.3816}",
+      "success": true,
+      "details": "Expected 400/401/403/422, got: {'detail': 'Authorization header missing'}"
+    },
+    {
+      "test": "Invalid location structure rejected: {'zone': 'Test Zone', 'lat': -34.6037, 'lng': 'invalid'}",
+      "success": true,
+      "details": "Expected 400/401/403/422, got: {'detail': 'Authorization header missing'}"
+    },
+    {
+      "test": "Cooldown endpoint user/location exists",
+      "success": true,
+      "details": "Expected 200/400/401/403, got: {'detail': 'Authorization header missing'}"
+    },
+    {
+      "test": "Cooldown endpoint user/radius exists",
+      "success": true,
+      "details": "Expected 200/400/401/403, got: {'detail': 'Authorization header missing'}"
+    },
+    {
+      "test": "Album matches endpoint exists",
+      "success": true,
+      "details": "Expected 200/401/403, got: {'detail': 'Authorization header missing'}"
+    },
+    {
+      "test": "Invalid album ID handled properly",
+      "success": true,
+      "details": "Expected 401/403/404, got: {'detail': 'Authorization header missing'}"
+    },
+    {
+      "test": "Terms acceptance endpoint exists",
+      "success": true,
+      "details": "Expected 200/401/403, got: {'detail': 'Authorization header missing'}"
+    },
+    {
+      "test": "Invalid terms acceptance rejected: {'version': ''}",
+      "success": true,
+      "details": "Expected 400/401/403/422, got: {'detail': 'Authorization header missing'}"
+    },
+    {
+      "test": "Invalid terms acceptance rejected: {'version': 'invalid'}",
+      "success": true,
+      "details": "Expected 400/401/403/422, got: {'detail': 'Authorization header missing'}"
+    },
+    {
+      "test": "Invalid terms acceptance rejected: {}",
+      "success": true,
+      "details": "Expected 400/401/403/422, got: {'detail': 'Authorization header missing'}"
+    },
+    {
+      "test": "Invalid terms acceptance rejected: {'invalid_field': '1.0'}",
+      "success": true,
+      "details": "Expected 400/401/403/422, got: {'detail': 'Authorization header missing'}"
+    }
+  ],
+  "user_id": "3b6734a6-4a17-437f-845f-ba265fcc4b7b",
+  "fifa_album_id": "bc32fecb-f640-4d00-880d-5043bc112d4b",
+  "token_obtained": false
+}
