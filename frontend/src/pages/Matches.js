@@ -86,6 +86,20 @@ export const Matches = () => {
     return isGroupContext ? `/groups/${contextId}/inventory` : `/albums/${contextId}/inventory`;
   };
 
+  // Create exchange with a match
+  const handleCreateExchange = async (partnerUserId) => {
+    try {
+      const response = await api.post(`/albums/${contextId}/exchanges`, {
+        album_id: contextId,
+        partner_user_id: partnerUserId
+      });
+      toast.success(t('exchange.exchangeCreated'));
+      navigate(`/exchanges/${response.data.exchange.id}`);
+    } catch (error) {
+      toast.error(error.response?.data?.detail || t('common.error'));
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
