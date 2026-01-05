@@ -86,17 +86,34 @@ export const Matches = () => {
     return isGroupContext ? `/groups/${contextId}/inventory` : `/albums/${contextId}/inventory`;
   };
 
-  // Create exchange with a match
+  // Create or get existing exchange with a match (UPSERT behavior)
   const handleCreateExchange = async (partnerUserId) => {
     try {
       const response = await api.post(`/albums/${contextId}/exchanges`, {
         album_id: contextId,
         partner_user_id: partnerUserId
       });
-      toast.success(t('exchange.exchangeCreated'));
+      
+      // Show appropriate message based on whether it's new or existing
+      if (response.data.is_existing) {
+        toast.success(t('exchange.exchangeExists'));
+      } else {
+        toast.success(t('exchange.exchangeCreated'));
+      }
+      
+      // Always navigate to the exchange
       navigate(`/exchanges/${response.data.exchange.id}`);
     } catch (error) {
-      toast.error(error.response?.data?.detail || t('common.error'));
+      // Translate backend error codes to user-friendly messages
+      const errorCode = error.response?.data?.detail;
+      const errorMessages = {
+        'ALBUM_NOT_ACTIVATED': t('errors.albumNotActivated'),
+        'PARTNER_NOT_FOUND': t('errors.partnerNotFound'),
+        'ACCOUNT_RESTRICTED': t('errors.accountRestricted'),
+        'PARTNER_NOT_AVAILABLE': t('errors.partnerNotAvailable'),
+        'NO_MUTUAL_MATCH': t('errors.noMutualMatch')
+      };
+      toast.error(errorMessages[errorCode] || t('common.error'));
     }
   };
 
