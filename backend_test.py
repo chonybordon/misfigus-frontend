@@ -4,7 +4,7 @@ import json
 import time
 from datetime import datetime
 
-class MisFigusAlbumTester:
+class MisFigusTestUserFilterTester:
     def __init__(self, base_url="https://swap-stickers.preview.emergentagent.com"):
         self.base_url = base_url
         self.api_url = f"{base_url}/api"
