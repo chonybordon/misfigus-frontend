@@ -237,57 +237,9 @@ export const AlbumHome = () => {
           </Card>
         </div>
 
-        <Card data-testid="members-card" className="mb-8">
-          <CardHeader>
-            <CardTitle className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Users className="h-5 w-5" />
-                {t('albumHome.members')}
-              </div>
-              {memberCount > 0 && (
-                <Button
-                  data-testid="view-all-members-btn"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setMembersDialogOpen(true)}
-                >
-                  {t('members.viewAll')}
-                </Button>
-              )}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {/* EMPTY STATE: 0 members (owner is NEVER a member) */}
-            {memberCount === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                <p>{t('albumHome.noOtherMembers')}</p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                {/* SINGLE SOURCE: Use album.members from backend (excludes owner) */}
-                {album?.members?.slice(0, 6).map((member) => (
-                  <div key={member.id} className="flex items-center gap-2 p-2 rounded-lg bg-muted">
-                    <div className="h-8 w-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-sm">
-                      {getDisplayName(member, t)[0].toUpperCase()}
-                    </div>
-                    <span className="text-sm font-medium truncate">{getDisplayName(member, t)}</span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
+        {/* Invite button removed - exchanges happen organically through matches */}
 
-        <Dialog open={inviteDialogOpen} onOpenChange={setInviteDialogOpen}>
-          <DialogTrigger asChild>
-            <Button
-              data-testid="invite-member-btn"
-              className="w-full btn-secondary"
-            >
-              <UserPlus className="h-5 w-5 mr-2" />
-              {t('albumHome.invite')}
-            </Button>
-          </DialogTrigger>
+        <Dialog open={deactivateDialogOpen} onOpenChange={setDeactivateDialogOpen}>
           <DialogContent data-testid="invite-dialog">
             <DialogHeader>
               <DialogTitle>{t('invite.title')}</DialogTitle>
