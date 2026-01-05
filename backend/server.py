@@ -707,10 +707,17 @@ async def compute_album_exchange_count(album_id: str, user_id: str) -> int:
     """
     Compute count of potential exchange partners for this album.
     A match exists when: I have duplicates they need AND they have duplicates I need.
-    This is LOCAL exchanges only (based on album membership, not geographic radius yet).
+    Filters by user's search radius (proximity-based matching).
     Returns count only, not user details (privacy-preserving).
     EXCLUDES test/seed users from the count.
     """
+    # Get current user for radius and location
+    current_user = await db.users.find_one({"id": user_id}, {"_id": 0})
+    if not current_user:
+        return 0
+    
+    user_radius = current_user.get('search_radius_km', 5)
+    
     # Get all stickers for this album
     stickers = await db.stickers.find({"album_id": album_id}, {"_id": 0, "id": 1}).to_list(1000)
     sticker_ids = [s['id'] for s in stickers]
@@ -749,6 +756,10 @@ async def compute_album_exchange_count(album_id: str, user_id: str) -> int:
         other_user = await db.users.find_one({"id": other_user_id}, {"_id": 0})
         if is_test_user(other_user):
             continue  # Skip test/seed users
+        
+        # Check if within radius (enforced server-side)
+        if not is_within_radius(current_user, other_user, user_radius):
+            continue  # Skip users outside radius
         
         # Get their inventory
         other_inventory = await db.user_inventory.find({
