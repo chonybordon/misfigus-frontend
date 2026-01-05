@@ -134,7 +134,7 @@ export const Matches = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex flex-wrap gap-2 mb-4">
                     {match.has_stickers_i_need && (
                       <span className="text-sm bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-200 px-3 py-1 rounded-full">
                         {t('matches.hasStickersINeed')}
@@ -151,6 +151,17 @@ export const Matches = () => {
                       </span>
                     )}
                   </div>
+                  {match.can_exchange && (
+                    <Button
+                      className="w-full"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleCreateExchange(match.user.id);
+                      }}
+                    >
+                      {t('exchange.coordinateExchange')}
+                    </Button>
+                  )}
                 </CardContent>
               </Card>
             ))}
