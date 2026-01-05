@@ -98,6 +98,18 @@ frontend:
         agent: "testing"
         comment: "Frontend exchange UI not tested - backend testing only as per instructions."
 
+  - task: "Matches Page API Fix"
+    implemented: true
+    working: true
+    file: "frontend/src/pages/Matches.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "✅ Fixed incorrect API endpoint. Changed from '/matches?album_id=${contextId}' (404) to '/albums/${contextId}/matches' (correct). Empty state now shows properly without error toast."
+
 metadata:
   created_by: "testing_agent"
   version: "1.0"
