@@ -301,6 +301,15 @@ const resources = {
         newTestUser: 'Nuevo usuario (prueba)',
         technicalAccount: 'Cuenta técnica (prueba)'
       },
+      errors: {
+        albumNotActivated: 'El álbum no está activado',
+        partnerNotFound: 'Usuario no encontrado en este álbum',
+        accountRestricted: 'Tu cuenta está temporalmente restringida',
+        partnerNotAvailable: 'Este usuario no está disponible para intercambios',
+        noMutualMatch: 'No hay coincidencias mutuas para intercambiar',
+        locationCooldown: 'Podrás cambiar tu ubicación en {{days}} días',
+        radiusCooldown: 'Podrás cambiar el radio en {{days}} días'
+      },
       common: {
         loading: 'Cargando...',
         error: 'Error',
@@ -311,7 +320,8 @@ const resources = {
         save: 'Guardar',
         delete: 'Eliminar',
         optional: 'opcional',
-        edit: 'Editar'
+        edit: 'Editar',
+        confirm: 'Confirmar'
       }
     }
   },
