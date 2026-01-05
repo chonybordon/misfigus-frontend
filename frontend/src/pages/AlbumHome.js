@@ -35,37 +35,6 @@ export const AlbumHome = () => {
     }
   };
 
-  const handleGenerateInvite = async () => {
-    try {
-      const response = await api.post(`/albums/${albumId}/invites`);
-      const link = `${window.location.origin}/join/${response.data.token}`;
-      setInviteLink(link);
-      toast.success(t('invite.generate'));
-    } catch (error) {
-      toast.error(error.response?.data?.detail || t('common.error'));
-    }
-  };
-
-  const handleCopyLink = async () => {
-    try {
-      await navigator.clipboard.writeText(inviteLink);
-      toast.success(t('invite.copied'));
-    } catch (error) {
-      console.log('Clipboard API not available, user can select manually');
-    }
-  };
-
-  const handleSelectLink = () => {
-    const input = document.getElementById('invite-link-input');
-    if (input) {
-      input.select();
-    }
-  };
-
-  const handleOpenInNewTab = () => {
-    window.open(inviteLink, '_blank');
-  };
-
   const handleDeactivateAlbum = async () => {
     setDeactivating(true);
     try {
