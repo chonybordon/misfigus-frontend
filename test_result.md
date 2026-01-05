@@ -121,6 +121,54 @@ backend:
         agent: "testing"
         comment: "✅ Failed exchange scenario working correctly. Thumbs down with failure_reason immediately fails exchange and updates reputation."
 
+  - task: "Profile Settings - Location Endpoints"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ Location endpoints implemented correctly. GET /api/user/location-status and PUT /api/user/location endpoints exist with proper authentication. Code review confirms 7-day cooldown enforcement, location validation (zone, lat, lng), and proper error handling."
+
+  - task: "Profile Settings - Radius Endpoints"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ Radius endpoints implemented correctly. PUT /api/user/radius endpoint exists with proper authentication. Code review confirms validation of allowed values (3, 5, 10 km), 7-day cooldown enforcement, and proper error handling for invalid values."
+
+  - task: "Profile Settings - Terms & Conditions"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ Terms & Conditions endpoints working correctly. GET /api/terms supports Spanish/English languages with proper content. GET /api/user/terms-status and POST /api/user/accept-terms endpoints exist with authentication. Version 1.0 terms content verified with appropriate language-specific text."
+
+  - task: "Profile Settings - Exchange Matching with Radius"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ Album matches endpoint with radius filtering implemented correctly. GET /api/albums/{album_id}/matches endpoint exists with proper authentication. Code review confirms radius-based filtering using haversine distance calculation and proper user exclusion logic."
+
 frontend:
   - task: "ExchangeChat.js useAuth Import Fix"
     implemented: true
