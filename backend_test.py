@@ -140,9 +140,9 @@ class MisFigusAlbumTester:
         return False
 
     def test_albums_endpoint(self):
-        """Test GET /api/albums with user_state logic"""
+        """Test GET /api/albums with user_state logic and NO member_count"""
         print("\n" + "="*60)
-        print("TESTING ALBUMS ENDPOINT")
+        print("TESTING ALBUMS ENDPOINT (NO MEMBERS)")
         print("="*60)
         
         if not self.token:
@@ -180,7 +180,15 @@ class MisFigusAlbumTester:
             "Some albums missing user_state field" if not all_have_user_state else ""
         )
         
-        # Test 2: New user should see all available albums as INACTIVE except FIFA 2026
+        # Test 2: NO albums should have member_count field (removed feature)
+        albums_with_member_count = [album for album in response if 'member_count' in album]
+        self.log_test(
+            "No albums have member_count field", 
+            len(albums_with_member_count) == 0,
+            f"Found {len(albums_with_member_count)} albums with member_count field"
+        )
+        
+        # Test 3: New user should see all available albums as INACTIVE except FIFA 2026
         inactive_count = sum(1 for album in response if album.get('user_state') == 'inactive')
         coming_soon_count = sum(1 for album in response if album.get('user_state') == 'coming_soon')
         
@@ -190,7 +198,7 @@ class MisFigusAlbumTester:
             f"Found {inactive_count} inactive albums"
         )
         
-        # Test 3: FIFA 2026 should be coming_soon
+        # Test 4: FIFA 2026 should be coming_soon
         if albums_found['fifa_2026']:
             fifa_state = albums_found['fifa_2026'].get('user_state')
             self.log_test(
@@ -201,7 +209,7 @@ class MisFigusAlbumTester:
         else:
             self.log_test("FIFA 2026 album found", False, "FIFA 2026 album not found")
         
-        # Test 4: Qatar 2022 should be inactive initially
+        # Test 5: Qatar 2022 should be inactive initially
         if albums_found['qatar_2022']:
             qatar_state = albums_found['qatar_2022'].get('user_state')
             self.log_test(
