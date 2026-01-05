@@ -195,3 +195,51 @@ def send_invite_email(email: str, invite_code: str, group_name: str, inviter_nam
     logger.warning(f"[INVITE] Invited by: {inviter_name}")
     logger.warning("="*50)
     return True
+
+def send_terms_acceptance_email(email: str, version: str, acceptance_time) -> bool:
+    """
+    Send a confirmation email after user accepts terms and conditions.
+    Non-blocking - failure doesn't affect the terms acceptance.
+    """
+    sender = get_sender_address()
+    logger.info(f"[TERMS] Attempting to send terms acceptance email to: {email}")
+    
+    # Format acceptance time
+    if hasattr(acceptance_time, 'strftime'):
+        formatted_time = acceptance_time.strftime("%d/%m/%Y %H:%M UTC")
+    else:
+        formatted_time = str(acceptance_time)
+    
+    if get_resend_configured():
+        try:
+            resend.api_key = os.environ.get('RESEND_API_KEY', '').strip()
+            
+            params: resend.Emails.SendParams = {
+                "from": sender,
+                "to": [email],
+                "subject": "Aceptaste los Términos y Condiciones - MisFigus",
+                "html": f"""
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                    <h1 style="color: #333;">Términos y Condiciones Aceptados</h1>
+                    <p>Has aceptado los Términos y Condiciones de MisFigus.</p>
+                    <div style="background: #f5f5f5; padding: 20px; margin: 20px 0; border-radius: 8px;">
+                        <p><strong>Versión:</strong> {version}</p>
+                        <p><strong>Fecha de aceptación:</strong> {formatted_time}</p>
+                    </div>
+                    <p>Podés ver los términos completos en cualquier momento desde tu perfil en la aplicación.</p>
+                    <p style="color: #999; font-size: 12px;">Este es un correo de confirmación automático.</p>
+                </div>
+                """
+            }
+            
+            emails = Emails()
+            response = emails.send(params)
+            logger.info(f"[TERMS] Email sent successfully: {response}")
+            return True
+            
+        except Exception as e:
+            logger.error(f"[TERMS] Failed to send email: {e}")
+            return False
+    else:
+        logger.info(f"[TERMS] Resend not configured, skipping email")
+        return False
