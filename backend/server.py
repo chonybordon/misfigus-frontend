@@ -509,12 +509,12 @@ async def update_structured_location(location_data: StructuredLocationUpdate, us
     # Update radius if changed
     if location_data.radius_km != current_radius:
         update_fields["radius_km"] = location_data.radius_km
-        update_fields["radius_change_allowed_at"] = next_change
+        update_fields["radius_change_allowed_at"] = radius_next_change
     
     await db.users.update_one({"id": user_id}, {"$set": update_fields})
     
     updated_user = await db.users.find_one({"id": user_id}, {"_id": 0})
-    return {"message": "Location updated", "user": updated_user}
+    return {"message": "LOCATION_UPDATED", "user": updated_user}
 
 @api_router.put("/me/radius")
 async def update_radius_only(radius_data: RadiusUpdate, user_id: str = Depends(get_current_user)):
@@ -524,23 +524,23 @@ async def update_radius_only(radius_data: RadiusUpdate, user_id: str = Depends(g
     """
     user = await db.users.find_one({"id": user_id}, {"_id": 0})
     if not user:
-        raise HTTPException(status_code=404, detail="User not found")
+        raise HTTPException(status_code=404, detail="USER_NOT_FOUND")
     
     if radius_data.radius_km not in ALLOWED_RADIUS_VALUES:
         raise HTTPException(
             status_code=400,
-            detail=f"Invalid radius. Allowed values: {ALLOWED_RADIUS_VALUES}"
+            detail=f"INVALID_RADIUS"
         )
     
-    radius_can_change, radius_days = can_change_setting(user.get('radius_change_allowed_at'))
+    radius_can_change, radius_days = can_change_radius(user.get('radius_change_allowed_at'))
     if not radius_can_change:
         raise HTTPException(
             status_code=400,
-            detail=f"Search radius can only be changed once every 7 days. Try again in {radius_days} days."
+            detail=f"RADIUS_COOLDOWN:{radius_days}"
         )
     
     now = datetime.now(timezone.utc)
-    next_change = (now + timedelta(days=SETTINGS_CHANGE_COOLDOWN_DAYS)).isoformat()
+    next_change = (now + timedelta(days=RADIUS_CHANGE_COOLDOWN_DAYS)).isoformat()
     
     await db.users.update_one(
         {"id": user_id},
@@ -551,22 +551,22 @@ async def update_radius_only(radius_data: RadiusUpdate, user_id: str = Depends(g
     )
     
     updated_user = await db.users.find_one({"id": user_id}, {"_id": 0})
-    return {"message": "Search radius updated", "user": updated_user}
+    return {"message": "RADIUS_UPDATED", "user": updated_user}
 
 @api_router.get("/me/location-status")
 async def get_structured_location_status(user_id: str = Depends(get_current_user)):
     """
     Get user's complete location status including:
     - Structured location data
-    - Cooldown status
+    - Cooldown status (14 days for location, 7 days for radius)
     - Whether location is properly configured
     """
     user = await db.users.find_one({"id": user_id}, {"_id": 0})
     if not user:
-        raise HTTPException(status_code=404, detail="User not found")
+        raise HTTPException(status_code=404, detail="USER_NOT_FOUND")
     
-    location_can_change, location_days = can_change_setting(user.get('location_change_allowed_at'))
-    radius_can_change, radius_days = can_change_setting(user.get('radius_change_allowed_at'))
+    location_can_change, location_days = can_change_location(user.get('location_change_allowed_at'))
+    radius_can_change, radius_days = can_change_radius(user.get('radius_change_allowed_at'))
     
     # Check if user has structured location (not just legacy free-text)
     has_structured_location = bool(user.get('place_id') and user.get('latitude') and user.get('longitude'))
