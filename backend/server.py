@@ -374,102 +374,207 @@ async def update_me(user_update: UserUpdate, user_id: str = Depends(get_current_
     return user
 
 # ============================================
-# USER LOCATION & RADIUS ENDPOINTS
+# LOCATION ENDPOINTS (Structured, Global)
 # ============================================
-@api_router.put("/user/location")
-async def update_user_location(location_data: UserLocationUpdate, user_id: str = Depends(get_current_user)):
-    """
-    Update user's approximate location (zone).
-    Can only be changed once every 7 days.
-    """
-    user = await db.users.find_one({"id": user_id}, {"_id": 0})
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-    
-    # Check cooldown
-    can_change, days_remaining = can_change_setting(user.get('location_updated_at'))
-    if not can_change:
-        raise HTTPException(
-            status_code=400, 
-            detail=f"Location can only be changed once every 7 days. Try again in {days_remaining} days."
-        )
-    
-    # Update location
-    await db.users.update_one(
-        {"id": user_id},
-        {"$set": {
-            "location_zone": location_data.zone,
-            "location_lat": location_data.lat,
-            "location_lng": location_data.lng,
-            "location_updated_at": datetime.now(timezone.utc).isoformat()
-        }}
-    )
-    
-    user = await db.users.find_one({"id": user_id}, {"_id": 0})
-    return {"message": "Location updated", "user": user}
+@api_router.get("/locations/countries")
+async def get_countries(language: str = 'es'):
+    """Get list of supported countries with localized names."""
+    result = []
+    for code, data in sorted(COUNTRIES.items(), key=lambda x: get_country_name(x[0], language)):
+        result.append({
+            "code": code,
+            "name": get_country_name(code, language),
+            "has_regions": data.get("regions", True)
+        })
+    return result
 
-@api_router.put("/user/radius")
-async def update_user_radius(radius_data: UserRadiusUpdate, user_id: str = Depends(get_current_user)):
+@api_router.get("/locations/regions/{country_code}")
+async def get_regions(country_code: str):
+    """Get list of regions/states for a country."""
+    regions = get_regions_for_country(country_code)
+    if not regions:
+        return []
+    return [{"code": r["code"], "name": r["name"]} for r in regions]
+
+@api_router.get("/locations/search")
+async def search_locations(query: str, country: str = None, limit: int = 10):
     """
-    Update user's search radius.
-    Allowed values: 3, 5, 10 km.
-    Can only be changed once every 7 days.
+    Search for cities/localities.
+    User MUST select from results - no free-text allowed for matching.
+    
+    Returns:
+    - place_id: unique identifier
+    - label: "City, Region, Country"
+    - city_name, region_name, country_code
+    - latitude, longitude (approximate center)
+    """
+    if len(query.strip()) < 2:
+        return []
+    
+    results = search_places(query, country, min(limit, 20))
+    return results
+
+@api_router.post("/me/location")
+async def update_structured_location(location_data: StructuredLocationUpdate, user_id: str = Depends(get_current_user)):
+    """
+    Update user's structured location.
+    Requires real place selection (place_id from search results).
+    Enforces 7-day cooldown for location changes.
     """
     user = await db.users.find_one({"id": user_id}, {"_id": 0})
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     
-    # Validate radius value
-    if radius_data.radius_km not in ALLOWED_RADIUS_VALUES:
+    # Validate radius
+    if location_data.radius_km not in ALLOWED_RADIUS_VALUES:
         raise HTTPException(
-            status_code=400, 
+            status_code=400,
             detail=f"Invalid radius. Allowed values: {ALLOWED_RADIUS_VALUES}"
         )
     
-    # Check cooldown
-    can_change, days_remaining = can_change_setting(user.get('search_radius_updated_at'))
-    if not can_change:
+    # Check location cooldown
+    location_can_change, location_days = can_change_setting(user.get('location_change_allowed_at'))
+    if not location_can_change:
         raise HTTPException(
-            status_code=400, 
-            detail=f"Search radius can only be changed once every 7 days. Try again in {days_remaining} days."
+            status_code=400,
+            detail=f"Location can only be changed once every 7 days. Try again in {location_days} days."
         )
     
-    # Update radius
-    await db.users.update_one(
-        {"id": user_id},
-        {"$set": {
-            "search_radius_km": radius_data.radius_km,
-            "search_radius_updated_at": datetime.now(timezone.utc).isoformat()
-        }}
-    )
+    # Check if radius is being changed and its cooldown
+    current_radius = user.get('radius_km', 5)
+    if location_data.radius_km != current_radius:
+        radius_can_change, radius_days = can_change_setting(user.get('radius_change_allowed_at'))
+        if not radius_can_change:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Search radius can only be changed once every 7 days. Try again in {radius_days} days."
+            )
     
-    user = await db.users.find_one({"id": user_id}, {"_id": 0})
-    return {"message": "Search radius updated", "user": user}
+    now = datetime.now(timezone.utc)
+    next_change = (now + timedelta(days=SETTINGS_CHANGE_COOLDOWN_DAYS)).isoformat()
+    
+    update_fields = {
+        "country_code": location_data.country_code.upper(),
+        "region_name": location_data.region_name,
+        "city_name": location_data.city_name,
+        "place_id": location_data.place_id,
+        "latitude": location_data.latitude,
+        "longitude": location_data.longitude,
+        "neighborhood_text": location_data.neighborhood_text,
+        "location_change_allowed_at": next_change,
+    }
+    
+    # Update radius if changed
+    if location_data.radius_km != current_radius:
+        update_fields["radius_km"] = location_data.radius_km
+        update_fields["radius_change_allowed_at"] = next_change
+    
+    await db.users.update_one({"id": user_id}, {"$set": update_fields})
+    
+    updated_user = await db.users.find_one({"id": user_id}, {"_id": 0})
+    return {"message": "Location updated", "user": updated_user}
 
-@api_router.get("/user/location-status")
-async def get_location_status(user_id: str = Depends(get_current_user)):
+@api_router.put("/me/radius")
+async def update_radius_only(radius_data: RadiusUpdate, user_id: str = Depends(get_current_user)):
     """
-    Get user's location and radius status including cooldown info.
+    Update only the search radius.
+    Enforces 7-day cooldown.
     """
     user = await db.users.find_one({"id": user_id}, {"_id": 0})
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     
-    location_can_change, location_days = can_change_setting(user.get('location_updated_at'))
-    radius_can_change, radius_days = can_change_setting(user.get('search_radius_updated_at'))
+    if radius_data.radius_km not in ALLOWED_RADIUS_VALUES:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid radius. Allowed values: {ALLOWED_RADIUS_VALUES}"
+        )
+    
+    radius_can_change, radius_days = can_change_setting(user.get('radius_change_allowed_at'))
+    if not radius_can_change:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Search radius can only be changed once every 7 days. Try again in {radius_days} days."
+        )
+    
+    now = datetime.now(timezone.utc)
+    next_change = (now + timedelta(days=SETTINGS_CHANGE_COOLDOWN_DAYS)).isoformat()
+    
+    await db.users.update_one(
+        {"id": user_id},
+        {"$set": {
+            "radius_km": radius_data.radius_km,
+            "radius_change_allowed_at": next_change
+        }}
+    )
+    
+    updated_user = await db.users.find_one({"id": user_id}, {"_id": 0})
+    return {"message": "Search radius updated", "user": updated_user}
+
+@api_router.get("/me/location-status")
+async def get_structured_location_status(user_id: str = Depends(get_current_user)):
+    """
+    Get user's complete location status including:
+    - Structured location data
+    - Cooldown status
+    - Whether location is properly configured
+    """
+    user = await db.users.find_one({"id": user_id}, {"_id": 0})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    location_can_change, location_days = can_change_setting(user.get('location_change_allowed_at'))
+    radius_can_change, radius_days = can_change_setting(user.get('radius_change_allowed_at'))
+    
+    # Check if user has structured location (not just legacy free-text)
+    has_structured_location = bool(user.get('place_id') and user.get('latitude') and user.get('longitude'))
+    
+    # Build display label
+    location_label = None
+    if has_structured_location:
+        city = user.get('city_name', '')
+        region = user.get('region_name', '')
+        country = get_country_name(user.get('country_code', ''), 'es')
+        location_label = f"{city}, {region}, {country}"
     
     return {
+        "has_location": has_structured_location,
+        "needs_location_setup": not has_structured_location,
         "location": {
-            "zone": user.get('location_zone'),
+            "country_code": user.get('country_code'),
+            "region_name": user.get('region_name'),
+            "city_name": user.get('city_name'),
+            "place_id": user.get('place_id'),
+            "neighborhood_text": user.get('neighborhood_text'),
+            "label": location_label,
             "can_change": location_can_change,
             "days_until_change": location_days
         },
         "radius": {
-            "km": user.get('search_radius_km', 5),
+            "km": user.get('radius_km', 5),
             "can_change": radius_can_change,
             "days_until_change": radius_days
         }
     }
+
+# Legacy endpoints (backward compatibility)
+@api_router.put("/user/location")
+async def legacy_update_location(location_data: dict = Body(...), user_id: str = Depends(get_current_user)):
+    """Legacy endpoint - redirects to new structured endpoint."""
+    raise HTTPException(
+        status_code=400,
+        detail="Please use the new location system. Select a city from the search results."
+    )
+
+@api_router.put("/user/radius")
+async def legacy_update_radius(radius_data: RadiusUpdate, user_id: str = Depends(get_current_user)):
+    """Legacy endpoint - forwards to new endpoint."""
+    return await update_radius_only(radius_data, user_id)
+
+@api_router.get("/user/location-status")
+async def legacy_location_status(user_id: str = Depends(get_current_user)):
+    """Legacy endpoint - forwards to new endpoint."""
+    return await get_structured_location_status(user_id)
 
 # ============================================
 # TERMS & CONDITIONS ENDPOINTS
