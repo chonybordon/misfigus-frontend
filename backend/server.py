@@ -1521,29 +1521,43 @@ async def get_user_reputation(user_id: str) -> dict:
         await db.user_reputation.insert_one(rep)
     return rep
 
-async def update_reputation_after_exchange(user_id: str, was_successful: bool):
-    """Update user reputation after an exchange confirmation."""
+async def update_reputation_after_exchange(user_id: str, was_successful: bool, failure_reason: str = None):
+    """
+    Update user reputation after an exchange confirmation.
+    
+    IMPORTANT: Minor failure reasons (schedule_conflict, personal_issue, etc.)
+    do NOT affect reputation - they are non-penalizing.
+    Only SERIOUS failure reasons affect reputation.
+    """
     rep = await get_user_reputation(user_id)
     
     rep['total_exchanges'] += 1
     
+    # Check if this is a non-penalizing failure (minor issue)
+    is_minor_failure = failure_reason in EXCHANGE_FAILURE_REASONS_MINOR if failure_reason else False
+    
     if was_successful:
         rep['successful_exchanges'] += 1
         rep['consecutive_failures'] = 0  # Reset consecutive failures
+    elif is_minor_failure:
+        # Minor failure - don't affect reputation
+        # Just count the exchange but don't increment failure counters
+        pass
     else:
+        # Serious failure - affects reputation
         rep['failed_exchanges'] += 1
         rep['consecutive_failures'] += 1
     
-    # Determine new status based on thresholds
+    # Determine new status based on thresholds (only for serious failures)
     now = datetime.now(timezone.utc)
     
     if rep['consecutive_failures'] >= REPUTATION_CONSECUTIVE_FAIL_THRESHOLD:
-        # 2+ consecutive failures → 48h invisibility
+        # 2+ consecutive SERIOUS failures → 48h invisibility
         rep['status'] = 'under_review'
         rep['invisible_until'] = (now + timedelta(hours=48)).isoformat()
     
     if rep['failed_exchanges'] >= REPUTATION_TOTAL_FAIL_THRESHOLD:
-        # 5+ total failures → suspended
+        # 5+ total SERIOUS failures → suspended
         rep['status'] = 'restricted'
         rep['suspended_at'] = now.isoformat()
     
