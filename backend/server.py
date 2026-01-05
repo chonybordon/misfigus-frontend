@@ -13,6 +13,7 @@ from uuid import uuid4
 
 from models import (
     User, UserCreate, UserUpdate, OTPVerify, 
+    UserLocationUpdate, UserRadiusUpdate, TermsAcceptance,
     Album, Group, GroupMember, GroupCreate,
     EmailInvite, EmailInviteCreate, EmailInviteAccept,
     Sticker, UserInventory, InventoryUpdate,
@@ -20,12 +21,14 @@ from models import (
     Chat, ChatMessage,
     Exchange, ExchangeCreate, ExchangeConfirm, 
     UserReputation, EXCHANGE_FAILURE_REASONS,
-    REPUTATION_CONSECUTIVE_FAIL_THRESHOLD, REPUTATION_TOTAL_FAIL_THRESHOLD
+    REPUTATION_CONSECUTIVE_FAIL_THRESHOLD, REPUTATION_TOTAL_FAIL_THRESHOLD,
+    ALLOWED_RADIUS_VALUES, SETTINGS_CHANGE_COOLDOWN_DAYS, CURRENT_TERMS_VERSION
 )
+from math import radians, cos, sin, asin, sqrt
 from datetime import timedelta
 from email_service import (
     generate_otp_code, generate_invite_code, hash_otp, verify_otp_hash,
-    send_otp_email, send_invite_email, check_resend_config
+    send_otp_email, send_invite_email, check_resend_config, send_terms_acceptance_email
 )
 from auth import create_token, get_current_user
 
