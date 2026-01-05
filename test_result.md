@@ -169,9 +169,10 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Exchange Creation API"
-    - "Exchange Confirmation System"
-    - "Reputation System"
+    - "Test User Filtering (is_test_user function)"
+    - "Album Matches Filtering"
+    - "Exchange Count Filtering"
+    - "ExchangeChat.js useAuth Import Fix"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
