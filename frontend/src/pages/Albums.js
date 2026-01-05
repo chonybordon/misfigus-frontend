@@ -99,14 +99,6 @@ export const Albums = () => {
     );
   };
 
-  // Helper for consistent member count display
-  const getMemberCountDisplay = (album) => {
-    const count = album.member_count ?? 0;
-    if (count === 0) return `0 ${t('albumHome.memberPlural')}`;
-    if (count === 1) return `1 ${t('albumHome.member')}`;
-    return `${count} ${t('albumHome.memberPlural')}`;
-  };
-
   // Get card styles based on state
   const getCardStyles = (album) => {
     if (album.user_state === 'coming_soon') {
