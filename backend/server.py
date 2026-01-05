@@ -1570,15 +1570,17 @@ async def is_user_visible(user_id: str) -> bool:
     return True
 
 @api_router.post("/albums/{album_id}/exchanges")
-async def create_exchange(
+async def create_or_get_exchange(
     album_id: str, 
     exchange_input: ExchangeCreate,
     user_id: str = Depends(get_current_user)
 ):
     """
-    Create an exchange with another user.
+    Create an exchange with another user OR return existing one (upsert behavior).
     Only allowed if there is a MUTUAL sticker match.
     Creates an exchange record and enables chat between users.
+    
+    UPSERT: If exchange already exists, returns it instead of error.
     """
     # Verify user has activated this album
     activation = await db.user_album_activations.find_one({
@@ -1586,7 +1588,7 @@ async def create_exchange(
         "album_id": album_id
     })
     if not activation:
-        raise HTTPException(status_code=403, detail="Album not activated")
+        raise HTTPException(status_code=403, detail="ALBUM_NOT_ACTIVATED")
     
     partner_id = exchange_input.partner_user_id
     
@@ -1596,15 +1598,15 @@ async def create_exchange(
         "album_id": album_id
     })
     if not partner_activation:
-        raise HTTPException(status_code=404, detail="Partner not found in this album")
+        raise HTTPException(status_code=404, detail="PARTNER_NOT_FOUND")
     
     # Check both users are visible (reputation check)
     if not await is_user_visible(user_id):
-        raise HTTPException(status_code=403, detail="Your account is currently restricted")
+        raise HTTPException(status_code=403, detail="ACCOUNT_RESTRICTED")
     if not await is_user_visible(partner_id):
-        raise HTTPException(status_code=404, detail="Partner not available for exchanges")
+        raise HTTPException(status_code=404, detail="PARTNER_NOT_AVAILABLE")
     
-    # Check for existing pending exchange between these users
+    # Check for existing pending exchange between these users (UPSERT LOGIC)
     existing = await db.exchanges.find_one({
         "album_id": album_id,
         "status": "pending",
@@ -1612,9 +1614,11 @@ async def create_exchange(
             {"user_a_id": user_id, "user_b_id": partner_id},
             {"user_a_id": partner_id, "user_b_id": user_id}
         ]
-    })
+    }, {"_id": 0})
+    
+    # If exchange already exists, return it (NO ERROR)
     if existing:
-        raise HTTPException(status_code=400, detail="Exchange already exists")
+        return {"message": "EXCHANGE_EXISTS", "exchange": existing, "is_existing": True}
     
     # Verify mutual match exists
     stickers = await db.stickers.find({"album_id": album_id}, {"_id": 0, "id": 1}).to_list(1000)
@@ -1641,7 +1645,7 @@ async def create_exchange(
     i_can_get = [sid for sid in partner_duplicates if sid in my_missing]
     
     if not i_can_give or not i_can_get:
-        raise HTTPException(status_code=400, detail="No mutual match exists")
+        raise HTTPException(status_code=400, detail="NO_MUTUAL_MATCH")
     
     # Create exchange
     now = datetime.now(timezone.utc)
@@ -1661,7 +1665,8 @@ async def create_exchange(
         "user_b_failure_reason": None,
         "created_at": now.isoformat(),
         "completed_at": None,
-        "expires_at": (now + timedelta(days=EXCHANGE_EXPIRY_DAYS)).isoformat()
+        "expires_at": (now + timedelta(days=EXCHANGE_EXPIRY_DAYS)).isoformat(),
+        "is_new": True  # Flag for frontend to know it's new
     }
     await db.exchanges.insert_one(exchange)
     
@@ -1675,19 +1680,19 @@ async def create_exchange(
     }
     await db.chats.insert_one(chat)
     
-    # Add system message
+    # Add system message (use message key, not hardcoded text)
     system_message = {
         "id": str(uuid4()),
         "chat_id": chat['id'],
         "sender_id": "system",
-        "content": "Exchange started. Coordinate your in-person exchange here.",
+        "content": "SYSTEM_EXCHANGE_STARTED",  # i18n key, frontend will translate
         "is_system": True,
         "created_at": now.isoformat()
     }
     await db.chat_messages.insert_one(system_message)
     
     exchange.pop('_id', None)
-    return {"message": "Exchange created", "exchange": exchange}
+    return {"message": "EXCHANGE_CREATED", "exchange": exchange, "is_existing": False}
 
 @api_router.get("/albums/{album_id}/exchanges")
 async def get_user_exchanges(album_id: str, user_id: str = Depends(get_current_user)):
