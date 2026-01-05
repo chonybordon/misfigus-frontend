@@ -66,11 +66,19 @@ export const Exchanges = () => {
       const response = await api.get(`/albums/${albumId}/exchanges`);
       setExchanges(response.data);
     } catch (error) {
-      toast.error(error.response?.data?.detail || t('common.error'));
+      // Empty result is NOT an error - don't show error toast for 404 or empty
+      // Only show toast for actual errors (500, network, etc.)
+      if (error.response?.status >= 500) {
+        toast.error(t('common.error'));
+      }
+      // For 404 or any other case, just show empty state
     } finally {
       setLoading(false);
     }
   };
+
+  // Check if user has any new/unseen exchanges
+  const hasNewExchanges = exchanges.some(ex => ex.is_new && ex.status === 'pending');
 
   if (loading) {
     return (
@@ -92,12 +100,17 @@ export const Exchanges = () => {
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <h1 className="text-3xl font-black tracking-tight text-primary">{t('exchange.myExchanges')}</h1>
+          {hasNewExchanges && (
+            <Badge className="bg-red-500 text-white animate-pulse">
+              {t('exchange.newExchange')}
+            </Badge>
+          )}
         </div>
 
         {exchanges.length === 0 ? (
           <div className="text-center py-20">
             <MessageCircle className="h-24 w-24 mx-auto text-muted-foreground mb-4" />
-            <h2 className="text-2xl font-bold mb-2">{t('exchange.noExchanges')}</h2>
+            <h2 className="text-2xl font-bold mb-2">{t('exchange.noExchangesInArea')}</h2>
             <p className="text-muted-foreground mb-6">{t('exchange.noExchangesHint')}</p>
             <Button onClick={() => navigate(`/albums/${albumId}/matches`)}>
               {t('exchange.findMatches')}
