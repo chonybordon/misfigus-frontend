@@ -107,6 +107,40 @@ async def get_group_members_excluding_user(group_id: str, exclude_user_id: str) 
     return other_users, len(other_users)
 
 # ============================================
+# HELPER: Detect test/seed users
+# ============================================
+def is_test_user(user: dict) -> bool:
+    """
+    Check if a user is a test/seed user that should be excluded from exchanges.
+    Test users are identified by:
+    - Email ending with @test.com
+    - Email ending with @misfigus.com (internal test domain)
+    - Email containing +test (common test pattern)
+    - is_test_user flag set to True
+    - role set to 'seed'
+    """
+    if not user:
+        return True  # Treat missing users as test users for safety
+    
+    email = (user.get('email') or '').lower()
+    
+    # Check email patterns
+    if email.endswith('@test.com'):
+        return True
+    if email.endswith('@misfigus.com'):
+        return True
+    if '+test' in email:
+        return True
+    
+    # Check flags/role if present
+    if user.get('is_test_user') is True:
+        return True
+    if user.get('role') == 'seed':
+        return True
+    
+    return False
+
+# ============================================
 # AUTH ENDPOINTS (OTP never shown in UI)
 # ============================================
 @api_router.post("/auth/send-otp")
