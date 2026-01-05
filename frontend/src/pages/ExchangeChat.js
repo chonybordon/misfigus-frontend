@@ -56,8 +56,10 @@ export const ExchangeChat = () => {
       setChatData(chatRes.data);
       setMessages(chatRes.data.messages || []);
     } catch (error) {
-      toast.error(error.response?.data?.detail || t('common.error'));
-      navigate(-1);
+      // Don't show raw backend error - use generic message
+      toast.error(t('common.error'));
+      // Navigate explicitly to exchange details, never use navigate(-1)
+      navigate(`/exchanges/${exchangeId}`);
     } finally {
       setLoading(false);
     }
