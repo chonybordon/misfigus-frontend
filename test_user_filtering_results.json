@@ -1,0 +1,76 @@
+{
+  "timestamp": "2026-01-05T01:31:14.627356",
+  "tests_run": 13,
+  "tests_passed": 12,
+  "success_rate": 92.3076923076923,
+  "results": [
+    {
+      "test": "Frontend compiles successfully",
+      "success": true,
+      "details": "ExchangeChat.js useAuth import fix resolved - no compilation errors"
+    },
+    {
+      "test": "ExchangeChat.js has correct AuthContext import",
+      "success": true,
+      "details": "AuthContext imported from '../App'"
+    },
+    {
+      "test": "ExchangeChat.js uses AuthContext correctly",
+      "success": true,
+      "details": "useContext(AuthContext) found in component"
+    },
+    {
+      "test": "is_test_user(user@test.com) \u2192 TEST USER",
+      "success": true,
+      "details": "Email ending with @test.com - Expected: TEST USER, Got: TEST USER"
+    },
+    {
+      "test": "is_test_user(user@misfigus.com) \u2192 TEST USER",
+      "success": true,
+      "details": "Email ending with @misfigus.com - Expected: TEST USER, Got: TEST USER"
+    },
+    {
+      "test": "is_test_user(user+test@gmail.com) \u2192 TEST USER",
+      "success": true,
+      "details": "Email containing +test - Expected: TEST USER, Got: TEST USER"
+    },
+    {
+      "test": "is_test_user(exchange-test-user-1@test.com) \u2192 TEST USER",
+      "success": true,
+      "details": "Seed user with @test.com - Expected: TEST USER, Got: TEST USER"
+    },
+    {
+      "test": "is_test_user(exchange-test-user-2@misfigus.com) \u2192 TEST USER",
+      "success": true,
+      "details": "Seed user with @misfigus.com - Expected: TEST USER, Got: TEST USER"
+    },
+    {
+      "test": "is_test_user(realuser@gmail.com) \u2192 NOT test user",
+      "success": true,
+      "details": "Real user email - Expected: NOT test user, Got: NOT test user"
+    },
+    {
+      "test": "is_test_user(john.doe@yahoo.com) \u2192 NOT test user",
+      "success": true,
+      "details": "Another real user email - Expected: NOT test user, Got: NOT test user"
+    },
+    {
+      "test": "is_test_user(user@example.com) \u2192 NOT test user",
+      "success": true,
+      "details": "Regular example email - Expected: NOT test user, Got: NOT test user"
+    },
+    {
+      "test": "Send OTP",
+      "success": true,
+      "details": ""
+    },
+    {
+      "test": "Extract OTP from logs",
+      "success": false,
+      "details": "OTP not found in logs"
+    }
+  ],
+  "qatar_album_id": "bc32fecb-f640-4d00-880d-5043bc112d4b",
+  "test_user_id": "3b6734a6-4a17-437f-845f-ba265fcc4b7b",
+  "token_obtained": false
+}
