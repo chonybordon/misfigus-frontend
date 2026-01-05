@@ -144,6 +144,153 @@ def is_test_user(user: dict) -> bool:
     return False
 
 # ============================================
+# HELPER: Haversine distance calculation
+# ============================================
+def haversine_distance(lat1: float, lng1: float, lat2: float, lng2: float) -> float:
+    """
+    Calculate the great-circle distance between two points in kilometers.
+    Used for proximity-based exchange matching.
+    """
+    # Convert to radians
+    lat1, lng1, lat2, lng2 = map(radians, [lat1, lng1, lat2, lng2])
+    
+    # Haversine formula
+    dlat = lat2 - lat1
+    dlng = lng2 - lng1
+    a = sin(dlat/2)**2 + cos(lat1) * cos(lat2) * sin(dlng/2)**2
+    c = 2 * asin(sqrt(a))
+    
+    # Earth's radius in kilometers
+    r = 6371
+    return c * r
+
+def is_within_radius(user1: dict, user2: dict, radius_km: int) -> bool:
+    """
+    Check if two users are within the specified radius of each other.
+    Returns True if either user has no location set (fallback to allow matching).
+    """
+    lat1 = user1.get('location_lat')
+    lng1 = user1.get('location_lng')
+    lat2 = user2.get('location_lat')
+    lng2 = user2.get('location_lng')
+    
+    # If either user has no location, allow matching (backward compatibility)
+    if lat1 is None or lng1 is None or lat2 is None or lng2 is None:
+        return True
+    
+    distance = haversine_distance(lat1, lng1, lat2, lng2)
+    return distance <= radius_km
+
+def can_change_setting(last_updated_at: datetime) -> tuple:
+    """
+    Check if user can change a setting (location/radius) based on 7-day cooldown.
+    Returns (can_change: bool, days_remaining: int)
+    """
+    if last_updated_at is None:
+        return True, 0
+    
+    # Handle ISO string format
+    if isinstance(last_updated_at, str):
+        last_updated_at = datetime.fromisoformat(last_updated_at.replace('Z', '+00:00'))
+    
+    cooldown_end = last_updated_at + timedelta(days=SETTINGS_CHANGE_COOLDOWN_DAYS)
+    now = datetime.now(timezone.utc)
+    
+    if now >= cooldown_end:
+        return True, 0
+    
+    days_remaining = (cooldown_end - now).days + 1
+    return False, days_remaining
+
+# ============================================
+# TERMS & CONDITIONS
+# ============================================
+TERMS_CONTENT = {
+    "es": """
+# Términos y Condiciones de MisFigus
+
+**Versión 1.0 - Vigente desde Enero 2025**
+
+## 1. Propósito de la Aplicación
+MisFigus es una plataforma exclusivamente para el **intercambio gratuito de figuritas** entre coleccionistas. No es una red social ni un marketplace.
+
+## 2. Reglas de Intercambio
+- Los intercambios son **gratuitos y en persona**.
+- **Está prohibido vender figuritas o solicitar dinero**.
+- No se permiten envíos ni transacciones a distancia.
+- Los intercambios deben realizarse en **lugares públicos y seguros**.
+
+## 3. Comportamiento Esperado
+- Trata a todos los usuarios con respeto.
+- Cumple con los acuerdos de intercambio.
+- No canceles intercambios sin aviso previo.
+- Reporta comportamientos inapropiados.
+
+## 4. Edad y Responsabilidad
+- **Edad mínima**: 13 años.
+- Se recomienda que los **chats y encuentros presenciales** sean realizados por usuarios de **16 años o más**.
+- Los **padres o tutores legales son responsables** de los menores que usen la aplicación.
+
+## 5. Privacidad y Ubicación
+- Tu ubicación se usa **únicamente** para encontrar intercambios cercanos.
+- **Nunca compartimos tu ubicación exacta** con otros usuarios.
+- Solo mostramos tu zona aproximada (barrio/localidad).
+
+## 6. Penalizaciones Automáticas
+- Las violaciones a estas reglas pueden resultar en:
+  - Suspensión temporal de la cuenta.
+  - Restricción de funciones.
+  - Cancelación permanente de la cuenta.
+
+## 7. Aceptación
+Al usar MisFigus, aceptás estos términos y te comprometés a respetarlos.
+""",
+    "en": """
+# MisFigus Terms & Conditions
+
+**Version 1.0 - Effective January 2025**
+
+## 1. Application Purpose
+MisFigus is a platform exclusively for **free sticker exchanges** between collectors. It is not a social network or marketplace.
+
+## 2. Exchange Rules
+- Exchanges are **free and in-person**.
+- **Selling stickers or requesting money is prohibited**.
+- Shipping or remote transactions are not allowed.
+- Exchanges must take place in **public and safe locations**.
+
+## 3. Expected Behavior
+- Treat all users with respect.
+- Honor exchange agreements.
+- Do not cancel exchanges without prior notice.
+- Report inappropriate behavior.
+
+## 4. Age and Responsibility
+- **Minimum age**: 13 years.
+- **Chats and in-person meetings** are recommended for users **16 years or older**.
+- **Parents or legal guardians are responsible** for minors using the app.
+
+## 5. Privacy and Location
+- Your location is used **only** to find nearby exchanges.
+- **We never share your exact location** with other users.
+- We only show your approximate area (neighborhood/locality).
+
+## 6. Automatic Penalties
+- Violations of these rules may result in:
+  - Temporary account suspension.
+  - Feature restrictions.
+  - Permanent account cancellation.
+
+## 7. Acceptance
+By using MisFigus, you accept these terms and commit to respecting them.
+"""
+}
+
+def get_terms_content(language: str = 'es') -> str:
+    """Get terms content in the specified language."""
+    return TERMS_CONTENT.get(language, TERMS_CONTENT['es'])
+
+# ============================================
 # AUTH ENDPOINTS (OTP never shown in UI)
 # ============================================
 @api_router.post("/auth/send-otp")
