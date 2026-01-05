@@ -16,6 +16,8 @@ import Inventory from './pages/Inventory';
 import Matches from './pages/Matches';
 import Settings from './pages/Settings';
 import Profile from './pages/Profile';
+import { Exchanges, ExchangeDetail } from './pages/Exchanges';
+import ExchangeChat from './pages/ExchangeChat';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
