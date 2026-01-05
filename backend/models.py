@@ -14,6 +14,17 @@ class User(BaseModel):
     display_name: Optional[str] = None
     verified: bool = False
     language: str = 'es'
+    # Location & Radius
+    location_zone: Optional[str] = None  # Approximate zone (e.g., "Caballito, CABA")
+    location_lat: Optional[float] = None  # Approximate latitude
+    location_lng: Optional[float] = None  # Approximate longitude
+    location_updated_at: Optional[datetime] = None
+    search_radius_km: int = 5  # Default 5km, allowed: 3, 5, 10
+    search_radius_updated_at: Optional[datetime] = None
+    # Terms acceptance
+    terms_accepted: bool = False
+    terms_version: Optional[str] = None
+    terms_accepted_at: Optional[datetime] = None
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 class UserCreate(BaseModel):
@@ -23,9 +34,27 @@ class UserUpdate(BaseModel):
     display_name: Optional[str] = None
     language: Optional[str] = None
 
+class UserLocationUpdate(BaseModel):
+    zone: str  # Approximate zone name
+    lat: float  # Approximate latitude
+    lng: float  # Approximate longitude
+
+class UserRadiusUpdate(BaseModel):
+    radius_km: int  # 3, 5, or 10
+
+class TermsAcceptance(BaseModel):
+    version: str  # Terms version being accepted
+
 class OTPVerify(BaseModel):
     email: str
     otp: str
+
+# Allowed search radius values
+ALLOWED_RADIUS_VALUES = [3, 5, 10]
+# Cooldown for location/radius changes (7 days)
+SETTINGS_CHANGE_COOLDOWN_DAYS = 7
+# Current terms version
+CURRENT_TERMS_VERSION = "1.0"
 
 # ============================================
 # ALBUM MODELS (Album = template)
