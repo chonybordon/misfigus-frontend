@@ -1,0 +1,41 @@
+{
+  "timestamp": "2026-01-05T01:56:53.944806",
+  "tests_run": 6,
+  "tests_passed": 5,
+  "success_rate": 83.33333333333334,
+  "results": [
+    {
+      "test": "Send OTP",
+      "success": true,
+      "details": ""
+    },
+    {
+      "test": "Extract OTP from logs",
+      "success": false,
+      "details": "OTP not found in logs"
+    },
+    {
+      "test": "GET /api/terms",
+      "success": true,
+      "details": "Terms content retrieved"
+    },
+    {
+      "test": "Terms response has required fields",
+      "success": true,
+      "details": "Missing fields: []"
+    },
+    {
+      "test": "GET /api/terms with Spanish language",
+      "success": true,
+      "details": "Spanish terms retrieved"
+    },
+    {
+      "test": "GET /api/terms with English language",
+      "success": true,
+      "details": "English terms retrieved"
+    }
+  ],
+  "user_id": "3b6734a6-4a17-437f-845f-ba265fcc4b7b",
+  "fifa_album_id": "bc32fecb-f640-4d00-880d-5043bc112d4b",
+  "token_obtained": false
+}
