@@ -205,13 +205,13 @@ def get_user_radius(user: dict) -> int:
     """Get user's search radius, preferring new field over legacy."""
     return user.get('radius_km') or user.get('search_radius_km', 5)
 
-def can_change_setting(allowed_at: datetime) -> tuple:
+def can_change_setting(allowed_at: datetime, max_days: int) -> tuple:
     """
     Check if user can change a setting based on the allowed_at timestamp.
-    The allowed_at field stores WHEN the next change is allowed (not when the last change happened).
+    The allowed_at field stores WHEN the next change is allowed.
     Returns (can_change: bool, days_remaining: int)
     
-    Cooldown is exactly 7 days - never more.
+    max_days: The maximum cooldown period for this specific setting.
     """
     if allowed_at is None:
         return True, 0
@@ -229,15 +229,23 @@ def can_change_setting(allowed_at: datetime) -> tuple:
     if now >= allowed_at:
         return True, 0
     
-    # Calculate days remaining (capped at 7)
+    # Calculate days remaining (capped at max_days)
     time_remaining = allowed_at - now
-    days_remaining = min(time_remaining.days + 1, SETTINGS_CHANGE_COOLDOWN_DAYS)
+    days_remaining = min(time_remaining.days + 1, max_days)
     
-    # Safety: ensure we never show more than 7 days
-    if days_remaining > SETTINGS_CHANGE_COOLDOWN_DAYS:
-        days_remaining = SETTINGS_CHANGE_COOLDOWN_DAYS
+    # Safety: ensure we never show more than max_days
+    if days_remaining > max_days:
+        days_remaining = max_days
     
     return False, days_remaining
+
+def can_change_location(allowed_at: datetime) -> tuple:
+    """Check if user can change location (14-day cooldown)."""
+    return can_change_setting(allowed_at, LOCATION_CHANGE_COOLDOWN_DAYS)
+
+def can_change_radius(allowed_at: datetime) -> tuple:
+    """Check if user can change radius (7-day cooldown)."""
+    return can_change_setting(allowed_at, RADIUS_CHANGE_COOLDOWN_DAYS)
 
 # ============================================
 # TERMS & CONDITIONS
