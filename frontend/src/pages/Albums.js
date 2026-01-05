@@ -170,7 +170,13 @@ export const Albums = () => {
                       }`} />
                     </div>
                     <div>
-                      <h3 className={`text-xl font-bold ${getTitleStyles(album)}`}>{album.name}</h3>
+                      <div className="flex items-center gap-2">
+                        <h3 className={`text-xl font-bold ${getTitleStyles(album)}`}>{album.name}</h3>
+                        {/* Completion checkmark for 100% completed albums */}
+                        {album.is_member && album.progress === 100 && (
+                          <CheckCircle className="h-5 w-5 text-green-700 flex-shrink-0" />
+                        )}
+                      </div>
                       <div className="flex items-center gap-4 text-sm text-muted-foreground">
                         <span>{album.year}</span>
                         <span>•</span>
@@ -179,7 +185,11 @@ export const Albums = () => {
                         {album.is_member && album.progress !== undefined && (
                           <>
                             <span>•</span>
-                            <span className="font-semibold text-primary">
+                            <span className={`font-semibold ${
+                              album.progress === 100 
+                                ? 'text-green-700' 
+                                : 'text-primary'
+                            }`}>
                               {Math.round(album.progress)}% {t('albumHome.completed')}
                             </span>
                           </>
