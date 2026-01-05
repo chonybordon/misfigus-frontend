@@ -1,9 +1,9 @@
 {
-  "timestamp": "2026-01-05T01:10:11.475691",
+  "timestamp": "2026-01-05T01:10:54.907549",
   "test_type": "matches_endpoint_bug_fix",
-  "tests_run": 2,
-  "tests_passed": 1,
-  "success_rate": 50.0,
+  "tests_run": 11,
+  "tests_passed": 11,
+  "success_rate": 100.0,
   "results": [
     {
       "test": "Send OTP",
@@ -11,12 +11,57 @@
       "details": ""
     },
     {
-      "test": "Extract OTP from logs",
-      "success": false,
-      "details": "OTP not found in logs"
+      "test": "Verify OTP",
+      "success": true,
+      "details": ""
+    },
+    {
+      "test": "FIFA album activation",
+      "success": true,
+      "details": "Album activated successfully"
+    },
+    {
+      "test": "Pok\u00e9mon album activation",
+      "success": true,
+      "details": "Album activated successfully"
+    },
+    {
+      "test": "FIFA album matches endpoint returns 200",
+      "success": true,
+      "details": "Returned 0 matches"
+    },
+    {
+      "test": "FIFA album matches returns array",
+      "success": true,
+      "details": "Response type: <class 'list'>"
+    },
+    {
+      "test": "Pok\u00e9mon album matches endpoint returns 200",
+      "success": true,
+      "details": "Returned 0 matches"
+    },
+    {
+      "test": "Pok\u00e9mon album matches returns array",
+      "success": true,
+      "details": "Response type: <class 'list'>"
+    },
+    {
+      "test": "Old FIFA endpoint returns 404",
+      "success": true,
+      "details": "Correctly returned 404: {'detail': 'Not Found'}"
+    },
+    {
+      "test": "Old Pok\u00e9mon endpoint returns 404",
+      "success": true,
+      "details": "Correctly returned 404: {'detail': 'Not Found'}"
+    },
+    {
+      "test": "Non-activated album returns 403",
+      "success": true,
+      "details": "Correctly returned 403: {'detail': 'Album not activated'}"
     }
   ],
   "fifa_album_id": "bc32fecb-f640-4d00-880d-5043bc112d4b",
   "pokemon_album_id": "ecc59406-6ec2-4c32-b721-8d50bd04a89e",
-  "token_obtained": false
+  "token_obtained": true
 }
