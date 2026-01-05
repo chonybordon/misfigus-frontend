@@ -285,13 +285,24 @@ class ExchangeConfirm(BaseModel):
     confirmed: bool  # True=👍, False=👎
     failure_reason: Optional[str] = None  # Required if confirmed=False
 
-# Failure reasons for 👎
-EXCHANGE_FAILURE_REASONS = [
-    'no_show',           # Did not show up
-    'cancelled',         # Cancelled without notice
-    'attempted_sale',    # Attempted to sell
-    'inappropriate'      # Inappropriate behavior
+# Failure reasons for 👎 - Separated into MINOR (no reputation impact) and SERIOUS (affects reputation)
+EXCHANGE_FAILURE_REASONS_MINOR = [
+    'schedule_conflict',   # No coincidimos en horarios
+    'personal_issue',      # Surgió un imprevisto personal
+    'moved_away',          # Me mudé / cambié de zona
+    'lost_stickers'        # Perdí las figuritas
 ]
+
+EXCHANGE_FAILURE_REASONS_SERIOUS = [
+    'no_show',             # No se presentó
+    'cancelled_no_notice', # Canceló sin aviso
+    'attempted_sale',      # Intentó vender
+    'inappropriate',       # Comportamiento inapropiado
+    'wrong_stickers'       # Trajo figuritas incorrectas
+]
+
+# Combined list for validation
+EXCHANGE_FAILURE_REASONS = EXCHANGE_FAILURE_REASONS_MINOR + EXCHANGE_FAILURE_REASONS_SERIOUS
 
 # ============================================
 # REPUTATION MODELS (Automatic, Non-Social)
