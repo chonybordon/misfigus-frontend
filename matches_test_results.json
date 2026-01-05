@@ -1,0 +1,22 @@
+{
+  "timestamp": "2026-01-05T01:10:11.475691",
+  "test_type": "matches_endpoint_bug_fix",
+  "tests_run": 2,
+  "tests_passed": 1,
+  "success_rate": 50.0,
+  "results": [
+    {
+      "test": "Send OTP",
+      "success": true,
+      "details": ""
+    },
+    {
+      "test": "Extract OTP from logs",
+      "success": false,
+      "details": "OTP not found in logs"
+    }
+  ],
+  "fifa_album_id": "bc32fecb-f640-4d00-880d-5043bc112d4b",
+  "pokemon_album_id": "ecc59406-6ec2-4c32-b721-8d50bd04a89e",
+  "token_obtained": false
+}
