@@ -1,0 +1,56 @@
+{
+  "timestamp": "2026-01-05T00:51:24.161617",
+  "tests_run": 9,
+  "tests_passed": 0,
+  "success_rate": 0.0,
+  "results": [
+    {
+      "test": "Authenticate User 1",
+      "success": false,
+      "details": "Failed to authenticate user 1"
+    },
+    {
+      "test": "Get Qatar stickers",
+      "success": false,
+      "details": "Status: 401, Response: {'detail': 'Authorization header missing'}"
+    },
+    {
+      "test": "Create exchange",
+      "success": false,
+      "details": "Status: 401, Response: {'detail': 'Authorization header missing'}"
+    },
+    {
+      "test": "Get User 1 exchanges",
+      "success": false,
+      "details": "Status: 401, Response: {'detail': 'Authorization header missing'}"
+    },
+    {
+      "test": "Exchange detail test",
+      "success": false,
+      "details": "No exchange ID available"
+    },
+    {
+      "test": "Exchange chat test",
+      "success": false,
+      "details": "No exchange ID available"
+    },
+    {
+      "test": "Exchange confirmation test",
+      "success": false,
+      "details": "No exchange ID available"
+    },
+    {
+      "test": "Get User 1 reputation",
+      "success": false,
+      "details": "Status: 401, Response: {'detail': 'Authorization header missing'}"
+    },
+    {
+      "test": "Create second exchange",
+      "success": false,
+      "details": "Status: 401, Response: {'detail': 'Authorization header missing'}"
+    }
+  ],
+  "exchange_id": null,
+  "user1_id": null,
+  "user2_id": null
+}
