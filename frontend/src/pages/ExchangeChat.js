@@ -134,10 +134,18 @@ export const ExchangeChat = () => {
           const isMe = msg.sender_id === user?.id;
 
           if (isSystem) {
+            // Translate system message keys
+            const systemMessageKeys = {
+              'SYSTEM_EXCHANGE_STARTED': t('system.exchangeStarted'),
+              'SYSTEM_EXCHANGE_COMPLETED': t('system.exchangeCompleted'),
+              'SYSTEM_EXCHANGE_FAILED': t('system.exchangeFailed')
+            };
+            const displayContent = systemMessageKeys[msg.content] || msg.content;
+            
             return (
               <div key={msg.id} className="flex justify-center">
                 <div className="bg-gray-200 text-gray-600 px-4 py-2 rounded-full text-sm">
-                  {msg.content}
+                  {displayContent}
                 </div>
               </div>
             );
