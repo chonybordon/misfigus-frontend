@@ -183,13 +183,7 @@ export const Albums = () => {
                         <span>{album.year}</span>
                         <span>•</span>
                         <span>{album.category}</span>
-                        {/* Show member count ONLY for active albums (backend already excludes owner) */}
-                        {album.is_member && album.member_count !== undefined && (
-                          <>
-                            <span>•</span>
-                            <span>{getMemberCountDisplay(album)}</span>
-                          </>
-                        )}
+                        {/* Show progress for active albums */}
                         {album.is_member && album.progress !== undefined && (
                           <>
                             <span>•</span>
