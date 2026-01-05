@@ -306,7 +306,7 @@ async def deactivate_album(album_id: str, user_id: str = Depends(get_current_use
 
 @api_router.get("/albums/{album_id}")
 async def get_album(album_id: str, user_id: str = Depends(get_current_user)):
-    """Get album template details with member count and progress."""
+    """Get album template details with progress and exchange count."""
     album = await db.albums.find_one({"id": album_id}, {"_id": 0})
     if not album:
         raise HTTPException(status_code=404, detail="Album not found")
@@ -320,15 +320,11 @@ async def get_album(album_id: str, user_id: str = Depends(get_current_user)):
     if album.get('status') == 'coming_soon':
         album['user_state'] = 'coming_soon'
         album['is_member'] = False
-        album['member_count'] = 0
         album['progress'] = 0
+        album['exchange_count'] = 0
     elif activation:
         album['user_state'] = 'active'
         album['is_member'] = True
-        
-        # Get member count (excluding current user)
-        member_count = await db.album_members.count_documents({"album_id": album_id})
-        album['member_count'] = max(0, member_count - 1)  # Exclude current user
         
         # Calculate progress (rounded to integer)
         sticker_count = await db.stickers.count_documents({"album_id": album_id})
@@ -338,16 +334,160 @@ async def get_album(album_id: str, user_id: str = Depends(get_current_user)):
                 "album_id": album_id,
                 "owned_qty": {"$gte": 1}
             })
-            album['progress'] = round(inventory_count / sticker_count * 100)  # Integer
+            album['progress'] = round(inventory_count / sticker_count * 100)
         else:
             album['progress'] = 0
+        
+        # Calculate exchange count (users with mutual matches in this album)
+        album['exchange_count'] = await compute_album_exchange_count(album_id, user_id)
     else:
         album['user_state'] = 'inactive'
         album['is_member'] = False
-        album['member_count'] = 0
         album['progress'] = 0
+        album['exchange_count'] = 0
     
     return album
+
+async def compute_album_exchange_count(album_id: str, user_id: str) -> int:
+    """
+    Compute count of potential exchange partners for this album.
+    A match exists when: I have duplicates they need AND they have duplicates I need.
+    This is LOCAL exchanges only (based on album membership, not geographic radius yet).
+    Returns count only, not user details (privacy-preserving).
+    """
+    # Get all stickers for this album
+    stickers = await db.stickers.find({"album_id": album_id}, {"_id": 0, "id": 1}).to_list(1000)
+    sticker_ids = [s['id'] for s in stickers]
+    
+    if not sticker_ids:
+        return 0
+    
+    # Get my inventory
+    my_inventory = await db.user_inventory.find({
+        "user_id": user_id,
+        "album_id": album_id
+    }, {"_id": 0}).to_list(1000)
+    
+    my_inv_map = {item['sticker_id']: item['owned_qty'] for item in my_inventory}
+    
+    # My duplicates (owned >= 2) and missing (owned == 0)
+    my_duplicates = set(sid for sid in sticker_ids if my_inv_map.get(sid, 0) >= 2)
+    my_missing = set(sid for sid in sticker_ids if my_inv_map.get(sid, 0) == 0)
+    
+    # If user has no duplicates or no missing, no exchanges possible
+    if not my_duplicates or not my_missing:
+        return 0
+    
+    # Get other album members
+    other_members = await db.album_members.find(
+        {"album_id": album_id, "user_id": {"$ne": user_id}},
+        {"_id": 0, "user_id": 1}
+    ).to_list(1000)
+    
+    exchange_count = 0
+    
+    for member in other_members:
+        other_user_id = member['user_id']
+        
+        # Get their inventory
+        other_inventory = await db.user_inventory.find({
+            "user_id": other_user_id,
+            "album_id": album_id
+        }, {"_id": 0}).to_list(1000)
+        
+        other_inv_map = {item['sticker_id']: item['owned_qty'] for item in other_inventory}
+        
+        # Their duplicates and missing
+        other_duplicates = set(sid for sid in sticker_ids if other_inv_map.get(sid, 0) >= 2)
+        other_missing = set(sid for sid in sticker_ids if other_inv_map.get(sid, 0) == 0)
+        
+        # Mutual match: I can give them something AND they can give me something
+        i_can_give = my_duplicates & other_missing
+        i_can_get = other_duplicates & my_missing
+        
+        # Only count if MUTUAL exchange is possible (both directions)
+        if i_can_give and i_can_get:
+            exchange_count += 1
+    
+    return exchange_count
+
+@api_router.get("/albums/{album_id}/matches")
+async def get_album_matches(album_id: str, user_id: str = Depends(get_current_user)):
+    """
+    Get potential exchange matches within the album.
+    Only returns users with MUTUAL matches (both can exchange).
+    Does not expose user lists/directories - only real exchange opportunities.
+    """
+    # Verify user has activated this album
+    activation = await db.user_album_activations.find_one({
+        "user_id": user_id,
+        "album_id": album_id
+    })
+    if not activation:
+        raise HTTPException(status_code=403, detail="Album not activated")
+    
+    # Get all stickers for this album
+    stickers = await db.stickers.find({"album_id": album_id}, {"_id": 0}).to_list(1000)
+    sticker_ids = [s['id'] for s in stickers]
+    
+    if not sticker_ids:
+        return []
+    
+    # Get my inventory
+    my_inventory = await db.user_inventory.find({
+        "user_id": user_id,
+        "album_id": album_id
+    }, {"_id": 0}).to_list(1000)
+    
+    my_inv_map = {item['sticker_id']: item['owned_qty'] for item in my_inventory}
+    
+    my_duplicates = [sid for sid in sticker_ids if my_inv_map.get(sid, 0) >= 2]
+    my_missing = [sid for sid in sticker_ids if my_inv_map.get(sid, 0) == 0]
+    
+    # Get other album members
+    other_members = await db.album_members.find(
+        {"album_id": album_id, "user_id": {"$ne": user_id}},
+        {"_id": 0, "user_id": 1}
+    ).to_list(1000)
+    
+    matches = []
+    
+    for member in other_members:
+        other_user_id = member['user_id']
+        
+        # Get user info
+        other_user = await db.users.find_one({"id": other_user_id}, {"_id": 0})
+        if not other_user:
+            continue
+        
+        # Get their inventory
+        other_inventory = await db.user_inventory.find({
+            "user_id": other_user_id,
+            "album_id": album_id
+        }, {"_id": 0}).to_list(1000)
+        
+        other_inv_map = {item['sticker_id']: item['owned_qty'] for item in other_inventory}
+        
+        other_duplicates = [sid for sid in sticker_ids if other_inv_map.get(sid, 0) >= 2]
+        other_missing = [sid for sid in sticker_ids if other_inv_map.get(sid, 0) == 0]
+        
+        i_can_give = [sid for sid in my_duplicates if sid in other_missing]
+        i_can_get = [sid for sid in other_duplicates if sid in my_missing]
+        
+        # Only include MUTUAL matches (both directions)
+        if i_can_give and i_can_get:
+            matches.append({
+                "user": {
+                    "id": other_user['id'],
+                    "email": other_user.get('email'),
+                    "display_name": other_user.get('display_name')
+                },
+                "has_stickers_i_need": len(i_can_get) > 0,
+                "needs_stickers_i_have": len(i_can_give) > 0,
+                "can_exchange": True  # Only true matches are included
+            })
+    
+    return matches
 
 @api_router.get("/inventory")
 async def get_inventory(album_id: str, user_id: str = Depends(get_current_user)):
