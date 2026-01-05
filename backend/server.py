@@ -13,7 +13,7 @@ from uuid import uuid4
 
 from models import (
     User, UserCreate, UserUpdate, OTPVerify, 
-    UserLocationUpdate, UserRadiusUpdate, TermsAcceptance,
+    StructuredLocationUpdate, RadiusUpdate, TermsAcceptance,
     Album, Group, GroupMember, GroupCreate,
     EmailInvite, EmailInviteCreate, EmailInviteAccept,
     Sticker, UserInventory, InventoryUpdate,
@@ -23,6 +23,10 @@ from models import (
     UserReputation, EXCHANGE_FAILURE_REASONS,
     REPUTATION_CONSECUTIVE_FAIL_THRESHOLD, REPUTATION_TOTAL_FAIL_THRESHOLD,
     ALLOWED_RADIUS_VALUES, SETTINGS_CHANGE_COOLDOWN_DAYS, CURRENT_TERMS_VERSION
+)
+from location_data import (
+    COUNTRIES, REGIONS, get_country_name, get_regions_for_country,
+    get_cities_for_country, search_places
 )
 from math import radians, cos, sin, asin, sqrt
 from datetime import timedelta
