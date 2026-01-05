@@ -18,6 +18,7 @@ import Settings from './pages/Settings';
 import Profile from './pages/Profile';
 import { Exchanges, ExchangeDetail } from './pages/Exchanges';
 import ExchangeChat from './pages/ExchangeChat';
+import { TermsView, TermsAcceptance } from './pages/Terms';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -48,9 +49,51 @@ api.interceptors.response.use(
 
 export const AuthContext = React.createContext(null);
 
+// Private route that also checks for terms acceptance
 const PrivateRoute = ({ children }) => {
   const token = localStorage.getItem('token');
-  return token ? children : <Navigate to="/" />;
+  const [needsTerms, setNeedsTerms] = useState(false);
+  const [checkingTerms, setCheckingTerms] = useState(true);
+  
+  useEffect(() => {
+    if (token) {
+      checkTermsStatus();
+    } else {
+      setCheckingTerms(false);
+    }
+  }, [token]);
+  
+  const checkTermsStatus = async () => {
+    try {
+      const response = await api.get('/user/terms-status');
+      setNeedsTerms(response.data.needs_acceptance);
+    } catch (error) {
+      console.error('Failed to check terms status:', error);
+      setNeedsTerms(false);
+    } finally {
+      setCheckingTerms(false);
+    }
+  };
+  
+  const handleTermsAccepted = () => {
+    setNeedsTerms(false);
+  };
+  
+  if (!token) return <Navigate to="/" />;
+  
+  if (checkingTerms) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-2xl font-bold">Loading...</div>
+      </div>
+    );
+  }
+  
+  if (needsTerms) {
+    return <TermsAcceptance onAccepted={handleTermsAccepted} />;
+  }
+  
+  return children;
 };
 
 function App() {
@@ -107,8 +150,11 @@ function App() {
           {/* Exchange routes */}
           <Route path="/exchanges/:exchangeId" element={<PrivateRoute><ExchangeDetail /></PrivateRoute>} />
           <Route path="/exchanges/:exchangeId/chat" element={<PrivateRoute><ExchangeChat /></PrivateRoute>} />
+          {/* Settings and Profile */}
           <Route path="/settings" element={<PrivateRoute><Settings /></PrivateRoute>} />
           <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
+          {/* Terms */}
+          <Route path="/terms" element={<PrivateRoute><TermsView /></PrivateRoute>} />
         </Routes>
         <Toaster position="top-center" richColors />
       </BrowserRouter>
