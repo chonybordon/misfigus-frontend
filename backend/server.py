@@ -845,7 +845,7 @@ async def compute_album_exchange_count(album_id: str, user_id: str) -> int:
     if not current_user:
         return 0
     
-    user_radius = current_user.get('search_radius_km', 5)
+    user_radius = get_user_radius(current_user)
     
     # Get all stickers for this album
     stickers = await db.stickers.find({"album_id": album_id}, {"_id": 0, "id": 1}).to_list(1000)
