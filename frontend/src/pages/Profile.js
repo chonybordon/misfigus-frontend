@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { api, AuthContext } from '../App';
@@ -9,9 +9,97 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
-import { ArrowLeft, User, MapPin, Compass, FileText, Clock, AlertCircle } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { ArrowLeft, User, MapPin, Compass, FileText, Clock, AlertCircle, Search, Globe, Building, Home } from 'lucide-react';
 
 const RADIUS_OPTIONS = [3, 5, 10];
+
+// City search component with typeahead
+const CitySearch = ({ country, onSelect, value }) => {
+  const [query, setQuery] = useState('');
+  const [results, setResults] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const { t } = useTranslation();
+
+  const searchCities = useCallback(async (searchQuery) => {
+    if (searchQuery.length < 2) {
+      setResults([]);
+      return;
+    }
+    
+    setLoading(true);
+    try {
+      const response = await api.get(`/locations/search?query=${encodeURIComponent(searchQuery)}&country=${country || ''}`);
+      setResults(response.data);
+      setShowDropdown(true);
+    } catch (error) {
+      console.error('Failed to search cities:', error);
+      setResults([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [country]);
+
+  useEffect(() => {
+    const debounce = setTimeout(() => {
+      searchCities(query);
+    }, 300);
+    return () => clearTimeout(debounce);
+  }, [query, searchCities]);
+
+  const handleSelect = (place) => {
+    onSelect(place);
+    setQuery(place.label);
+    setShowDropdown(false);
+    setResults([]);
+  };
+
+  return (
+    <div className="relative">
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Input
+          placeholder={t('profile.searchCity')}
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          onFocus={() => results.length > 0 && setShowDropdown(true)}
+          className="pl-10"
+        />
+        {loading && (
+          <div className="absolute right-3 top-1/2 -translate-y-1/2">
+            <div className="animate-spin h-4 w-4 border-2 border-primary border-t-transparent rounded-full" />
+          </div>
+        )}
+      </div>
+      
+      {showDropdown && results.length > 0 && (
+        <div className="absolute z-50 w-full mt-1 bg-background border rounded-md shadow-lg max-h-60 overflow-auto">
+          {results.map((place) => (
+            <button
+              key={place.place_id}
+              onClick={() => handleSelect(place)}
+              className="w-full px-4 py-3 text-left hover:bg-muted flex items-center gap-3 border-b last:border-b-0"
+            >
+              <MapPin className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+              <div>
+                <p className="font-medium">{place.city_name}</p>
+                <p className="text-sm text-muted-foreground">{place.region_name}, {place.country_code}</p>
+              </div>
+            </button>
+          ))}
+        </div>
+      )}
+      
+      {value && (
+        <p className="mt-2 text-sm text-muted-foreground flex items-center gap-2">
+          <MapPin className="h-4 w-4" />
+          {value.label}
+        </p>
+      )}
+    </div>
+  );
+};
 
 export const Profile = () => {
   const [displayName, setDisplayName] = useState('');
@@ -20,19 +108,26 @@ export const Profile = () => {
   const [locationStatus, setLocationStatus] = useState(null);
   const [showLocationDialog, setShowLocationDialog] = useState(false);
   const [showRadiusDialog, setShowRadiusDialog] = useState(false);
-  const [newZone, setNewZone] = useState('');
+  const [termsStatus, setTermsStatus] = useState(null);
+  
+  // Location form state
+  const [countries, setCountries] = useState([]);
+  const [selectedCountry, setSelectedCountry] = useState('');
+  const [selectedPlace, setSelectedPlace] = useState(null);
+  const [neighborhood, setNeighborhood] = useState('');
   const [selectedRadius, setSelectedRadius] = useState(5);
   const [updatingLocation, setUpdatingLocation] = useState(false);
   const [updatingRadius, setUpdatingRadius] = useState(false);
-  const [termsStatus, setTermsStatus] = useState(null);
+  
   const navigate = useNavigate();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { user, login } = useContext(AuthContext);
 
   useEffect(() => {
     fetchProfile();
     fetchLocationStatus();
     fetchTermsStatus();
+    fetchCountries();
   }, []);
 
   const fetchProfile = async () => {
@@ -48,9 +143,17 @@ export const Profile = () => {
 
   const fetchLocationStatus = async () => {
     try {
-      const response = await api.get('/user/location-status');
+      const response = await api.get('/me/location-status');
       setLocationStatus(response.data);
       setSelectedRadius(response.data.radius?.km || 5);
+      
+      // Pre-fill country if location exists
+      if (response.data.location?.country_code) {
+        setSelectedCountry(response.data.location.country_code);
+      }
+      if (response.data.location?.neighborhood_text) {
+        setNeighborhood(response.data.location.neighborhood_text);
+      }
     } catch (error) {
       console.error('Failed to fetch location status:', error);
     }
@@ -62,6 +165,15 @@ export const Profile = () => {
       setTermsStatus(response.data);
     } catch (error) {
       console.error('Failed to fetch terms status:', error);
+    }
+  };
+
+  const fetchCountries = async () => {
+    try {
+      const response = await api.get(`/locations/countries?language=${i18n.language}`);
+      setCountries(response.data);
+    } catch (error) {
+      console.error('Failed to fetch countries:', error);
     }
   };
 
@@ -85,19 +197,22 @@ export const Profile = () => {
   };
 
   const handleUpdateLocation = async () => {
-    if (!newZone.trim()) {
-      toast.error(t('profile.enterZone'));
+    if (!selectedPlace) {
+      toast.error(t('profile.selectCity'));
       return;
     }
     
     setUpdatingLocation(true);
     try {
-      // For now, use approximate coordinates based on zone name
-      // In production, this would use a geocoding service
-      await api.put('/user/location', {
-        zone: newZone.trim(),
-        lat: -34.6037 + (Math.random() - 0.5) * 0.1, // Buenos Aires area
-        lng: -58.3816 + (Math.random() - 0.5) * 0.1
+      await api.post('/me/location', {
+        country_code: selectedPlace.country_code,
+        region_name: selectedPlace.region_name,
+        city_name: selectedPlace.city_name,
+        place_id: selectedPlace.place_id,
+        latitude: selectedPlace.latitude,
+        longitude: selectedPlace.longitude,
+        neighborhood_text: neighborhood.trim() || null,
+        radius_km: selectedRadius
       });
       
       toast.success(t('profile.locationUpdated'));
@@ -113,7 +228,7 @@ export const Profile = () => {
   const handleUpdateRadius = async () => {
     setUpdatingRadius(true);
     try {
-      await api.put('/user/radius', {
+      await api.put('/me/radius', {
         radius_km: selectedRadius
       });
       
@@ -149,6 +264,26 @@ export const Profile = () => {
           </Button>
           <h1 className="text-3xl font-black tracking-tight text-primary">{t('profile.title')}</h1>
         </div>
+
+        {/* Location Setup Required Warning */}
+        {locationStatus?.needs_location_setup && (
+          <Card className="mb-6 border-amber-300 bg-amber-50">
+            <CardContent className="p-4 flex items-start gap-3">
+              <AlertCircle className="h-6 w-6 text-amber-600 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="font-medium text-amber-800">{t('profile.locationRequired')}</p>
+                <p className="text-sm text-amber-700 mt-1">{t('profile.locationRequiredDesc')}</p>
+                <Button
+                  onClick={() => setShowLocationDialog(true)}
+                  className="mt-3"
+                  size="sm"
+                >
+                  {t('profile.setLocation')}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Basic Profile Card */}
         <Card className="mb-6">
@@ -210,17 +345,20 @@ export const Profile = () => {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            {/* Location Zone */}
+            {/* Location Display */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label>{t('profile.zone')}</Label>
+                <Label className="flex items-center gap-2">
+                  <Globe className="h-4 w-4" />
+                  {t('profile.location')}
+                </Label>
                 {locationStatus?.location?.can_change ? (
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => setShowLocationDialog(true)}
                   >
-                    {locationStatus?.location?.zone ? t('profile.changeLocation') : t('profile.setLocation')}
+                    {locationStatus?.has_location ? t('profile.changeLocation') : t('profile.setLocation')}
                   </Button>
                 ) : (
                   <Badge variant="secondary" className="flex items-center gap-1">
@@ -229,9 +367,20 @@ export const Profile = () => {
                   </Badge>
                 )}
               </div>
-              <div className="bg-muted rounded-lg p-3">
-                {locationStatus?.location?.zone ? (
-                  <p className="font-medium">{locationStatus.location.zone}</p>
+              <div className="bg-muted rounded-lg p-4 space-y-2">
+                {locationStatus?.has_location ? (
+                  <>
+                    <div className="flex items-center gap-2">
+                      <Building className="h-4 w-4 text-primary" />
+                      <span className="font-medium">{locationStatus.location.label}</span>
+                    </div>
+                    {locationStatus.location.neighborhood_text && (
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Home className="h-4 w-4" />
+                        <span>{locationStatus.location.neighborhood_text}</span>
+                      </div>
+                    )}
+                  </>
                 ) : (
                   <p className="text-muted-foreground italic">{t('profile.noLocationSet')}</p>
                 )}
@@ -241,7 +390,10 @@ export const Profile = () => {
             {/* Search Radius */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label>{t('profile.searchRadius')}</Label>
+                <Label className="flex items-center gap-2">
+                  <Compass className="h-4 w-4" />
+                  {t('profile.searchRadius')}
+                </Label>
                 {locationStatus?.radius?.can_change ? (
                   <Button
                     variant="outline"
@@ -257,7 +409,7 @@ export const Profile = () => {
                   </Badge>
                 )}
               </div>
-              <div className="bg-muted rounded-lg p-3">
+              <div className="bg-muted rounded-lg p-4">
                 <p className="font-medium flex items-center gap-2">
                   <Compass className="h-4 w-4 text-primary" />
                   {locationStatus?.radius?.km || 5} km
@@ -307,32 +459,105 @@ export const Profile = () => {
           </CardContent>
         </Card>
 
-        {/* Location Change Dialog */}
+        {/* Location Setup Dialog */}
         <Dialog open={showLocationDialog} onOpenChange={setShowLocationDialog}>
-          <DialogContent>
+          <DialogContent className="max-w-lg">
             <DialogHeader>
-              <DialogTitle>{t('profile.changeLocation')}</DialogTitle>
+              <DialogTitle>{t('profile.setupLocation')}</DialogTitle>
               <DialogDescription>
-                {t('profile.changeLocationDescription')}
+                {t('profile.setupLocationDesc')}
               </DialogDescription>
             </DialogHeader>
-            <div className="py-4">
-              <Label htmlFor="zone">{t('profile.zone')}</Label>
-              <Input
-                id="zone"
-                placeholder={t('profile.zonePlaceholder')}
-                value={newZone}
-                onChange={(e) => setNewZone(e.target.value)}
-              />
-              <p className="text-xs text-muted-foreground mt-2">
-                {t('profile.zoneHelp')}
-              </p>
+            <div className="py-4 space-y-6">
+              {/* Country Selection */}
+              <div className="space-y-2">
+                <Label className="flex items-center gap-2">
+                  <Globe className="h-4 w-4" />
+                  {t('profile.country')} *
+                </Label>
+                <Select value={selectedCountry} onValueChange={(value) => {
+                  setSelectedCountry(value);
+                  setSelectedPlace(null);
+                }}>
+                  <SelectTrigger>
+                    <SelectValue placeholder={t('profile.selectCountry')} />
+                  </SelectTrigger>
+                  <SelectContent className="max-h-60">
+                    {countries.map((country) => (
+                      <SelectItem key={country.code} value={country.code}>
+                        {country.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* City Search */}
+              {selectedCountry && (
+                <div className="space-y-2">
+                  <Label className="flex items-center gap-2">
+                    <Building className="h-4 w-4" />
+                    {t('profile.city')} *
+                  </Label>
+                  <CitySearch
+                    country={selectedCountry}
+                    onSelect={setSelectedPlace}
+                    value={selectedPlace}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    {t('profile.citySearchHelp')}
+                  </p>
+                </div>
+              )}
+
+              {/* Neighborhood (Optional) */}
+              {selectedPlace && (
+                <div className="space-y-2">
+                  <Label className="flex items-center gap-2">
+                    <Home className="h-4 w-4" />
+                    {t('profile.neighborhood')} ({t('common.optional')})
+                  </Label>
+                  <Input
+                    placeholder={t('profile.neighborhoodPlaceholder')}
+                    value={neighborhood}
+                    onChange={(e) => setNeighborhood(e.target.value)}
+                    maxLength={100}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    {t('profile.neighborhoodHelp')}
+                  </p>
+                </div>
+              )}
+
+              {/* Search Radius */}
+              <div className="space-y-2">
+                <Label className="flex items-center gap-2">
+                  <Compass className="h-4 w-4" />
+                  {t('profile.searchRadius')}
+                </Label>
+                <div className="grid grid-cols-3 gap-2">
+                  {RADIUS_OPTIONS.map((radius) => (
+                    <Button
+                      key={radius}
+                      type="button"
+                      variant={selectedRadius === radius ? 'default' : 'outline'}
+                      onClick={() => setSelectedRadius(radius)}
+                      className="w-full"
+                    >
+                      {radius} km
+                    </Button>
+                  ))}
+                </div>
+              </div>
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowLocationDialog(false)}>
                 {t('common.cancel')}
               </Button>
-              <Button onClick={handleUpdateLocation} disabled={updatingLocation}>
+              <Button
+                onClick={handleUpdateLocation}
+                disabled={updatingLocation || !selectedPlace}
+              >
                 {updatingLocation ? t('common.loading') : t('common.save')}
               </Button>
             </DialogFooter>
