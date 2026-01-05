@@ -14,13 +14,26 @@ class User(BaseModel):
     display_name: Optional[str] = None
     verified: bool = False
     language: str = 'es'
-    # Location & Radius
-    location_zone: Optional[str] = None  # Approximate zone (e.g., "Caballito, CABA")
-    location_lat: Optional[float] = None  # Approximate latitude
-    location_lng: Optional[float] = None  # Approximate longitude
-    location_updated_at: Optional[datetime] = None
-    search_radius_km: int = 5  # Default 5km, allowed: 3, 5, 10
-    search_radius_updated_at: Optional[datetime] = None
+    
+    # Structured Location Fields (globally scalable)
+    country_code: Optional[str] = None  # ISO-3166 alpha-2 (e.g., "AR", "US", "ES")
+    region_name: Optional[str] = None   # State / Province / Prefecture
+    city_name: Optional[str] = None     # Locality selected from real places
+    place_id: Optional[str] = None      # Unique ID from geocoding provider
+    latitude: Optional[float] = None    # Approximate center of locality
+    longitude: Optional[float] = None   # Approximate center of locality
+    neighborhood_text: Optional[str] = None  # User-provided, display only, NEVER for matching
+    
+    # Search radius
+    radius_km: int = 5  # Default 5km, allowed: 3, 5, 10
+    
+    # Cooldown control timestamps
+    location_change_allowed_at: Optional[datetime] = None
+    radius_change_allowed_at: Optional[datetime] = None
+    
+    # Legacy field (for migration)
+    location_zone: Optional[str] = None  # Deprecated - keep for backward compat
+    
     # Terms acceptance
     terms_accepted: bool = False
     terms_version: Optional[str] = None
@@ -34,12 +47,18 @@ class UserUpdate(BaseModel):
     display_name: Optional[str] = None
     language: Optional[str] = None
 
-class UserLocationUpdate(BaseModel):
-    zone: str  # Approximate zone name
-    lat: float  # Approximate latitude
-    lng: float  # Approximate longitude
+class StructuredLocationUpdate(BaseModel):
+    """Structured location update - requires real place selection"""
+    country_code: str  # ISO-3166 alpha-2
+    region_name: str
+    city_name: str
+    place_id: str
+    latitude: float
+    longitude: float
+    neighborhood_text: Optional[str] = None  # Optional, display only
+    radius_km: int = 5  # 3, 5, or 10
 
-class UserRadiusUpdate(BaseModel):
+class RadiusUpdate(BaseModel):
     radius_km: int  # 3, 5, or 10
 
 class TermsAcceptance(BaseModel):
@@ -48,6 +67,16 @@ class TermsAcceptance(BaseModel):
 class OTPVerify(BaseModel):
     email: str
     otp: str
+
+# Location search response model
+class PlaceSearchResult(BaseModel):
+    place_id: str
+    label: str  # "City, Region, Country"
+    city_name: str
+    region_name: str
+    country_code: str
+    latitude: float
+    longitude: float
 
 # Allowed search radius values
 ALLOWED_RADIUS_VALUES = [3, 5, 10]
