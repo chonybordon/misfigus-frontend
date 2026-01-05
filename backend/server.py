@@ -393,6 +393,7 @@ async def compute_album_exchange_count(album_id: str, user_id: str) -> int:
     A match exists when: I have duplicates they need AND they have duplicates I need.
     This is LOCAL exchanges only (based on album membership, not geographic radius yet).
     Returns count only, not user details (privacy-preserving).
+    EXCLUDES test/seed users from the count.
     """
     # Get all stickers for this album
     stickers = await db.stickers.find({"album_id": album_id}, {"_id": 0, "id": 1}).to_list(1000)
@@ -427,6 +428,11 @@ async def compute_album_exchange_count(album_id: str, user_id: str) -> int:
     
     for member in other_members:
         other_user_id = member['user_id']
+        
+        # Get user info and skip test/seed users
+        other_user = await db.users.find_one({"id": other_user_id}, {"_id": 0})
+        if is_test_user(other_user):
+            continue  # Skip test/seed users
         
         # Get their inventory
         other_inventory = await db.user_inventory.find({
