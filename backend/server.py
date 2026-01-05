@@ -1847,30 +1847,44 @@ async def confirm_exchange(
         )
         
         # Update reputation for both users
+        # Pass failure reason to determine if it's minor (non-penalizing) or serious
+        user_a_failure = exchange.get('user_a_failure_reason') if not exchange.get('user_a_confirmed') else None
+        user_b_failure = exchange.get('user_b_failure_reason') if not exchange.get('user_b_confirmed') else None
+        
         await update_reputation_after_exchange(
             exchange['user_a_id'], 
-            final_status == 'completed'
+            final_status == 'completed',
+            user_a_failure
         )
         await update_reputation_after_exchange(
             exchange['user_b_id'], 
-            final_status == 'completed'
+            final_status == 'completed',
+            user_b_failure
         )
         
-        # Add system message to chat
+        # Add system message to chat (use i18n keys)
         chat = await db.chats.find_one({"exchange_id": exchange_id}, {"_id": 0})
         if chat:
-            status_msg = "✅ Exchange completed successfully!" if final_status == 'completed' else "❌ Exchange was not completed."
+            status_key = "SYSTEM_EXCHANGE_COMPLETED" if final_status == 'completed' else "SYSTEM_EXCHANGE_FAILED"
             system_message = {
                 "id": str(uuid4()),
                 "chat_id": chat['id'],
                 "sender_id": "system",
-                "content": status_msg,
+                "content": status_key,  # i18n key, frontend will translate
                 "is_system": True,
                 "created_at": now.isoformat()
             }
             await db.chat_messages.insert_one(system_message)
     
-    return {"message": "Confirmation recorded", "status": final_status or exchange['status']}
+    return {"message": "CONFIRMATION_RECORDED", "status": final_status or exchange['status']}
+
+@api_router.get("/exchanges/failure-reasons")
+async def get_failure_reasons():
+    """Get list of failure reasons categorized by severity."""
+    return {
+        "minor": EXCHANGE_FAILURE_REASONS_MINOR,
+        "serious": EXCHANGE_FAILURE_REASONS_SERIOUS
+    }
 
 @api_router.get("/user/reputation")
 async def get_my_reputation(user_id: str = Depends(get_current_user)):
