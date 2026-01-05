@@ -789,6 +789,7 @@ async def get_album_matches(album_id: str, user_id: str = Depends(get_current_us
     Get potential exchange matches within the album.
     Only returns users with MUTUAL matches (both can exchange).
     Does not expose user lists/directories - only real exchange opportunities.
+    Filters by user's search radius (proximity-based matching).
     EXCLUDES test/seed users from results.
     """
     # Verify user has activated this album
@@ -798,6 +799,13 @@ async def get_album_matches(album_id: str, user_id: str = Depends(get_current_us
     })
     if not activation:
         raise HTTPException(status_code=403, detail="Album not activated")
+    
+    # Get current user for radius and location
+    current_user = await db.users.find_one({"id": user_id}, {"_id": 0})
+    if not current_user:
+        return []
+    
+    user_radius = current_user.get('search_radius_km', 5)
     
     # Get all stickers for this album
     stickers = await db.stickers.find({"album_id": album_id}, {"_id": 0}).to_list(1000)
@@ -836,6 +844,10 @@ async def get_album_matches(album_id: str, user_id: str = Depends(get_current_us
         # Skip test/seed users - they should not appear in exchange suggestions
         if is_test_user(other_user):
             continue
+        
+        # Check if within radius (enforced server-side)
+        if not is_within_radius(current_user, other_user, user_radius):
+            continue  # Skip users outside radius
         
         # Get their inventory
         other_inventory = await db.user_inventory.find({
