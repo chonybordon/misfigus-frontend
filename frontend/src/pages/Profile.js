@@ -361,9 +361,9 @@ export const Profile = () => {
                     {locationStatus?.has_location ? t('profile.changeLocation') : t('profile.setLocation')}
                   </Button>
                 ) : (
-                  <Badge variant="secondary" className="flex items-center gap-1">
+                  <Badge variant="secondary" className="flex items-center gap-1 text-xs">
                     <Clock className="h-3 w-3" />
-                    {t('profile.cooldown', { days: locationStatus?.location?.days_until_change || 0 })}
+                    {t('profile.locationCooldown', { days: locationStatus?.location?.days_until_change || 0 })}
                   </Badge>
                 )}
               </div>
@@ -403,9 +403,9 @@ export const Profile = () => {
                     {t('profile.changeRadius')}
                   </Button>
                 ) : (
-                  <Badge variant="secondary" className="flex items-center gap-1">
+                  <Badge variant="secondary" className="flex items-center gap-1 text-xs">
                     <Clock className="h-3 w-3" />
-                    {t('profile.cooldown', { days: locationStatus?.radius?.days_until_change || 0 })}
+                    {t('profile.radiusCooldown', { days: locationStatus?.radius?.days_until_change || 0 })}
                   </Badge>
                 )}
               </div>
