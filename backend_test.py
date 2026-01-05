@@ -51,7 +51,13 @@ class MisFigusTestUserFilterTester:
 
             print(f"   {method} {url} -> {response.status_code}")
             
-            if response.status_code == expected_status:
+            # Handle multiple expected status codes
+            if isinstance(expected_status, list):
+                status_match = response.status_code in expected_status
+            else:
+                status_match = response.status_code == expected_status
+            
+            if status_match:
                 try:
                     return True, response.json()
                 except:
