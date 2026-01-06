@@ -98,11 +98,14 @@ frontend:
     file: "/app/frontend/src/pages/AlbumHome.js"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: NA
         agent: "main"
         comment: "AlbumHome now shows red indicator on Exchanges card when has_unread_exchanges=true. Also shows pending_exchanges count."
+      - working: NA
+        agent: "testing"
+        comment: "CANNOT TEST: Requires authentication. App uses OTP email authentication which cannot be accessed in testing environment. Code review shows implementation in AlbumHome.js lines 169-190 with proper conditional styling and red indicator."
 
   - task: "Exchange card unread indicator"
     implemented: true
