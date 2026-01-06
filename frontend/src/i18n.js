@@ -372,6 +372,7 @@ const resources = {
       },
       albums: {
         title: 'My Albums',
+        subtitle: 'Select an album',
         select: 'Select an album',
         active: 'ACTIVE',
         inactive: 'INACTIVE',
