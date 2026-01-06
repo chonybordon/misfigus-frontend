@@ -386,7 +386,8 @@ const resources = {
         noExchangesAvailable: 'No exchanges available in your area at the moment',
         joinedSuccess: 'You joined the album',
         noStickersYet: 'Stickers coming soon',
-        placeholderBanner: 'Collection in preparation: use numbering for now'
+        placeholderBanner: 'Collection in preparation: use numbering for now',
+        newMessagesInExchanges: 'You have new messages in your exchanges'
       },
       invite: {
         title: 'Invite to Album',
