@@ -226,7 +226,7 @@ export const Albums = () => {
             <div className="py-4">
               <p className="font-semibold text-lg">{selectedAlbum?.name}</p>
               <p className="text-sm text-muted-foreground">
-                {selectedAlbum?.year} • {selectedAlbum?.category}
+                {selectedAlbum?.year} • {selectedAlbum && getCategoryDisplay(selectedAlbum, t)}
               </p>
             </div>
             <DialogFooter className="gap-2 sm:gap-0">
