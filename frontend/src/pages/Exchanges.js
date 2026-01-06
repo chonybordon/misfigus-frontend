@@ -148,7 +148,7 @@ export const Exchanges = () => {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <div className="h-12 w-12 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold relative">
-                        {(exchange.partner?.display_name || 'U')[0].toUpperCase()}
+                        {getDisplayName(exchange.partner, t)[0].toUpperCase()}
                         {/* Unread indicator dot */}
                         {exchange.has_unread && exchange.status === 'pending' && (
                           <span className="absolute -top-1 -right-1 h-4 w-4 bg-red-500 rounded-full flex items-center justify-center text-[10px] text-white font-bold">
@@ -158,7 +158,7 @@ export const Exchanges = () => {
                       </div>
                       <div>
                         <p className="font-semibold">
-                          {exchange.partner?.display_name || t('app.defaultUser')}
+                          {getDisplayName(exchange.partner, t)}
                         </p>
                         <div className="flex items-center gap-2 mt-1">
                           <ReputationBadge status={exchange.partner?.reputation_status} t={t} />
