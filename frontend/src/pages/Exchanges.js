@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, MessageCircle, CheckCircle, XCircle, Clock, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, MessageCircle, CheckCircle, XCircle, Clock, AlertTriangle, Mail } from 'lucide-react';
 
 // Reputation badge component
 const ReputationBadge = ({ status, t }) => {
@@ -85,8 +85,9 @@ export const Exchanges = () => {
     }
   };
 
-  // Check if user has any new/unseen exchanges
+  // Check if user has any new/unseen exchanges or unread messages
   const hasNewExchanges = exchanges.some(ex => ex.is_new && ex.status === 'pending');
+  const hasUnreadMessages = exchanges.some(ex => ex.has_unread && ex.status === 'pending');
 
   if (loading) {
     return (
@@ -108,9 +109,10 @@ export const Exchanges = () => {
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <h1 className="text-3xl font-black tracking-tight text-primary">{t('exchange.myExchanges')}</h1>
-          {hasNewExchanges && (
-            <Badge className="bg-red-500 text-white animate-pulse">
-              {t('exchange.newExchange')}
+          {(hasNewExchanges || hasUnreadMessages) && (
+            <Badge className="bg-red-500 text-white animate-pulse flex items-center gap-1">
+              <Mail className="h-3 w-3" />
+              {hasNewExchanges ? t('exchange.newExchange') : t('exchange.hasNewMessage')}
             </Badge>
           )}
         </div>
