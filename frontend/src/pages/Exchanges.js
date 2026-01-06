@@ -131,14 +131,24 @@ export const Exchanges = () => {
             {exchanges.map((exchange) => (
               <Card 
                 key={exchange.id}
-                className="cursor-pointer hover:shadow-lg transition-all"
+                className={`cursor-pointer hover:shadow-lg transition-all ${
+                  exchange.has_unread && exchange.status === 'pending' 
+                    ? 'border-2 border-primary' 
+                    : ''
+                }`}
                 onClick={() => navigate(`/exchanges/${exchange.id}`)}
               >
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="h-12 w-12 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold">
+                      <div className="h-12 w-12 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold relative">
                         {(exchange.partner?.display_name || 'U')[0].toUpperCase()}
+                        {/* Unread indicator dot */}
+                        {exchange.has_unread && exchange.status === 'pending' && (
+                          <span className="absolute -top-1 -right-1 h-4 w-4 bg-red-500 rounded-full flex items-center justify-center text-[10px] text-white font-bold">
+                            {exchange.unread_count > 9 ? '9+' : exchange.unread_count}
+                          </span>
+                        )}
                       </div>
                       <div>
                         <p className="font-semibold">
