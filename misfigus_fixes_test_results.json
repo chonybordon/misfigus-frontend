@@ -1,18 +1,18 @@
 {
-  "timestamp": "2026-01-06T00:15:15.421580",
-  "tests_run": 6,
-  "tests_passed": 4,
-  "success_rate": 66.66666666666666,
+  "timestamp": "2026-01-06T00:15:46.608925",
+  "tests_run": 12,
+  "tests_passed": 10,
+  "success_rate": 83.33333333333334,
   "results": [
     {
       "test": "Authenticate User 1",
       "success": true,
-      "details": "User ID: 9790db3d-1b52-4d27-925f-7f37f5963e2b"
+      "details": "User ID: a63a3657-e167-4f0d-9753-adba9d496b3b"
     },
     {
       "test": "Authenticate User 2",
       "success": true,
-      "details": "User ID: 9b4fe248-2b18-4070-bfec-2d3c8db55dfa"
+      "details": "User ID: 8aece6e3-0e47-4496-a2c3-9d1c5479ea47"
     },
     {
       "test": "Activate Qatar album for User 1",
@@ -25,16 +25,46 @@
       "details": ""
     },
     {
-      "test": "Create exchange for i18n test",
-      "success": false,
-      "details": "Status: 400, Response: {'detail': 'NO_MUTUAL_MATCH'}"
+      "test": "Setup mutual sticker matches",
+      "success": true,
+      "details": "User 1 has 56c84277-db3b-4421-8a7b-e6f3fa1a823a, needs 09a3f6e3-3d25-472a-8593-a443a07f67ec; User 2 has 09a3f6e3-3d25-472a-8593-a443a07f67ec, needs 56c84277-db3b-4421-8a7b-e6f3fa1a823a"
     },
     {
-      "test": "Create duplicate exchange",
+      "test": "Create exchange for i18n test",
+      "success": true,
+      "details": "Exchange ID: e934b174-7d55-4c6d-a599-a4fcda1c36aa"
+    },
+    {
+      "test": "System message uses i18n key",
+      "success": true,
+      "details": "Message content: 'SYSTEM_EXCHANGE_STARTED' (expected: 'SYSTEM_EXCHANGE_STARTED')"
+    },
+    {
+      "test": "Send message from partner",
       "success": false,
-      "details": "Status: 400, Response: {'detail': 'NO_MUTUAL_MATCH'}"
+      "details": "Status: 405, Response: {'detail': 'Method Not Allowed'}"
+    },
+    {
+      "test": "Duplicate exchange returns existing",
+      "success": true,
+      "details": "is_existing: True, exchange_id: e934b174-7d55-4c6d-a599-a4fcda1c36aa"
+    },
+    {
+      "test": "Same exchange ID returned",
+      "success": true,
+      "details": "Original: e934b174-7d55-4c6d-a599-a4fcda1c36aa, Returned: e934b174-7d55-4c6d-a599-a4fcda1c36aa"
+    },
+    {
+      "test": "Confirm exchange with minor failure reason",
+      "success": true,
+      "details": "schedule_conflict accepted"
+    },
+    {
+      "test": "Get reputation after minor failure",
+      "success": false,
+      "details": "Status: 404, Response: {'detail': 'Not Found'}"
     }
   ],
-  "exchange_id": null,
-  "chat_id": null
+  "exchange_id": "e934b174-7d55-4c6d-a599-a4fcda1c36aa",
+  "chat_id": "6cca9a60-67a2-47c1-8915-fa83863db410"
 }
