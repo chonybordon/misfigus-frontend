@@ -116,11 +116,11 @@ export const ExchangeChat = () => {
         </Button>
         <div className="flex items-center gap-3 flex-1">
           <div className="h-10 w-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold">
-            {(exchange?.partner?.display_name || 'U')[0].toUpperCase()}
+            {getDisplayName(exchange?.partner, t)[0].toUpperCase()}
           </div>
           <div>
             <p className="font-semibold">
-              {exchange?.partner?.display_name || t('app.defaultUser')}
+              {getDisplayName(exchange?.partner, t)}
             </p>
             <ReputationBadge status={exchange?.partner?.reputation_status} t={t} />
           </div>
