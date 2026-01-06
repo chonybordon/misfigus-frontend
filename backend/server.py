@@ -1744,6 +1744,27 @@ async def get_user_exchanges(album_id: str, user_id: str = Depends(get_current_u
         
         # Mark which user is "me"
         exchange['is_user_a'] = exchange['user_a_id'] == user_id
+        
+        # Check for unread messages (messages from partner after user's last read)
+        chat = await db.chats.find_one({"exchange_id": exchange['id']}, {"_id": 0})
+        if chat:
+            last_read_field = 'user_a_last_read' if exchange['is_user_a'] else 'user_b_last_read'
+            last_read = chat.get(last_read_field)
+            
+            # Count messages from partner that are newer than last_read
+            query = {
+                "chat_id": chat['id'],
+                "sender_id": partner_id  # Only messages from partner
+            }
+            if last_read:
+                query["created_at"] = {"$gt": last_read}
+            
+            unread_count = await db.chat_messages.count_documents(query)
+            exchange['has_unread'] = unread_count > 0
+            exchange['unread_count'] = unread_count
+        else:
+            exchange['has_unread'] = False
+            exchange['unread_count'] = 0
     
     return exchanges
 
