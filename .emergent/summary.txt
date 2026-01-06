@@ -1,160 +1,165 @@
 <analysis>**original_problem_statement:**
-The user initially aimed to build a sticker trading app, which evolved into MisFigus, an album-centric application. The development has focused on creating a private, local, and non-social exchange model.
+The user is building a sticker trading app called MisFigus. The goal is to fix three high-priority issues identified during testing in a single implementation pass.
 
-Recent user requests have been a mix of new features and extensive bug fixing based on user testing:
-1.  **UX Fix:** Prevent a Not Found error toast when viewing an empty list of exchanges/matches.
-2.  **UI Enhancement:** Add a special visual treatment (dark green text, checkmark icon) for 100% completed albums.
-3.  **Build Fix & Security:** Fix a compilation error in  and filter out test/seed users from all match-making logic.
-4.  **Core Feature:** Implement Profile settings for Location & Search Radius, and a mandatory Terms & Conditions acceptance flow for new users.
-5.  **Architecture:** Evolve the location system into a globally scalable, structured model (Country/Region/City) to ensure accurate radius-based matching without relying on free-text input.
-6.  **Consolidated Bug Fixes:** A large, final request consolidated 10 distinct bugs and UX issues found during testing, covering i18n, navigation loops, cooldown logic, and exchange flow improvements.
+**PRODUCT REQUIREMENTS (from the latest user request):**
 
-**User's preferred language**: The user communicates in English. The application UI is in Spanish. The next agent must respond in **English**.
+1.  **Fix User Name Display:**
+    *   Currently, other users are displayed as a generic Usuario.
+    *   This needs to be replaced with the user's actual .
+    *   A Complete your profile flow must be enforced on first login if  is missing, requiring a name/nickname.
+    *   If a name is not set, the UI should display a fallback like Sin nombre (es) / No name (en), not Usuario.
+    *   All parts of the UI (exchanges list, chat, etc.) must use a consistent helper to display the correct name.
+
+2.  **Fix Chat i18n Leak:**
+    *   The system message Exchange started. Coordinate your in-person exchange here appears in English, even when the app language is Spanish.
+    *   This must be fixed by storing a translatable key (e.g., ) in the database for system messages, instead of the final rendered text. The frontend should then use  to render the correct translation at runtime.
+
+3.  **Fix Album Screen i18n Leaks:**
+    *   On the main albums screen, the subtitle (Selecciona un álbum) and category labels (Fútbol, Anime, etc.) remain in Spanish when the language is switched to English.
+    *   The hardcoded subtitle must be replaced with an  key.
+    *   The backend must be modified to provide a stable  (e.g., , ) for each album, and the frontend must use this key to look up the translated category name.
+
+**User's preferred language**: English. The application's UI is primarily in Spanish, but with English translations. The next agent must respond in **English**.
 
 **what currently exists?**
-The project is a full-stack application (React, FastAPI, MongoDB) with a functional album-centric, private exchange model. Key features like OTP authentication (Resend), a complete exchange lifecycle, and an automatic reputation system are in place.
+The application is a full-stack React/FastAPI/MongoDB project. In the last session, the agent implemented a large number of fixes based on user feedback, including:
+- A message visibility system with unread indicators on the Exchanges list and a badge on the Album Home page.
+- A fix for a navigation loop when going back from the chat screen.
+- The addition of non-penalizing failure reasons for exchanges.
+- Extensive additions to the  translation files.
 
-The most recent session implemented a significant number of features and fixes:
-*   **Structured Location System:** The backend and frontend now support a globally scalable location system. Users select their location from predefined lists (Country, Region, City), and all matching is done server-side via latitude/longitude and a Haversine-based distance calculation.
-*   **Terms & Conditions Flow:** A mandatory T&C acceptance modal is now shown once to new users. Acceptance is tracked in the backend.
-*   **Profile Page Overhaul:** The profile page was completely rebuilt to manage the new structured location, search radius, and view T&C acceptance status, including handling for settings-change cooldowns.
-*   **Consolidated Fixes:** The codebase for a large batch of 10 user-reported bugs (related to i18n, exchange creation, navigation, and UX) has been implemented.
+The agent ran both backend and frontend testing sub-agents on these fixes, and they passed. However, immediately after, the user provided a new, higher-priority list of three critical issues to be fixed.
 
 **Last working item**:
-The agent worked on a large, consolidated list of 10 bug fixes and UX improvements sourced from user testing.
+The agent just began work on a new, three-part task from the user to fix critical UI and i18n issues.
 
-*   **Last item agent was working:** Implementing code changes for all 10 items in the user's consolidated feedback list. This included fixing i18n string leaks, correcting the T&C modal from appearing on every login, implementing an upsert logic for exchange creation, fixing navigation loops, and adding non-penalizing reasons for failed exchanges.
-*   **Status:** IN PROGRESS
-*   **Agent Testing Done:** N (The agent completed the coding for the batch of 10 fixes but did not perform a comprehensive verification of all changes.)
-*   **Which testing method agent to use?** both
-*   **User Testing Done:** N
+-   **Last item agent was working:** Analyzing the codebase to address the three new high-priority issues: (1) user names displaying as Usuario, (2) English system text leaking into the chat, and (3) untranslated text on the Albums screen. The agent has reviewed  and was about to start implementation.
+-   **Status:** NOT STARTED
+-   **Agent Testing Done:** N
+-   **Which testing method agent to use?** both (Backend changes are needed for data models and API responses; frontend changes are needed for UI rendering and i18n logic).
+-   **User Testing Done:** N
 
 **All Pending/In progress Issue list**:
-*   **Issue 1: Comprehensive Verification of Consolidated Fixes (P0)**
-    *   **Description:** The last user request involved 10 distinct bug fixes and UX improvements. While the code has been written, it has not been tested as a whole. A full end-to-end verification is required to confirm all issues are resolved.
-    *   **Attempted fixes:** Code implementation is complete across multiple frontend and backend files.
-    *   **Next debug checklist:**
-        1.  Systematically test each of the 10 items from the final user request (Message #333).
-        2.  **i18n:** Switch languages and verify no English text leaks appear.
-        3.  **T&C:** Log in as an existing user and confirm the modal does not appear.
-        4.  **Exchange Creation:** Click Coordinate Exchange on the same match twice; confirm it opens the existing chat without an error.
-        5.  **Chat Navigation:** Use the back button in the chat and confirm it doesn't loop.
-        6.  **Rating Flow:** Simulate a failed exchange and verify the new non-penalizing reasons are available and do not affect reputation.
-    *   **Why fix this issue?** To ensure application stability and confirm that all user-reported bugs from the recent testing cycle are actually resolved.
-    *   **Status:** IN PROGRESS
-    *   **Is recurring issue?** N
-    *   **Should Test frontend/backend/both after fix?** both
-    *   **Blocked on other issue:** None.
-
-*   **Issue 2: Suggested Exchanges Visibility Bug (P1)**
-    *   **Description:** Item #9 in the user's final request was to add a visual indicator (badge/dot) for new exchange proposals. This was not implemented in the last session.
-    *   **Attempted fixes:** None.
-    *   **Next debug checklist:**
-        1.  Modify the backend  endpoint to include a flag for unread messages or unseen status changes.
-        2.  Update the frontend to display a visual indicator (e.g., a dot) on the Exchanges navigation link or on the specific exchange card in .
-    *   **Why fix this issue?** To improve user experience by making it clear when they have a pending action or a new exchange to review.
+*   **Issue 1: Implement Three Critical Fixes (P0)**
+    *   **Description:** The user has mandated that three issues—User Name Display, Chat i18n Leak, and Album Screen i18n—be fixed in a single pass. This is the top priority.
     *   **Status:** NOT STARTED
+    *   **Is recurring issue?** Yes (Chat i18n leak).
+    *   **Blocked on other issue:** None.
+    *   **Issues Detail:** See  section for a breakdown.
+
+*   **Issue 2: Full Verification of Previous Fixes (P1)**
+    *   **Description:** A large batch of 7 fixes (message visibility, nav loop, etc.) was coded and passed automated tests, but the user has not verified them. A full, manual end-to-end check of these features is still required after the current P0 task is complete.
+    *   **Status:** USER VERIFICATION PENDING
     *   **Is recurring issue?** N
     *   **Should Test frontend/backend/both after fix?** both
-    *   **Blocked on other issue:** None.
+    *   **Blocked on other issue:** Implement Three Critical Fixes.
 
-*   **Issue 3: Navigation Issue from  (P2)**
-    *   **Description:** A low-priority navigation issue was reported in an old test report and has not been evaluated or addressed yet.
-    *   **Attempted fixes:** None.
-    *   **Next debug checklist:**
-        1.  Review  to understand the original issue.
-        2.  Attempt to reproduce it in the current application.
-    *   **Why fix this issue?** To ensure a smooth and predictable user experience.
+*   **Issue 3: Old Navigation Issue from  (P2)**
+    *   **Description:** A low-priority navigation issue was reported in an old test report and has not been addressed.
     *   **Status:** NOT STARTED
     *   **Is recurring issue?** N
     *   **Should Test frontend/backend/both after fix?** frontend
     *   **Blocked on other issue:** None.
 
 **In progress Task List**:
-*   None. The main pending work is categorized under issues.
+*   None. The current work is defined by the P0 issue.
 
 **Upcoming and Future Tasks**
-*   **Upcoming Tasks:**
-    *   Implement the visual indicator for new exchanges (part of Issue 2).
+
+*   **Upcoming Tasks (Current P0 Task):**
+    *   **Task 1 (P0): Fix User Name Display:**
+        *   **Backend:** Add  to the  model.
+        *   **Backend:** Create a new endpoint or modify an existing one to update the .
+        *   **Frontend:** Implement a Complete Profile modal/page that is enforced if  is missing.
+        *   **Frontend:** Update all components that show a user's name (, , etc.) to use  with a fallback to an i18n key ().
+    *   **Task 2 (P0): Fix Chat i18n Leak:**
+        *   **Backend:** Modify the  data structure within an  to store a system message  (e.g., ) instead of hardcoded English text.
+        *   **Frontend:** In , check if a message is a system message and use the  to render the text via .
+    *   **Task 3 (P0): Fix Album Screen i18n:**
+        *   **Backend:** Modify the  endpoint. For each album, return a  (e.g., sports) instead of or in addition to the Spanish category name. Implement a mapping from old Spanish names (Fútbol) to the new keys.
+        *   **Frontend:** In , replace the hardcoded Selecciona un álbum subtitle with .
+        *   **Frontend:** In , use  to display the translated category name.
+        *   **Frontend:** Add all new keys to  for English and Spanish.
 
 *   **Future Tasks:**
-    *   Re-evaluate and potentially fix the old navigation issue from .
+    *   Address the old navigation issue from .
 
 **Completed work in this session**
-- **Structured Location System:** Implemented a full-stack, globally scalable location system using structured data (Country/Region/City), with server-side geocoding and Haversine-based distance calculations for all matching logic (, , ).
-- **Profile & T&C Feature:** Created a mandatory Terms & Conditions acceptance flow for new users and a completely new Profile UI to manage location, search radius, and view T&C status.
-- **Bug Fix (Exchange Creation):** Implemented an upsert endpoint () to prevent an error when a user tries to coordinate an already existing exchange (, ).
-- **Bug Fix (Cooldown Logic):** Corrected backend logic to enforce independent 14-day (location) and 7-day (radius) cooldowns, and updated the UI to display them correctly.
-- **Bug Fix (i18n & Hardcoded Text):** Replaced numerous hardcoded English strings and raw backend error messages with i18n keys throughout the frontend.
-- **Bug Fix (Build Error):** Resolved a compilation error in  by correctly using  for the .
-- **Security Fix (Test User Filtering):** Implemented server-side logic in  to filter test/seed users from all match suggestions and metrics.
-- **UI Enhancement (Album Completion):** Added a checkmark icon and green text for 100% completed albums in .
+- **Message Visibility Feature:** Implemented backend support ( flags in  model) and two new endpoints (, ). Updated the frontend to show a New Message indicator on exchange cards and a notification badge on the Album home page.
+- **Navigation Loop Fix:** Corrected a bug in  that caused a loop when navigating back from the chat screen.
+- **Rating Flow Improvement:** Added non-penalizing failure reasons to the backend model.
+- **i18n Expansion:** Added a large number of new translation keys to .
+- **Automated Testing:** Ran and passed both backend and frontend testing sub-agents for the above fixes.
+
+**Earlier issues found/mentioned but not fixed**
+-   **Issue 1: Chat system message localization.**
+    -   **Debug checklist:** This was reported in the previous user request. The agent added i18n keys but failed to address the root cause. The user has now specified that the backend is storing the *final text* in the database instead of a *translatable key*. The fix requires changing the data model for system messages.
+    -   **Why to solve this issue and what will be achieved with this?** To ensure the chat UI is fully localized and respects the user's language preference.
+    -   **Should Test frontend/backend/both after fix:** both
+    -   **Is recurring issue?** Y
+
+**Known issue recurrence from previous fork**
+- None.
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
-*   **Backend:** FastAPI, Pydantic, MongoDB (via ).
-*   **Frontend:** React, React Router, , , , .
-*   **Geolocation:** Structured location data model (country, region, etc.). Server-side distance calculation using the **Haversine formula**.
-*   **Settings Cooldown:** Server-enforced, independent cooldown periods for changing location (14 days) and search radius (7 days).
+*   **i18n Strategy:** The critical concept for the next task is moving from storing rendered text in the database to storing translatable keys, which are then rendered on the client-side. This applies to both chat messages and album categories.
+*   **User Onboarding:** A light Complete Profile flow needs to be implemented.
 
 **key DB schema**
-*   **users:** uid=0(root) gid=0(root) groups=0(root), , , ,  (bool),  (str),  (datetime),  (int),  (str),  (str),  (str),  (str),  (float),  (float),  (str),  (datetime),  (datetime).
-*   **exchanges:** Updated to include  and  (str).
+-   **users:** Will require a new  field (string).
+-   **exchanges:** Contains  (bool) and  (bool). The  array within will need to be updated to support system message keys.
+-   **albums:** The data source for albums will need to be updated to include a  (string).
 
 **changes in tech stack**
-*   **Added:**  to the frontend for rendering the Terms & Conditions.
+- None in the last session.
 
 **All files of reference**
-*   : The core backend logic, heavily modified for location, matching, T&C, and bug fixes.
-*   : Defines the updated Pydantic models for users and exchanges.
-*   : A new static data source for country/region/city information.
-*   : The completely rewritten UI for user settings.
-*   : The new component for displaying and accepting Terms & Conditions.
-*   : Contains the global routing logic that enforces T&C acceptance.
-*   : The central file for all UI translations, which was significantly expanded.
+*   : Will need changes for user profile updates and album category keys.
+*   : Will need changes for the  model.
+*   : Target for i18n fixes.
+*   : Target for chat system message fix.
+*   : Will need new translation keys.
+*   Any component that displays a username will need to be updated (e.g., , ).
 
 **key api endpoints**
-*   : Creates a new exchange or retrieves an existing one between two users for an album.
-*   : Returns a list of all supported countries.
-*   : Returns regions for a given country.
-*   : Searches for cities within a country.
-*   : Saves the user's new structured location and resets the cooldown.
-*   : Returns the user's location and cooldown status.
-*   : Records the user's acceptance of the T&C.
-*   : Updated to accept  and apply reputation changes conditionally.
+*   : Marks messages in a chat as read by the current user.
+*   : Gets the number of exchanges with unread messages for an album.
+*   : Will need to be modified to return a .
+*   A new endpoint will be needed to update a user's .
 
 **Critical Info for New Agent**
-*   **Verification is the top priority.** A large batch of fixes was just implemented. You must start by systematically testing each of the 10 items from the user's last major request to ensure they are all resolved correctly.
-*   **The location system is new and critical.** All user matching is now based on latitude/longitude stored in the user's profile. Free-text location is gone.
-*   **Follow cooldown rules.** Location change cooldown is 14 days, radius is 7 days. They are independent. The backend enforces this.
-*   One requested feature, a **visual indicator for new exchanges**, was missed. This is the next implementation task after verification is complete.
+*   **Your immediate and only priority is to implement the three fixes from the user's last message (message #87) in a single pass.** Do not work on anything else until this is done.
+*   The **chat i18n issue is recurring**. The previous agent's fix was insufficient. The correct solution, as specified by the user, is to change the database to store a translatable *key* for system messages, not the rendered English text.
+*   The **user name fix** requires both backend ( field) and frontend (profile completion flow, UI updates) changes. The fallback for a missing name must be Sin nombre / No name, not Usuario.
+*   The **album category fix** requires the backend to send a  and the frontend to use it for translation lookups.
 
 **documents and test reports created in this job**
-*    (Updated)
+*    (Updated for the previous set of fixes).
 
 **Last 10 User Messages and any pending HUMAN messages**
-1.  **USER:** Requested a fix for the location cooldown logic (was showing 14 days incorrectly).
-2.  **USER:** Provided a large, consolidated list of 10 bugs and UX fixes to be implemented. (This was the last major task worked on).
+1.  **USER (Message #5):** Interrupted the agent to report 7 new critical bugs found in testing (A-G), including chat i18n leaks and message visibility issues. Demanded these be fixed first. (COMPLETED by agent, pending user verification).
+2.  **USER (Message #8):** Approved the plan to fix the 7 critical bugs and provided strict execution rules and deliverables. (COMPLETED by agent, pending user verification).
+3.  **USER (Message #87):** Ignored the agent's completion summary and submitted a new, high-priority request to fix 3 critical issues in one pass: user names showing as Usuario, the recurring chat i18n leak, and i18n leaks on the Albums screen. (PENDING - This is the current task).
 
 **Project Health Check:**
-*   **Functional:** The application is in a runnable state, but core logic has been heavily modified.
+*   **Broken:** The UI currently has significant visual and internationalization bugs that harm the user experience (incorrect names, untranslated text).
 *   **Mocked:** No features are currently mocked.
 
 **3rd Party Integrations**
-*   **Resend:** For sending OTP and transactional emails.
+*   **Resend:** For OTP and transactional emails.
 *   **react-markdown:** For rendering T&C content.
 
 **Testing status**
-*   **Testing agent used after significant changes:** YES, used to verify individual fixes and endpoints throughout the session.
-*   **Troubleshoot agent used after agent stuck in loop:** NO.
-*   **Test files created:** None permanent, but several ad-hoc Python scripts were used for testing.
-*   **Known regressions:** None confirmed, but the risk is high due to the volume of recent changes. Verification is needed.
+-   **Testing agent used after significant changes:** YES (on the previous batch of fixes).
+-   **Troubleshoot agent used after agent stuck in loop:** NO.
+-   **Test files created:** None.
+-   **Known regressions:** The chat system message i18n issue is a known regression/incomplete fix.
 
 **Credentials to test flow:**
-*   The OTP login flow is live. Use any real email address; the OTP will be sent to that inbox from .
+*   Use any real email address for OTP login. The code will be sent from .
 
 **What agent forgot to execute**
-*   The agent did not implement the requested visual indicator (badge/dot) for new/pending exchanges, which was part of the user's consolidated list of fixes (item #9).
-*   The agent did not perform a final, comprehensive test of all 10 fixes implemented from the user's last request.</analysis>
+*   The previous agent failed to correctly diagnose and fix the root cause of the chat system message i18n leak, which required a change to the data being stored in the database.</analysis>
