@@ -184,7 +184,10 @@ class MisFigusFixesTester:
         success, response = self.make_request(
             "POST",
             f"albums/{self.qatar_album_id}/exchanges",
-            {"partner_user_id": self.partner_user_id},
+            {
+                "album_id": self.qatar_album_id,
+                "partner_user_id": self.partner_user_id
+            },
             200
         )
         
