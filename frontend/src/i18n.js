@@ -67,7 +67,8 @@ const resources = {
         noExchangesAvailable: 'No hay intercambios disponibles en tu zona por el momento',
         joinedSuccess: 'Te has unido al álbum',
         noStickersYet: 'Figuritas próximamente',
-        placeholderBanner: 'Colección en preparación: por ahora usá numeración'
+        placeholderBanner: 'Colección en preparación: por ahora usá numeración',
+        newMessagesInExchanges: 'Tenés mensajes nuevos en tus intercambios'
       },
       invite: {
         title: 'Invitar al Álbum',
