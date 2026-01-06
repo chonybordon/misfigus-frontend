@@ -299,7 +299,7 @@ class MisFigusFixesTester:
         # Send a message from partner to user
         success, response = self.make_request(
             "POST",
-            f"exchanges/{self.exchange_id}/chat",
+            f"exchanges/{self.exchange_id}/chat/messages",
             {"content": "Hello, let's exchange stickers!"},
             200,
             token=self.partner_token
