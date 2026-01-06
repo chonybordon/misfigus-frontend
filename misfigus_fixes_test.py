@@ -505,8 +505,9 @@ class MisFigusFixesTester:
         
         success, rep_after = self.make_request(
             "GET",
-            f"users/{self.user_id}/reputation",
-            expected_status=200
+            "user/reputation",
+            expected_status=200,
+            token=self.token
         )
         
         if not success:
