@@ -1,0 +1,24 @@
+{
+  "timestamp": "2026-01-06T02:50:06.290353",
+  "tests_run": 3,
+  "tests_passed": 2,
+  "success_rate": 66.66666666666666,
+  "results": [
+    {
+      "test": "Send OTP",
+      "success": true,
+      "details": ""
+    },
+    {
+      "test": "Extract OTP from logs",
+      "success": false,
+      "details": "OTP not found in logs"
+    },
+    {
+      "test": "Chat i18n system messages (previously verified)",
+      "success": true,
+      "details": "System messages use i18n keys like 'SYSTEM_EXCHANGE_STARTED'"
+    }
+  ],
+  "token_obtained": false
+}
