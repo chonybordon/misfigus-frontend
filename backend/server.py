@@ -1936,6 +1936,15 @@ async def get_exchange_chat(exchange_id: str, user_id: str = Depends(get_current
         {"_id": 0}
     ).sort("created_at", 1).to_list(500)
     
+    # Mark messages as read for this user
+    now = datetime.now(timezone.utc).isoformat()
+    is_user_a = exchange['user_a_id'] == user_id
+    last_read_field = 'user_a_last_read' if is_user_a else 'user_b_last_read'
+    await db.chats.update_one(
+        {"id": chat['id']},
+        {"$set": {last_read_field: now}}
+    )
+    
     return {
         "chat": chat,
         "messages": messages,
