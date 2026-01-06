@@ -611,6 +611,15 @@ const resources = {
         newTestUser: 'New test user',
         technicalAccount: 'Technical account (test)'
       },
+      errors: {
+        albumNotActivated: 'Album is not activated',
+        partnerNotFound: 'User not found in this album',
+        accountRestricted: 'Your account is temporarily restricted',
+        partnerNotAvailable: 'This user is not available for exchanges',
+        noMutualMatch: 'No mutual matches to exchange',
+        locationCooldown: 'You can change your location in {{days}} days',
+        radiusCooldown: 'You can change the radius in {{days}} days'
+      },
       common: {
         loading: 'Loading...',
         error: 'Error',
@@ -620,7 +629,9 @@ const resources = {
         cancel: 'Cancel',
         save: 'Save',
         delete: 'Delete',
-        edit: 'Edit'
+        optional: 'optional',
+        edit: 'Edit',
+        confirm: 'Confirm'
       }
     }
   },
