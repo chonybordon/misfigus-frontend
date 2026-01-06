@@ -11,7 +11,12 @@ const resources = {
         defaultUser: 'Usuario'
       },
       profile: {
-        noName: 'Sin nombre'
+        noName: 'Sin nombre',
+        completeTitle: 'Completá tu perfil',
+        completeSubtitle: 'Para continuar, necesitamos tu nombre o apodo',
+        enterName: 'Ingresá tu nombre',
+        namePlaceholder: 'Ej: Juan, Mati, La Flaca...',
+        continueBtn: 'Continuar'
       },
       categories: {
         sports: 'Fútbol',
@@ -345,7 +350,12 @@ const resources = {
         defaultUser: 'User'
       },
       profile: {
-        noName: 'No name'
+        noName: 'No name',
+        completeTitle: 'Complete your profile',
+        completeSubtitle: 'To continue, we need your name or nickname',
+        enterName: 'Enter your name',
+        namePlaceholder: 'E.g.: John, Matt, Buddy...',
+        continueBtn: 'Continue'
       },
       categories: {
         sports: 'Sports',
