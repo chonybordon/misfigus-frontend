@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-01-06T00:14:31.012532",
+  "timestamp": "2026-01-06T00:15:15.421580",
   "tests_run": 6,
   "tests_passed": 4,
   "success_rate": 66.66666666666666,
@@ -7,12 +7,12 @@
     {
       "test": "Authenticate User 1",
       "success": true,
-      "details": "User ID: 808b199c-5d03-408a-9011-10c08abc4fc7"
+      "details": "User ID: 9790db3d-1b52-4d27-925f-7f37f5963e2b"
     },
     {
       "test": "Authenticate User 2",
       "success": true,
-      "details": "User ID: ea9628c0-4ce5-4ffd-9a18-62a5caf4f8eb"
+      "details": "User ID: 9b4fe248-2b18-4070-bfec-2d3c8db55dfa"
     },
     {
       "test": "Activate Qatar album for User 1",
@@ -27,12 +27,12 @@
     {
       "test": "Create exchange for i18n test",
       "success": false,
-      "details": "Status: 422, Response: {'detail': [{'type': 'missing', 'loc': ['body', 'album_id'], 'msg': 'Field required', 'input': {'partner_user_id': 'ea9628c0-4ce5-4ffd-9a18-62a5caf4f8eb'}, 'url': 'https://errors.pydantic.dev/2.12/v/missing'}]}"
+      "details": "Status: 400, Response: {'detail': 'NO_MUTUAL_MATCH'}"
     },
     {
       "test": "Create duplicate exchange",
       "success": false,
-      "details": "Status: 422, Response: {'detail': [{'type': 'missing', 'loc': ['body', 'album_id'], 'msg': 'Field required', 'input': {'partner_user_id': 'ea9628c0-4ce5-4ffd-9a18-62a5caf4f8eb'}, 'url': 'https://errors.pydantic.dev/2.12/v/missing'}]}"
+      "details": "Status: 400, Response: {'detail': 'NO_MUTUAL_MATCH'}"
     }
   ],
   "exchange_id": null,
