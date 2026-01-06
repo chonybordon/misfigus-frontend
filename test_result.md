@@ -3,27 +3,33 @@
 backend:
   - task: "Fix A - Chat i18n system message"
     implemented: true
-    working: NA
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: NA
         agent: "main"
         comment: "Backend stores 'SYSTEM_EXCHANGE_STARTED' key instead of English text. Frontend translates it."
+      - working: true
+        agent: "testing"
+        comment: "✅ VERIFIED: System messages now store 'SYSTEM_EXCHANGE_STARTED' i18n key instead of hardcoded English text. Exchange creation triggers proper system message with i18n key."
 
   - task: "Fix B & C - Message visibility indicators"
     implemented: true
-    working: NA
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: NA
         agent: "main"
         comment: "Added unread tracking: user_a_last_read/user_b_last_read in chats collection. get_user_exchanges returns has_unread and unread_count. get_album returns has_unread_exchanges and pending_exchanges."
+      - working: true
+        agent: "testing"
+        comment: "✅ VERIFIED: All message visibility indicators working correctly. GET /api/albums/{album_id}/exchanges returns has_unread and unread_count fields. GET /api/albums/{album_id} returns has_unread_exchanges and pending_exchanges fields. GET /api/exchanges/{exchange_id}/chat properly marks messages as read and updates unread counts."
 
   - task: "Fix D - Navigation loop"
     implemented: true
@@ -39,27 +45,33 @@ backend:
 
   - task: "Fix E - Exchange already exists error"
     implemented: true
-    working: NA
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: NA
         agent: "main"
         comment: "UPSERT logic already in place. POST /api/albums/{album_id}/exchanges returns existing exchange with is_existing=true instead of error."
+      - working: true
+        agent: "testing"
+        comment: "✅ VERIFIED: UPSERT behavior working correctly. Creating duplicate exchange between same users returns existing exchange with is_existing=true instead of throwing error. Same exchange ID returned consistently."
 
   - task: "Fix G - Non-penalizing failure reasons"
     implemented: true
-    working: NA
-    file: "/app/frontend/src/pages/Exchanges.js"
+    working: true
+    file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: NA
         agent: "main"
         comment: "Added FAILURE_REASONS_MINOR (schedule_conflict, personal_issue, moved_away, lost_stickers) with distinct UI. Backend already had EXCHANGE_FAILURE_REASONS_MINOR that doesn't affect reputation."
+      - working: true
+        agent: "testing"
+        comment: "✅ VERIFIED: Non-penalizing failure reasons working correctly. Exchange confirmation with failure_reason='schedule_conflict' is accepted and does NOT negatively affect user reputation. Minor failure reasons properly distinguished from serious ones."
 
 frontend:
   - task: "Fix F - i18n key leak"
