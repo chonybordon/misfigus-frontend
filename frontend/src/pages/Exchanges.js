@@ -42,12 +42,20 @@ const ExchangeStatusBadge = ({ status, t }) => {
   );
 };
 
-// Failure reasons
-const FAILURE_REASONS = [
+// Failure reasons - Split into MINOR (no reputation impact) and SERIOUS
+const FAILURE_REASONS_MINOR = [
+  { value: 'schedule_conflict', labelKey: 'exchange.reasonScheduleConflict' },
+  { value: 'personal_issue', labelKey: 'exchange.reasonPersonalIssue' },
+  { value: 'moved_away', labelKey: 'exchange.reasonMovedAway' },
+  { value: 'lost_stickers', labelKey: 'exchange.reasonLostStickers' }
+];
+
+const FAILURE_REASONS_SERIOUS = [
   { value: 'no_show', labelKey: 'exchange.reasonNoShow' },
-  { value: 'cancelled', labelKey: 'exchange.reasonCancelled' },
+  { value: 'cancelled_no_notice', labelKey: 'exchange.reasonCancelledNoNotice' },
   { value: 'attempted_sale', labelKey: 'exchange.reasonAttemptedSale' },
-  { value: 'inappropriate', labelKey: 'exchange.reasonInappropriate' }
+  { value: 'inappropriate', labelKey: 'exchange.reasonInappropriate' },
+  { value: 'wrong_stickers', labelKey: 'exchange.reasonWrongStickers' }
 ];
 
 export const Exchanges = () => {
@@ -355,9 +363,28 @@ export const ExchangeDetail = () => {
             </DialogHeader>
 
             {confirmType === 'failure' && (
-              <div className="space-y-2">
+              <div className="space-y-3">
                 <p className="text-sm font-semibold">{t('exchange.selectReasonLabel')}</p>
-                {FAILURE_REASONS.map((reason) => (
+                
+                {/* Minor issues - No reputation impact */}
+                <p className="text-xs text-muted-foreground font-medium mt-2">{t('exchange.minorIssuesTitle')}</p>
+                {FAILURE_REASONS_MINOR.map((reason) => (
+                  <div 
+                    key={reason.value}
+                    className={`p-3 border rounded-lg cursor-pointer transition-all ${
+                      failureReason === reason.value 
+                        ? 'border-amber-500 bg-amber-50' 
+                        : 'hover:border-gray-400'
+                    }`}
+                    onClick={() => setFailureReason(reason.value)}
+                  >
+                    <p className="text-sm">{t(reason.labelKey)}</p>
+                  </div>
+                ))}
+                
+                {/* Serious issues - Affects reputation */}
+                <p className="text-xs text-muted-foreground font-medium mt-3">{t('exchange.seriousIssuesTitle')}</p>
+                {FAILURE_REASONS_SERIOUS.map((reason) => (
                   <div 
                     key={reason.value}
                     className={`p-3 border rounded-lg cursor-pointer transition-all ${
