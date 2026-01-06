@@ -10,6 +10,16 @@ const resources = {
         tagline: 'Intercambia figuritas con tu álbum',
         defaultUser: 'Usuario'
       },
+      profile: {
+        noName: 'Sin nombre'
+      },
+      categories: {
+        sports: 'Fútbol',
+        anime: 'Anime',
+        trading_cards: 'Trading Cards',
+        superheroes: 'Superhéroes',
+        entertainment: 'Entretenimiento'
+      },
       login: {
         title: 'MisFigus',
         subtitle: 'Intercambia figuritas con tu álbum',
@@ -333,6 +343,16 @@ const resources = {
         name: 'MisFigus',
         tagline: 'Trade stickers with your album',
         defaultUser: 'User'
+      },
+      profile: {
+        noName: 'No name'
+      },
+      categories: {
+        sports: 'Sports',
+        anime: 'Anime',
+        trading_cards: 'Trading Cards',
+        superheroes: 'Superheroes',
+        entertainment: 'Entertainment'
       },
       login: {
         title: 'MisFigus',
