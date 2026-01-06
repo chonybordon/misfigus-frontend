@@ -16,6 +16,7 @@ import Inventory from './pages/Inventory';
 import Matches from './pages/Matches';
 import Settings from './pages/Settings';
 import Profile from './pages/Profile';
+import CompleteProfile from './pages/CompleteProfile';
 import { Exchanges, ExchangeDetail } from './pages/Exchanges';
 import ExchangeChat from './pages/ExchangeChat';
 import { TermsView, TermsAcceptance } from './pages/Terms';
