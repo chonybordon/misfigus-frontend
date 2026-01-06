@@ -196,7 +196,8 @@ const resources = {
         exchangeCreated: 'Intercambio iniciado',
         exchangeExists: 'Intercambio encontrado',
         newExchange: 'Nuevo intercambio',
-        hasNewExchange: 'Tenés un nuevo intercambio pendiente'
+        hasNewExchange: 'Tenés un nuevo intercambio pendiente',
+        hasNewMessage: 'Mensajes nuevos'
       },
       system: {
         exchangeStarted: 'Intercambio iniciado. Coordina tu encuentro presencial aquí.',
