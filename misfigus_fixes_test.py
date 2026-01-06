@@ -472,8 +472,9 @@ class MisFigusFixesTester:
         # Get user reputation before failure
         success, rep_before = self.make_request(
             "GET",
-            f"users/{self.user_id}/reputation",
-            expected_status=[200, 404]  # 404 if no reputation record yet
+            "user/reputation",
+            expected_status=[200, 404],  # 404 if no reputation record yet
+            token=self.token
         )
         
         initial_failed_exchanges = 0
