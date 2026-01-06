@@ -50,30 +50,45 @@ api.interceptors.response.use(
 
 export const AuthContext = React.createContext(null);
 
-// Private route that also checks for terms acceptance
+// Private route that also checks for terms acceptance and profile completion
 const PrivateRoute = ({ children }) => {
   const token = localStorage.getItem('token');
   const [needsTerms, setNeedsTerms] = useState(false);
-  const [checkingTerms, setCheckingTerms] = useState(true);
+  const [needsProfile, setNeedsProfile] = useState(false);
+  const [checkingStatus, setCheckingStatus] = useState(true);
   
   useEffect(() => {
     if (token) {
-      checkTermsStatus();
+      checkStatus();
     } else {
-      setCheckingTerms(false);
+      setCheckingStatus(false);
     }
   }, [token]);
   
-  const checkTermsStatus = async () => {
+  const checkStatus = async () => {
     try {
       // Check cached terms status first to avoid repeated API calls
       const cachedTermsVersion = localStorage.getItem('termsAcceptedVersion');
       const currentVersion = '1.0'; // Must match backend CURRENT_TERMS_VERSION
       
+      // Check user profile for displayName
+      const userResponse = await api.get('/auth/me');
+      const userData = userResponse.data;
+      
+      // Update cached user data
+      localStorage.setItem('user', JSON.stringify(userData));
+      
+      // Check if profile needs completion (no display_name)
+      if (!userData.display_name) {
+        setNeedsProfile(true);
+        setCheckingStatus(false);
+        return;
+      }
+      
       if (cachedTermsVersion === currentVersion) {
         // Already accepted current version
         setNeedsTerms(false);
-        setCheckingTerms(false);
+        setCheckingStatus(false);
         return;
       }
       
@@ -88,11 +103,17 @@ const PrivateRoute = ({ children }) => {
       
       setNeedsTerms(needsAcceptance);
     } catch (error) {
-      console.error('Failed to check terms status:', error);
+      console.error('Failed to check status:', error);
       setNeedsTerms(false);
+      setNeedsProfile(false);
     } finally {
-      setCheckingTerms(false);
+      setCheckingStatus(false);
     }
+  };
+  
+  const handleProfileComplete = (updatedUser) => {
+    // User has completed their profile
+    setNeedsProfile(false);
   };
   
   const handleTermsAccepted = () => {
@@ -103,12 +124,17 @@ const PrivateRoute = ({ children }) => {
   
   if (!token) return <Navigate to="/" />;
   
-  if (checkingTerms) {
+  if (checkingStatus) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-2xl font-bold">Loading...</div>
       </div>
     );
+  }
+  
+  // Profile completion takes priority over terms
+  if (needsProfile) {
+    return <CompleteProfile onComplete={handleProfileComplete} />;
   }
   
   if (needsTerms) {
