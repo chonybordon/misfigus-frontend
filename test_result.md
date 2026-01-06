@@ -141,3 +141,5 @@ agent_communication:
     message: "Implemented all 7 fixes (A-G) from family testing. Backend changes: unread message tracking, album-level indicators. Frontend changes: navigation fix, failure reasons UI split, i18n updates. Ready for testing."
   - agent: "testing"
     message: "✅ BACKEND TESTING COMPLETE: All critical backend fixes (A, B, C, E, G) are working correctly. Fix A: i18n system messages verified. Fix B&C: Message visibility indicators fully functional. Fix E: UPSERT behavior working. Fix G: Non-penalizing failure reasons confirmed. Only frontend fixes (D, F) remain for testing."
+  - agent: "testing"
+    message: "✅ FRONTEND TESTING COMPLETE: Fix F (i18n key leak) VERIFIED - Spanish translations working correctly on login page, no raw keys detected. Fixes D, album indicators, and exchange indicators CANNOT BE TESTED due to OTP email authentication requirement. Code review shows proper implementation for untestable features."
