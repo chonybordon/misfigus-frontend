@@ -65,10 +65,7 @@ metadata:
   run_ui: false
 
 test_plan:
-  current_focus:
-    - "Fix 1 - User displayName Complete Profile"
-    - "Fix 3 - Album screen i18n"
-    - "User name display fallback"
+  current_focus: []
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
