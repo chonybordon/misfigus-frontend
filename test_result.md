@@ -118,11 +118,7 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Fix A - Chat i18n system message"
-    - "Fix B & C - Message visibility indicators"
     - "Fix D - Navigation loop"
-    - "Fix E - Exchange already exists error"
-    - "Fix G - Non-penalizing failure reasons"
     - "Fix F - i18n key leak"
   stuck_tasks: []
   test_all: false
@@ -131,3 +127,5 @@ test_plan:
 agent_communication:
   - agent: "main"
     message: "Implemented all 7 fixes (A-G) from family testing. Backend changes: unread message tracking, album-level indicators. Frontend changes: navigation fix, failure reasons UI split, i18n updates. Ready for testing."
+  - agent: "testing"
+    message: "✅ BACKEND TESTING COMPLETE: All critical backend fixes (A, B, C, E, G) are working correctly. Fix A: i18n system messages verified. Fix B&C: Message visibility indicators fully functional. Fix E: UPSERT behavior working. Fix G: Non-penalizing failure reasons confirmed. Only frontend fixes (D, F) remain for testing."
