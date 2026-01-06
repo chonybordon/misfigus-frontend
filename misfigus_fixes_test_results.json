@@ -1,18 +1,18 @@
 {
-  "timestamp": "2026-01-06T00:15:46.608925",
-  "tests_run": 12,
-  "tests_passed": 10,
-  "success_rate": 83.33333333333334,
+  "timestamp": "2026-01-06T00:16:48.586303",
+  "tests_run": 20,
+  "tests_passed": 20,
+  "success_rate": 100.0,
   "results": [
     {
       "test": "Authenticate User 1",
       "success": true,
-      "details": "User ID: a63a3657-e167-4f0d-9753-adba9d496b3b"
+      "details": "User ID: d18470e9-c32f-4c28-99b7-ecd6822b86ea"
     },
     {
       "test": "Authenticate User 2",
       "success": true,
-      "details": "User ID: 8aece6e3-0e47-4496-a2c3-9d1c5479ea47"
+      "details": "User ID: 85a5db87-270a-477d-853b-da797b3342a8"
     },
     {
       "test": "Activate Qatar album for User 1",
@@ -32,7 +32,7 @@
     {
       "test": "Create exchange for i18n test",
       "success": true,
-      "details": "Exchange ID: e934b174-7d55-4c6d-a599-a4fcda1c36aa"
+      "details": "Exchange ID: 6b7da8cb-c985-4960-8de5-8f7d205ff695"
     },
     {
       "test": "System message uses i18n key",
@@ -41,18 +41,58 @@
     },
     {
       "test": "Send message from partner",
-      "success": false,
-      "details": "Status: 405, Response: {'detail': 'Method Not Allowed'}"
+      "success": true,
+      "details": ""
+    },
+    {
+      "test": "Exchange has has_unread field",
+      "success": true,
+      "details": ""
+    },
+    {
+      "test": "Exchange has unread_count field",
+      "success": true,
+      "details": ""
+    },
+    {
+      "test": "Exchange shows unread messages",
+      "success": true,
+      "details": "has_unread: True, unread_count: 1"
+    },
+    {
+      "test": "Album has has_unread_exchanges field",
+      "success": true,
+      "details": ""
+    },
+    {
+      "test": "Album has pending_exchanges field",
+      "success": true,
+      "details": ""
+    },
+    {
+      "test": "Album shows unread exchanges",
+      "success": true,
+      "details": "has_unread_exchanges: True, pending_exchanges: 1"
+    },
+    {
+      "test": "Get chat marks messages as read",
+      "success": true,
+      "details": ""
+    },
+    {
+      "test": "Unread count decreased after reading",
+      "success": true,
+      "details": "Unread count after reading: 0"
     },
     {
       "test": "Duplicate exchange returns existing",
       "success": true,
-      "details": "is_existing: True, exchange_id: e934b174-7d55-4c6d-a599-a4fcda1c36aa"
+      "details": "is_existing: True, exchange_id: 6b7da8cb-c985-4960-8de5-8f7d205ff695"
     },
     {
       "test": "Same exchange ID returned",
       "success": true,
-      "details": "Original: e934b174-7d55-4c6d-a599-a4fcda1c36aa, Returned: e934b174-7d55-4c6d-a599-a4fcda1c36aa"
+      "details": "Original: 6b7da8cb-c985-4960-8de5-8f7d205ff695, Returned: 6b7da8cb-c985-4960-8de5-8f7d205ff695"
     },
     {
       "test": "Confirm exchange with minor failure reason",
@@ -60,11 +100,11 @@
       "details": "schedule_conflict accepted"
     },
     {
-      "test": "Get reputation after minor failure",
-      "success": false,
-      "details": "Status: 404, Response: {'detail': 'Not Found'}"
+      "test": "Minor failure doesn't affect reputation",
+      "success": true,
+      "details": "Failed exchanges before: 0, after: 0"
     }
   ],
-  "exchange_id": "e934b174-7d55-4c6d-a599-a4fcda1c36aa",
-  "chat_id": "6cca9a60-67a2-47c1-8915-fa83863db410"
+  "exchange_id": "6b7da8cb-c985-4960-8de5-8f7d205ff695",
+  "chat_id": "d458ca0f-2080-4931-a6ee-a728126d6801"
 }
