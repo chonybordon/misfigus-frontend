@@ -9,6 +9,16 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogD
 import { Badge } from '@/components/ui/badge';
 import { Settings, BookOpen, CheckCircle } from 'lucide-react';
 
+// Helper to get translated category name from categoryKey
+const getCategoryDisplay = (album, t) => {
+  // If album has categoryKey, use i18n translation
+  if (album.category_key) {
+    return t(`categories.${album.category_key}`);
+  }
+  // Fallback to raw category (for backward compat with old data)
+  return album.category;
+};
+
 export const Albums = () => {
   const [albums, setAlbums] = useState([]);
   const [loading, setLoading] = useState(true);
