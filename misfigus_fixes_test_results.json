@@ -1,13 +1,38 @@
 {
-  "timestamp": "2026-01-06T00:13:38.938216",
-  "tests_run": 1,
-  "tests_passed": 0,
-  "success_rate": 0.0,
+  "timestamp": "2026-01-06T00:14:31.012532",
+  "tests_run": 6,
+  "tests_passed": 4,
+  "success_rate": 66.66666666666666,
   "results": [
     {
       "test": "Authenticate User 1",
+      "success": true,
+      "details": "User ID: 808b199c-5d03-408a-9011-10c08abc4fc7"
+    },
+    {
+      "test": "Authenticate User 2",
+      "success": true,
+      "details": "User ID: ea9628c0-4ce5-4ffd-9a18-62a5caf4f8eb"
+    },
+    {
+      "test": "Activate Qatar album for User 1",
+      "success": true,
+      "details": ""
+    },
+    {
+      "test": "Activate Qatar album for User 2",
+      "success": true,
+      "details": ""
+    },
+    {
+      "test": "Create exchange for i18n test",
       "success": false,
-      "details": "Could not find OTP in backend logs"
+      "details": "Status: 422, Response: {'detail': [{'type': 'missing', 'loc': ['body', 'album_id'], 'msg': 'Field required', 'input': {'partner_user_id': 'ea9628c0-4ce5-4ffd-9a18-62a5caf4f8eb'}, 'url': 'https://errors.pydantic.dev/2.12/v/missing'}]}"
+    },
+    {
+      "test": "Create duplicate exchange",
+      "success": false,
+      "details": "Status: 422, Response: {'detail': [{'type': 'missing', 'loc': ['body', 'album_id'], 'msg': 'Field required', 'input': {'partner_user_id': 'ea9628c0-4ce5-4ffd-9a18-62a5caf4f8eb'}, 'url': 'https://errors.pydantic.dev/2.12/v/missing'}]}"
     }
   ],
   "exchange_id": null,
