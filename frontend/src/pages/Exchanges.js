@@ -9,6 +9,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogD
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, MessageCircle, CheckCircle, XCircle, Clock, AlertTriangle, Mail } from 'lucide-react';
 
+// Helper to get display name with i18n fallback
+const getDisplayName = (user, t) => {
+  if (!user) return t('profile.noName');
+  return user.display_name || t('profile.noName');
+};
+
 // Reputation badge component
 const ReputationBadge = ({ status, t }) => {
   const config = {
