@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { ArrowLeft, Package, Settings, LogOut } from 'lucide-react';
+import { ArrowLeft, Package, Settings, LogOut, MessageCircle } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 
 export const AlbumHome = () => {
@@ -51,6 +51,8 @@ export const AlbumHome = () => {
 
   // Exchange count from backend (mutual matches only)
   const exchangeCount = album?.exchange_count ?? 0;
+  const pendingExchanges = album?.pending_exchanges ?? 0;
+  const hasUnreadExchanges = album?.has_unread_exchanges ?? false;
 
   if (loading) {
     return (
@@ -163,15 +165,37 @@ export const AlbumHome = () => {
 
           <Card
             data-testid="matches-card"
-            className="hover:shadow-lg transition-all cursor-pointer border-2 hover:border-primary"
-            onClick={() => navigate(`/albums/${albumId}/matches`)}
+            className={`hover:shadow-lg transition-all cursor-pointer border-2 ${
+              hasUnreadExchanges 
+                ? 'border-red-400 bg-red-50' 
+                : 'hover:border-primary'
+            }`}
+            onClick={() => navigate(`/albums/${albumId}/exchanges`)}
           >
             <CardHeader>
-              <CardTitle>{t('albumHome.exchanges')}</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <MessageCircle className={`h-5 w-5 ${hasUnreadExchanges ? 'text-red-500' : ''}`} />
+                {t('albumHome.exchanges')}
+                {/* Unread indicator badge */}
+                {hasUnreadExchanges && (
+                  <span className="ml-auto h-5 w-5 bg-red-500 rounded-full flex items-center justify-center text-[10px] text-white font-bold animate-pulse">
+                    !
+                  </span>
+                )}
+                {/* Pending exchanges count */}
+                {pendingExchanges > 0 && !hasUnreadExchanges && (
+                  <span className="ml-auto text-xs bg-primary/20 text-primary px-2 py-1 rounded-full">
+                    {pendingExchanges}
+                  </span>
+                )}
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground">
-                {t('albumHome.findExchanges')}
+                {hasUnreadExchanges 
+                  ? t('albumHome.newMessagesInExchanges')
+                  : t('albumHome.findExchanges')
+                }
               </p>
             </CardContent>
           </Card>
