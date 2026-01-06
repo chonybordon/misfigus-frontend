@@ -190,7 +190,7 @@ export const Albums = () => {
                       <div className="flex items-center gap-4 text-sm text-muted-foreground">
                         <span>{album.year}</span>
                         <span>•</span>
-                        <span>{album.category}</span>
+                        <span>{getCategoryDisplay(album, t)}</span>
                         {/* Show progress for active albums */}
                         {album.is_member && album.progress !== undefined && (
                           <>
