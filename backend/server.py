@@ -830,6 +830,8 @@ async def get_album(album_id: str, user_id: str = Depends(get_current_user)):
         album['is_member'] = False
         album['progress'] = 0
         album['exchange_count'] = 0
+        album['pending_exchanges'] = 0
+        album['has_unread_exchanges'] = False
     elif activation:
         album['user_state'] = 'active'
         album['is_member'] = True
@@ -848,11 +850,49 @@ async def get_album(album_id: str, user_id: str = Depends(get_current_user)):
         
         # Calculate exchange count (users with mutual matches in this album)
         album['exchange_count'] = await compute_album_exchange_count(album_id, user_id)
+        
+        # Count pending exchanges and check for unread messages
+        pending_exchanges = await db.exchanges.find({
+            "album_id": album_id,
+            "status": "pending",
+            "$or": [
+                {"user_a_id": user_id},
+                {"user_b_id": user_id}
+            ]
+        }, {"_id": 0}).to_list(100)
+        
+        album['pending_exchanges'] = len(pending_exchanges)
+        
+        # Check for unread messages in any pending exchange
+        has_unread = False
+        for exchange in pending_exchanges:
+            chat = await db.chats.find_one({"exchange_id": exchange['id']}, {"_id": 0})
+            if chat:
+                is_user_a = exchange['user_a_id'] == user_id
+                partner_id = exchange['user_b_id'] if is_user_a else exchange['user_a_id']
+                last_read_field = 'user_a_last_read' if is_user_a else 'user_b_last_read'
+                last_read = chat.get(last_read_field)
+                
+                query = {
+                    "chat_id": chat['id'],
+                    "sender_id": partner_id
+                }
+                if last_read:
+                    query["created_at"] = {"$gt": last_read}
+                
+                unread_count = await db.chat_messages.count_documents(query)
+                if unread_count > 0:
+                    has_unread = True
+                    break
+        
+        album['has_unread_exchanges'] = has_unread
     else:
         album['user_state'] = 'inactive'
         album['is_member'] = False
         album['progress'] = 0
         album['exchange_count'] = 0
+        album['pending_exchanges'] = 0
+        album['has_unread_exchanges'] = False
     
     return album
 
