@@ -281,11 +281,11 @@ export const ExchangeDetail = () => {
           <CardContent className="p-4">
             <div className="flex items-center gap-4">
               <div className="h-16 w-16 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-xl">
-                {(exchange.partner?.display_name || 'U')[0].toUpperCase()}
+                {getDisplayName(exchange.partner, t)[0].toUpperCase()}
               </div>
               <div>
                 <p className="text-xl font-semibold">
-                  {exchange.partner?.display_name || t('app.defaultUser')}
+                  {getDisplayName(exchange.partner, t)}
                 </p>
                 <ReputationBadge status={exchange.partner?.reputation_status} t={t} />
               </div>
