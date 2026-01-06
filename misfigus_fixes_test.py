@@ -168,6 +168,57 @@ class MisFigusFixesTester:
             if not success:
                 return False
         
+        # Setup inventory to create mutual matches
+        # User 1: has duplicates of sticker 1, needs sticker 2
+        # User 2: has duplicates of sticker 2, needs sticker 1
+        
+        # Get inventory to find sticker IDs
+        success, inventory = self.make_request(
+            "GET",
+            f"inventory?album_id={self.qatar_album_id}",
+            expected_status=200
+        )
+        
+        if not success or not inventory:
+            self.log_test("Get inventory for setup", False, "Could not get inventory")
+            return False
+        
+        # Find first two stickers
+        sticker_1_id = inventory[0]['id'] if len(inventory) > 0 else None
+        sticker_2_id = inventory[1]['id'] if len(inventory) > 1 else None
+        
+        if not sticker_1_id or not sticker_2_id:
+            self.log_test("Find stickers for setup", False, "Not enough stickers in inventory")
+            return False
+        
+        # User 1: Set sticker 1 to 2 (duplicate), sticker 2 to 0 (missing)
+        for sticker_id, qty in [(sticker_1_id, 2), (sticker_2_id, 0)]:
+            success, response = self.make_request(
+                "PUT",
+                "inventory",
+                {"sticker_id": sticker_id, "owned_qty": qty},
+                200,
+                token=self.token
+            )
+            if not success:
+                self.log_test(f"Set User 1 inventory", False, response)
+                return False
+        
+        # User 2: Set sticker 1 to 0 (missing), sticker 2 to 2 (duplicate)
+        for sticker_id, qty in [(sticker_1_id, 0), (sticker_2_id, 2)]:
+            success, response = self.make_request(
+                "PUT",
+                "inventory",
+                {"sticker_id": sticker_id, "owned_qty": qty},
+                200,
+                token=self.partner_token
+            )
+            if not success:
+                self.log_test(f"Set User 2 inventory", False, response)
+                return False
+        
+        self.log_test("Setup mutual sticker matches", True, f"User 1 has {sticker_1_id}, needs {sticker_2_id}; User 2 has {sticker_2_id}, needs {sticker_1_id}")
+        
         return True
 
     def test_fix_a_chat_i18n_system_message(self):
