@@ -1,8 +1,8 @@
 {
-  "timestamp": "2026-01-06T02:50:06.290353",
-  "tests_run": 3,
-  "tests_passed": 2,
-  "success_rate": 66.66666666666666,
+  "timestamp": "2026-01-06T02:50:53.572463",
+  "tests_run": 10,
+  "tests_passed": 10,
+  "success_rate": 100.0,
   "results": [
     {
       "test": "Send OTP",
@@ -10,15 +10,50 @@
       "details": ""
     },
     {
-      "test": "Extract OTP from logs",
-      "success": false,
-      "details": "OTP not found in logs"
+      "test": "Verify OTP",
+      "success": true,
+      "details": ""
+    },
+    {
+      "test": "GET /api/auth/me",
+      "success": true,
+      "details": ""
+    },
+    {
+      "test": "PATCH /api/auth/me with display_name",
+      "success": true,
+      "details": "Updated display_name to: TestUser_025053"
+    },
+    {
+      "test": "Display name successfully updated",
+      "success": true,
+      "details": "Expected: TestUser_025053, Got: TestUser_025053"
     },
     {
       "test": "Chat i18n system messages (previously verified)",
       "success": true,
       "details": "System messages use i18n keys like 'SYSTEM_EXCHANGE_STARTED'"
+    },
+    {
+      "test": "GET /api/albums",
+      "success": true,
+      "details": "Retrieved 6 albums"
+    },
+    {
+      "test": "All albums have category_key field",
+      "success": true,
+      "details": "Albums without category_key: []"
+    },
+    {
+      "test": "All category_key values are valid",
+      "success": true,
+      "details": "Invalid category_keys found: []"
+    },
+    {
+      "test": "Spanish category name mappings are correct",
+      "success": true,
+      "details": "Mapping results: [{'album': 'FIFA World Cup Qatar 2022', 'category': 'F\u00fatbol', 'category_key': 'sports', 'expected_key': 'sports', 'correct': True}, {'album': 'Pok\u00e9mon', 'category': 'Trading Cards', 'category_key': 'trading_cards', 'expected_key': 'trading_cards', 'correct': True}, {'album': 'Dragon Ball', 'category': 'Anime', 'category_key': 'anime', 'expected_key': 'anime', 'correct': True}, {'album': 'Marvel', 'category': 'Superh\u00e9roes', 'category_key': 'superheroes', 'expected_key': 'superheroes', 'correct': True}, {'album': 'Disney', 'category': 'Entretenimiento', 'category_key': 'entertainment', 'expected_key': 'entertainment', 'correct': True}, {'album': 'FIFA World Cup 2026', 'category': 'F\u00fatbol', 'category_key': 'sports', 'expected_key': 'sports', 'correct': True}]"
     }
   ],
-  "token_obtained": false
+  "token_obtained": true
 }
