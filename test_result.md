@@ -30,15 +30,18 @@ backend:
 
   - task: "Fix 3 - Album screen i18n (subtitle + categoryKey)"
     implemented: true
-    working: NA
+    working: true
     file: "/app/backend/server.py, /app/frontend/src/pages/Albums.js, /app/frontend/src/i18n.js"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: NA
         agent: "main"
         comment: "Backend now returns category_key (sports, anime, etc.) for each album. Frontend uses t('categories.'+album.category_key) for translation. Added categories.sports, categories.anime, etc. to i18n.js for ES/EN. Subtitle already uses t('albums.subtitle')."
+      - working: true
+        agent: "testing"
+        comment: "✅ VERIFIED: GET /api/albums endpoint returns category_key field for all albums. All category_key values are valid (sports, anime, trading_cards, superheroes, entertainment). Spanish category name mappings are correct: 'Fútbol'->sports, 'Anime'->anime, 'Trading Cards'->trading_cards, 'Superhéroes'->superheroes, 'Entretenimiento'->entertainment."
 
   - task: "User name display fallback"
     implemented: true
