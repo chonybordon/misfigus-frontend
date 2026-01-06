@@ -1,0 +1,15 @@
+{
+  "timestamp": "2026-01-06T00:13:38.938216",
+  "tests_run": 1,
+  "tests_passed": 0,
+  "success_rate": 0.0,
+  "results": [
+    {
+      "test": "Authenticate User 1",
+      "success": false,
+      "details": "Could not find OTP in backend logs"
+    }
+  ],
+  "exchange_id": null,
+  "chat_id": null
+}
