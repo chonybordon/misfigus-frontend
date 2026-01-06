@@ -184,11 +184,21 @@ export const ExchangeDetail = () => {
       const response = await api.get(`/exchanges/${exchangeId}`);
       setExchange(response.data);
     } catch (error) {
-      toast.error(error.response?.data?.detail || t('common.error'));
-      navigate(-1);
+      // Don't show raw backend error
+      toast.error(t('common.error'));
+      // Navigate to albums if exchange not found (don't use navigate(-1))
+      navigate('/albums');
     } finally {
       setLoading(false);
     }
+  };
+  
+  // Get proper back navigation path
+  const getBackPath = () => {
+    if (exchange?.album_id) {
+      return `/albums/${exchange.album_id}/exchanges`;
+    }
+    return '/albums';
   };
 
   const handleConfirm = async () => {
@@ -238,7 +248,7 @@ export const ExchangeDetail = () => {
           <Button
             variant="outline"
             size="icon"
-            onClick={() => navigate(-1)}
+            onClick={() => navigate(getBackPath())}
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
