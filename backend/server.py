@@ -691,6 +691,20 @@ async def get_terms_status(user_id: str = Depends(get_current_user)):
 # ============================================
 # ALBUM ENDPOINTS (album templates)
 # ============================================
+
+# Category mapping: Spanish category name -> i18n key
+CATEGORY_KEY_MAP = {
+    "Fútbol": "sports",
+    "Anime": "anime",
+    "Trading Cards": "trading_cards",
+    "Superhéroes": "superheroes",
+    "Entretenimiento": "entertainment"
+}
+
+def get_category_key(category: str) -> str:
+    """Map Spanish category name to i18n key for frontend translation."""
+    return CATEGORY_KEY_MAP.get(category, category.lower().replace(" ", "_"))
+
 @api_router.get("/albums")
 async def get_albums(user_id: str = Depends(get_current_user)):
     """
@@ -712,6 +726,9 @@ async def get_albums(user_id: str = Depends(get_current_user)):
     
     # Compute user_state for each album
     for album in all_albums:
+        # Add category_key for i18n translation on frontend
+        album['category_key'] = get_category_key(album.get('category', ''))
+        
         if album.get('status') == 'coming_soon':
             album['user_state'] = 'coming_soon'
         elif album['id'] in activated_album_ids:
