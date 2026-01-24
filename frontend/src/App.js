@@ -122,7 +122,14 @@ function App() {
     const storedUser = localStorage.getItem('user');
     
     if (token && storedUser) {
-      setUser(JSON.parse(storedUser));
+      const userData = JSON.parse(storedUser);
+      setUser(userData);
+      
+      // Load user's saved language preference
+      if (userData.language) {
+        const { i18n } = require('./i18n');
+        i18n.changeLanguage(userData.language);
+      }
     }
     setLoading(false);
   }, []);
@@ -131,6 +138,12 @@ function App() {
     localStorage.setItem('token', token);
     localStorage.setItem('user', JSON.stringify(userData));
     setUser(userData);
+    
+    // Set language from user data if available
+    if (userData.language) {
+      const { i18n } = require('./i18n');
+      i18n.changeLanguage(userData.language);
+    }
   };
 
   const logout = () => {
