@@ -1,0 +1,75 @@
+{
+  "timestamp": "2026-01-24T22:36:17.042073",
+  "tests_run": 13,
+  "tests_passed": 1,
+  "success_rate": 7.6923076923076925,
+  "results": [
+    {
+      "test": "Step 1: Send OTP",
+      "success": true,
+      "details": ""
+    },
+    {
+      "test": "Step 2: Verify OTP",
+      "success": false,
+      "details": "Status: 400, Response: {'detail': 'Invalid OTP'}"
+    },
+    {
+      "test": "Create user for radius 3km test",
+      "success": false,
+      "details": "Failed to create test user"
+    },
+    {
+      "test": "Create user for radius 5km test",
+      "success": false,
+      "details": "Failed to create test user"
+    },
+    {
+      "test": "Create user for radius 10km test",
+      "success": false,
+      "details": "Failed to create test user"
+    },
+    {
+      "test": "Create user for radius 15km test",
+      "success": false,
+      "details": "Failed to create test user"
+    },
+    {
+      "test": "Create user for radius 20km test",
+      "success": false,
+      "details": "Failed to create test user"
+    },
+    {
+      "test": "Create user for invalid radius 1km test",
+      "success": false,
+      "details": "Failed to create test user"
+    },
+    {
+      "test": "Create user for invalid radius 2km test",
+      "success": false,
+      "details": "Failed to create test user"
+    },
+    {
+      "test": "Create user for invalid radius 4km test",
+      "success": false,
+      "details": "Failed to create test user"
+    },
+    {
+      "test": "Create user for invalid radius 6km test",
+      "success": false,
+      "details": "Failed to create test user"
+    },
+    {
+      "test": "Create user for invalid radius 7km test",
+      "success": false,
+      "details": "Failed to create test user"
+    },
+    {
+      "test": "Create user for terms test",
+      "success": false,
+      "details": "Failed to create test user"
+    }
+  ],
+  "test_email": "misfigus.complete.flow.20260124223601@gmail.com",
+  "token_obtained": false
+}
