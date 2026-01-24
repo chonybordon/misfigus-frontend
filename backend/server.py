@@ -422,6 +422,74 @@ async def update_me(user_update: UserUpdate, user_id: str = Depends(get_current_
     user = await db.users.find_one({"id": user_id}, {"_id": 0})
     return user
 
+@api_router.post("/user/complete-onboarding")
+async def complete_onboarding(onboarding_data: OnboardingComplete, user_id: str = Depends(get_current_user)):
+    """
+    Complete user onboarding in one step.
+    Sets full_name, location, radius, and accepts terms.
+    Can only be done once per user.
+    """
+    user = await db.users.find_one({"id": user_id}, {"_id": 0})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Check if already completed (allow re-onboarding for now, but flag it)
+    if user.get('onboarding_completed'):
+        raise HTTPException(status_code=400, detail="Onboarding already completed")
+    
+    # Validate radius
+    if onboarding_data.radius_km not in ALLOWED_RADIUS_VALUES:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid radius. Allowed values: {ALLOWED_RADIUS_VALUES}"
+        )
+    
+    # Validate terms version
+    if onboarding_data.terms_version != CURRENT_TERMS_VERSION:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid terms version. Current version: {CURRENT_TERMS_VERSION}"
+        )
+    
+    now = datetime.now(timezone.utc)
+    
+    # Update all fields in one operation
+    update_fields = {
+        "full_name": onboarding_data.full_name.strip(),
+        "display_name": onboarding_data.full_name.strip(),  # Also set display_name for UI
+        # Location fields
+        "country_code": onboarding_data.country_code.upper(),
+        "region_name": onboarding_data.region_name,
+        "city_name": onboarding_data.city_name,
+        "place_id": onboarding_data.place_id,
+        "latitude": onboarding_data.latitude,
+        "longitude": onboarding_data.longitude,
+        "neighborhood_text": onboarding_data.neighborhood_text,
+        # Radius
+        "radius_km": onboarding_data.radius_km,
+        # Terms
+        "terms_accepted": True,
+        "terms_version": onboarding_data.terms_version,
+        "terms_accepted_at": now.isoformat(),
+        # Mark onboarding complete
+        "onboarding_completed": True
+    }
+    
+    await db.users.update_one({"id": user_id}, {"$set": update_fields})
+    
+    # Send terms acceptance email (non-blocking)
+    try:
+        send_terms_acceptance_email(
+            user.get('email'),
+            onboarding_data.terms_version,
+            now
+        )
+    except Exception as e:
+        logger.warning(f"Failed to send terms acceptance email: {e}")
+    
+    updated_user = await db.users.find_one({"id": user_id}, {"_id": 0})
+    return {"message": "Onboarding completed", "user": updated_user}
+
 # ============================================
 # LOCATION ENDPOINTS (Structured, Global)
 # ============================================
