@@ -161,7 +161,7 @@ function App() {
   }
 
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ user, setUser, login, logout }}>
       <BrowserRouter>
         <Routes>
           {/* Default: Album selection is always the home screen */}
