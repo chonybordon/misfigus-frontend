@@ -4,7 +4,7 @@ import json
 import time
 from datetime import datetime
 
-class MisFigusTestUserFilterTester:
+class MisFigusAuthOnboardingTester:
     def __init__(self, base_url="https://trade-stickers.preview.emergentagent.com"):
         self.base_url = base_url
         self.api_url = f"{base_url}/api"
@@ -13,8 +13,7 @@ class MisFigusTestUserFilterTester:
         self.tests_run = 0
         self.tests_passed = 0
         self.test_results = []
-        self.qatar_album_id = "bc32fecb-f640-4d00-880d-5043bc112d4b"
-        self.test_user_id = "3b6734a6-4a17-437f-845f-ba265fcc4b7b"
+        self.test_email = None
 
     def log_test(self, name, success, details=""):
         """Log test result"""
