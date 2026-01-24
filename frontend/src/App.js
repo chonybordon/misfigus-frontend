@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
-import './i18n';
+import i18n from './i18n';
 import '@/App.css';
 import { Toaster } from '@/components/ui/sonner';
 import { toast } from 'sonner';
@@ -23,6 +23,18 @@ import { TermsView, TermsAcceptance } from './pages/Terms';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
+
+// Default language fallback
+const DEFAULT_LANGUAGE = 'en';
+
+// Helper to safely get language with fallback
+const getSafeLanguage = (lang) => {
+  const supportedLanguages = ['es', 'en', 'pt', 'fr', 'de', 'it'];
+  if (lang && supportedLanguages.includes(lang)) {
+    return lang;
+  }
+  return DEFAULT_LANGUAGE;
+};
 
 export const api = axios.create({
   baseURL: API,
@@ -73,6 +85,12 @@ const PrivateRoute = ({ children }) => {
       // Update cached user data
       localStorage.setItem('user', JSON.stringify(userData));
       
+      // Update language from server if available
+      const userLang = getSafeLanguage(userData.language);
+      if (i18n.language !== userLang) {
+        i18n.changeLanguage(userLang);
+      }
+      
       // Check if onboarding is needed
       if (!userData.onboarding_completed) {
         setNeedsOnboarding(true);
@@ -99,8 +117,11 @@ const PrivateRoute = ({ children }) => {
   
   if (checkingStatus) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-2xl font-bold">Loading...</div>
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-center">
+          <div className="text-4xl font-black text-primary mb-2">MisFigus</div>
+          <div className="text-muted-foreground">Loading...</div>
+        </div>
       </div>
     );
   }
@@ -116,22 +137,43 @@ const PrivateRoute = ({ children }) => {
 function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [languageReady, setLanguageReady] = useState(false);
 
+  // Initialize language on app startup
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    const storedUser = localStorage.getItem('user');
-    
-    if (token && storedUser) {
-      const userData = JSON.parse(storedUser);
-      setUser(userData);
-      
-      // Load user's saved language preference
-      if (userData.language) {
-        const { i18n } = require('./i18n');
-        i18n.changeLanguage(userData.language);
+    const initializeApp = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const storedUser = localStorage.getItem('user');
+        
+        if (token && storedUser) {
+          try {
+            const userData = JSON.parse(storedUser);
+            setUser(userData);
+            
+            // Load user's saved language preference with fallback
+            const userLang = getSafeLanguage(userData.language);
+            await i18n.changeLanguage(userLang);
+          } catch (parseError) {
+            // Invalid stored user data, clear it
+            localStorage.removeItem('user');
+            await i18n.changeLanguage(DEFAULT_LANGUAGE);
+          }
+        } else {
+          // No user, use default language
+          await i18n.changeLanguage(DEFAULT_LANGUAGE);
+        }
+      } catch (error) {
+        console.error('Failed to initialize app:', error);
+        // Ensure we always have a language set
+        await i18n.changeLanguage(DEFAULT_LANGUAGE);
+      } finally {
+        setLanguageReady(true);
+        setLoading(false);
       }
-    }
-    setLoading(false);
+    };
+    
+    initializeApp();
   }, []);
 
   const login = (token, userData) => {
@@ -139,23 +181,27 @@ function App() {
     localStorage.setItem('user', JSON.stringify(userData));
     setUser(userData);
     
-    // Set language from user data if available
-    if (userData.language) {
-      const { i18n } = require('./i18n');
-      i18n.changeLanguage(userData.language);
-    }
+    // Set language from user data with fallback
+    const userLang = getSafeLanguage(userData.language);
+    i18n.changeLanguage(userLang);
   };
 
   const logout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     setUser(null);
+    // Reset to default language on logout
+    i18n.changeLanguage(DEFAULT_LANGUAGE);
   };
 
-  if (loading) {
+  // Show loading screen until language is ready
+  if (loading || !languageReady) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-2xl font-bold">Loading...</div>
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-center">
+          <div className="text-4xl font-black text-primary mb-2">MisFigus</div>
+          <div className="text-muted-foreground">Loading...</div>
+        </div>
       </div>
     );
   }
