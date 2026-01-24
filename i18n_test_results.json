@@ -1,17 +1,157 @@
 {
-  "timestamp": "2026-01-24T23:16:03.113645",
+  "timestamp": "2026-01-24T23:16:45.166803",
   "test_type": "i18n_language_functionality",
-  "tests_run": 1,
-  "tests_passed": 0,
-  "success_rate": 0.0,
+  "tests_run": 29,
+  "tests_passed": 29,
+  "success_rate": 100.0,
   "results": [
     {
-      "test": "Setup - Extract OTP",
-      "success": false,
-      "details": "Could not find OTP in backend logs"
+      "test": "Setup - User Authentication",
+      "success": true,
+      "details": "User ID: 9349b2a9-55d0-46e1-a549-9db2fc0d9623"
+    },
+    {
+      "test": "PATCH /auth/me - Update to French",
+      "success": true,
+      "details": ""
+    },
+    {
+      "test": "PATCH /auth/me - Response has language field",
+      "success": true,
+      "details": "Missing 'language' field"
+    },
+    {
+      "test": "PATCH /auth/me - Language updated to French",
+      "success": true,
+      "details": "Expected 'fr', got 'fr'"
+    },
+    {
+      "test": "PATCH /auth/me - Update to Spanish",
+      "success": true,
+      "details": ""
+    },
+    {
+      "test": "PATCH /auth/me - Language updated to Spanish",
+      "success": true,
+      "details": "Expected 'es', got 'es'"
+    },
+    {
+      "test": "PATCH /auth/me - Update to English",
+      "success": true,
+      "details": ""
+    },
+    {
+      "test": "PATCH /auth/me - Language updated to English",
+      "success": true,
+      "details": "Expected 'en', got 'en'"
+    },
+    {
+      "test": "PATCH /auth/me - Update to ES",
+      "success": true,
+      "details": "Expected 'es', got 'es'"
+    },
+    {
+      "test": "PATCH /auth/me - Update to EN",
+      "success": true,
+      "details": "Expected 'en', got 'en'"
+    },
+    {
+      "test": "PATCH /auth/me - Update to PT",
+      "success": true,
+      "details": "Expected 'pt', got 'pt'"
+    },
+    {
+      "test": "PATCH /auth/me - Update to FR",
+      "success": true,
+      "details": "Expected 'fr', got 'fr'"
+    },
+    {
+      "test": "PATCH /auth/me - Update to DE",
+      "success": true,
+      "details": "Expected 'de', got 'de'"
+    },
+    {
+      "test": "PATCH /auth/me - Update to IT",
+      "success": true,
+      "details": "Expected 'it', got 'it'"
+    },
+    {
+      "test": "GET /auth/me - Language Persistence Check",
+      "success": true,
+      "details": ""
+    },
+    {
+      "test": "GET /auth/me - Has language field",
+      "success": true,
+      "details": "Missing 'language' field"
+    },
+    {
+      "test": "GET /auth/me - Language persisted as Portuguese",
+      "success": true,
+      "details": "Expected 'pt', got 'pt'"
+    },
+    {
+      "test": "GET /auth/me - German language persisted",
+      "success": true,
+      "details": "Expected 'de', got 'de'"
+    },
+    {
+      "test": "GET /auth/me - Italian language persisted",
+      "success": true,
+      "details": "Expected 'it', got 'it'"
+    },
+    {
+      "test": "Language Validation - Invalid code accepted",
+      "success": true,
+      "details": "No validation implemented - invalid language accepted"
+    },
+    {
+      "test": "Language Validation - Empty string handled",
+      "success": true,
+      "details": "Empty language handled, current: ''"
+    },
+    {
+      "test": "Language Validation - Null language handled",
+      "success": true,
+      "details": "Null language handled, current: ''"
+    },
+    {
+      "test": "Language Validation - Case sensitive (uppercase accepted)",
+      "success": true,
+      "details": "Uppercase 'EN' accepted"
+    },
+    {
+      "test": "Onboarding - Set language before onboarding",
+      "success": true,
+      "details": ""
+    },
+    {
+      "test": "Onboarding - Complete with language set",
+      "success": true,
+      "details": ""
+    },
+    {
+      "test": "Onboarding - Onboarding completed",
+      "success": true,
+      "details": "onboarding_completed should be true"
+    },
+    {
+      "test": "Onboarding - Language preserved during onboarding",
+      "success": true,
+      "details": "Expected 'fr', got 'fr'"
+    },
+    {
+      "test": "Onboarding - Full name set correctly",
+      "success": true,
+      "details": "Full name not set correctly"
+    },
+    {
+      "test": "Onboarding - Language persists after onboarding",
+      "success": true,
+      "details": "Expected 'fr', got 'fr'"
     }
   ],
-  "test_email": "misfigus.i18n.test.20260124231602@gmail.com",
+  "test_email": "misfigus.i18n.test.20260124231643@gmail.com",
   "supported_languages": [
     "es",
     "en",
@@ -20,5 +160,5 @@
     "de",
     "it"
   ],
-  "token_obtained": false
+  "token_obtained": true
 }
