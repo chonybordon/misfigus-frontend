@@ -81,9 +81,7 @@ metadata:
 
 test_plan:
   current_focus:
-    - "5-Step Onboarding with Language First"
-    - "Settings Language Change"
-    - "App Language Persistence"
+    - "Backend i18n API Endpoints"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
