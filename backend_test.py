@@ -365,296 +365,11 @@ class MisFigusAuthOnboardingTester:
             print(f"❌ Error extracting OTP from logs: {e}")
             return None
 
-    def test_albums_endpoint(self):
-        """Test GET /api/albums with user_state logic and NO member_count"""
-        print("\n" + "="*60)
-        print("TESTING ALBUMS ENDPOINT (NO MEMBERS)")
-        print("="*60)
-        
-        if not self.token:
-            print("❌ Skipping albums test - no auth token")
-            return False
-            
-        success, response = self.make_request("GET", "albums", expected_status=200)
-        
-        if not success:
-            self.log_test("GET /api/albums", False, response)
-            return False
-            
-        self.log_test("GET /api/albums", True, f"Retrieved {len(response)} albums")
-        
-        # Verify album structure and user_state logic
-        albums_found = {
-            'qatar_2022': None,
-            'fifa_2026': None,
-            'other_albums': []
-        }
-        
-        for album in response:
-            if 'Qatar' in album.get('name', '') and '2022' in album.get('name', ''):
-                albums_found['qatar_2022'] = album
-            elif 'FIFA' in album.get('name', '') and '2026' in album.get('name', ''):
-                albums_found['fifa_2026'] = album
-            else:
-                albums_found['other_albums'].append(album)
-        
-        # Test 1: All albums should have user_state field
-        all_have_user_state = all('user_state' in album for album in response)
-        self.log_test(
-            "All albums have user_state field", 
-            all_have_user_state,
-            "Some albums missing user_state field" if not all_have_user_state else ""
-        )
-        
-        # Test 2: NO albums should have member_count field (removed feature)
-        albums_with_member_count = [album for album in response if 'member_count' in album]
-        self.log_test(
-            "No albums have member_count field", 
-            len(albums_with_member_count) == 0,
-            f"Found {len(albums_with_member_count)} albums with member_count field"
-        )
-        
-        # Test 3: New user should see all available albums as INACTIVE except FIFA 2026
-        inactive_count = sum(1 for album in response if album.get('user_state') == 'inactive')
-        coming_soon_count = sum(1 for album in response if album.get('user_state') == 'coming_soon')
-        
-        self.log_test(
-            "New user sees albums as INACTIVE", 
-            inactive_count > 0,
-            f"Found {inactive_count} inactive albums"
-        )
-        
-        # Test 4: FIFA 2026 should be coming_soon
-        if albums_found['fifa_2026']:
-            fifa_state = albums_found['fifa_2026'].get('user_state')
-            self.log_test(
-                "FIFA 2026 is coming_soon", 
-                fifa_state == 'coming_soon',
-                f"FIFA 2026 state: {fifa_state}"
-            )
-        else:
-            self.log_test("FIFA 2026 album found", False, "FIFA 2026 album not found")
-        
-        # Test 5: Qatar 2022 should be inactive initially
-        if albums_found['qatar_2022']:
-            qatar_state = albums_found['qatar_2022'].get('user_state')
-            self.log_test(
-                "Qatar 2022 initially inactive", 
-                qatar_state == 'inactive',
-                f"Qatar 2022 state: {qatar_state}"
-            )
-            # Store Qatar album ID for later tests
-            self.qatar_album_id = albums_found['qatar_2022'].get('id', self.qatar_album_id)
-        else:
-            self.log_test("Qatar 2022 album found", False, "Qatar 2022 album not found")
-        
-        return True
-
-    def test_album_activation(self):
-        """Test POST /api/albums/{album_id}/activate"""
-        print("\n" + "="*60)
-        print("TESTING ALBUM ACTIVATION")
-        print("="*60)
-        
-        if not self.token:
-            print("❌ Skipping activation test - no auth token")
-            return False
-        
-        # First, get albums to find FIFA 2026 ID
-        success, albums = self.make_request("GET", "albums", expected_status=200)
-        if not success:
-            self.log_test("Get albums for activation test", False, albums)
-            return False
-        
-        fifa_2026_id = None
-        for album in albums:
-            if 'FIFA' in album.get('name', '') and '2026' in album.get('name', ''):
-                fifa_2026_id = album.get('id')
-                break
-        
-        # Test 1: Try to activate FIFA 2026 (should fail)
-        if fifa_2026_id:
-            success, response = self.make_request(
-                "POST", 
-                f"albums/{fifa_2026_id}/activate", 
-                expected_status=400
-            )
-            
-            self.log_test(
-                "FIFA 2026 activation blocked", 
-                success,  # Should succeed in getting 400 error
-                f"Correctly blocked with: {response}"
-            )
-        else:
-            self.log_test("FIFA 2026 ID found", False, "Could not find FIFA 2026 album")
-        
-        # Test 2: Activate Qatar 2022 (should succeed)
-        success, response = self.make_request(
-            "POST", 
-            f"albums/{self.qatar_album_id}/activate", 
-            expected_status=200
-        )
-        
-        self.log_test(
-            "Qatar 2022 activation success", 
-            success,
-            str(response) if not success else "Album activated successfully"
-        )
-        
-        if not success:
-            return False
-        
-        # Test 3: Try to activate Qatar 2022 again (should fail)
-        success, response = self.make_request(
-            "POST", 
-            f"albums/{self.qatar_album_id}/activate", 
-            expected_status=400
-        )
-        
-        self.log_test(
-            "Duplicate activation blocked", 
-            success,  # Should succeed in getting 400 error
-            f"Correctly blocked with: {response}"
-        )
-        
-        # Test 4: Verify Qatar 2022 is now ACTIVE
-        success, albums = self.make_request("GET", "albums", expected_status=200)
-        if success:
-            qatar_album = next((a for a in albums if a.get('id') == self.qatar_album_id), None)
-            if qatar_album:
-                qatar_state = qatar_album.get('user_state')
-                self.log_test(
-                    "Qatar 2022 now ACTIVE", 
-                    qatar_state == 'active',
-                    f"Qatar 2022 state after activation: {qatar_state}"
-                )
-            else:
-                self.log_test("Find Qatar 2022 after activation", False, "Album not found")
-        
-        return True
-
-    def test_qatar_inventory(self):
-        """Test GET /api/inventory?album_id={qatar_id} for Qatar 2022 catalog"""
-        print("\n" + "="*60)
-        print("TESTING QATAR 2022 INVENTORY")
-        print("="*60)
-        
-        if not self.token:
-            print("❌ Skipping inventory test - no auth token")
-            return False
-        
-        success, response = self.make_request(
-            "GET", 
-            f"inventory?album_id={self.qatar_album_id}", 
-            expected_status=200
-        )
-        
-        if not success:
-            self.log_test("GET Qatar 2022 inventory", False, response)
-            return False
-        
-        stickers = response
-        
-        # Test 1: Should return exactly 100 stickers
-        self.log_test(
-            "Qatar 2022 has 100 stickers", 
-            len(stickers) == 100,
-            f"Found {len(stickers)} stickers, expected 100"
-        )
-        
-        # Test 2: All stickers should have required fields
-        required_fields = ['number', 'name', 'team', 'category']
-        all_have_fields = all(
-            all(field in sticker for field in required_fields) 
-            for sticker in stickers
-        )
-        
-        self.log_test(
-            "All stickers have required fields", 
-            all_have_fields,
-            "Some stickers missing required fields (number, name, team, category)"
-        )
-        
-        # Test 3: Find Lionel Messi as sticker #61
-        messi_sticker = next((s for s in stickers if s.get('number') == 61), None)
-        
-        if messi_sticker:
-            is_messi = (
-                messi_sticker.get('name') == 'Lionel Messi' and
-                messi_sticker.get('team') == 'Argentina'
-            )
-            self.log_test(
-                "Sticker #61 is Lionel Messi from Argentina", 
-                is_messi,
-                f"Sticker #61: {messi_sticker.get('name')} from {messi_sticker.get('team')}"
-            )
-        else:
-            self.log_test("Find sticker #61", False, "Sticker #61 not found")
-        
-        # Test 4: Verify sticker numbers are sequential 1-100
-        numbers = sorted([s.get('number') for s in stickers])
-        sequential = numbers == list(range(1, 101))
-        
-        self.log_test(
-            "Sticker numbers are sequential 1-100", 
-            sequential,
-            f"Number range: {min(numbers)}-{max(numbers)}, gaps: {set(range(1, 101)) - set(numbers)}"
-        )
-        
-        # Test 5: Verify real team names (not dummy data)
-        teams = set(s.get('team') for s in stickers)
-        real_teams = {'Argentina', 'Brazil', 'England', 'France', 'Germany', 'Spain', 'Netherlands'}
-        has_real_teams = len(real_teams.intersection(teams)) >= 3
-        
-        self.log_test(
-            "Contains real team names", 
-            has_real_teams,
-            f"Found teams: {sorted(teams)}"
-        )
-        
-        # Test 6: Verify owned_qty field is present (user inventory overlay)
-        all_have_owned_qty = all('owned_qty' in sticker for sticker in stickers)
-        
-        self.log_test(
-            "All stickers have owned_qty field", 
-            all_have_owned_qty,
-            "Some stickers missing owned_qty field"
-        )
-        
-        return True
-
-    def test_album_not_found(self):
-        """Test inventory endpoint with invalid album ID"""
-        print("\n" + "="*60)
-        print("TESTING ERROR HANDLING")
-        print("="*60)
-        
-        if not self.token:
-            print("❌ Skipping error handling test - no auth token")
-            return False
-        
-        # Test with invalid album ID
-        fake_album_id = "00000000-0000-0000-0000-000000000000"
-        success, response = self.make_request(
-            "GET", 
-            f"inventory?album_id={fake_album_id}", 
-            expected_status=404
-        )
-        
-        self.log_test(
-            "Invalid album ID returns 404", 
-            success,  # Should succeed in getting 404 error
-            f"Correctly returned error: {response}"
-        )
-        
-        return True
-
     def run_all_tests(self):
-        """Run all tests in sequence"""
-        print(f"\n🚀 Starting MisFigus Album States & Qatar 2022 Catalog Tests")
+        """Run all authentication and onboarding tests"""
+        print(f"\n🚀 Starting MisFigus Authentication & Onboarding Tests")
         print(f"Base URL: {self.base_url}")
         print(f"API URL: {self.api_url}")
-        print(f"Qatar Album ID: {self.qatar_album_id}")
         
         # Test basic connectivity
         try:
@@ -666,11 +381,10 @@ class MisFigusAuthOnboardingTester:
         
         # Run test sequence
         tests = [
-            ("Authentication Flow", self.test_auth_flow),
-            ("Albums Endpoint", self.test_albums_endpoint),
-            ("Album Activation", self.test_album_activation),
-            ("Qatar 2022 Inventory", self.test_qatar_inventory),
-            ("Error Handling", self.test_album_not_found)
+            ("Send OTP Endpoint", self.test_send_otp_endpoint),
+            ("Verify OTP Endpoint", self.test_verify_otp_endpoint),
+            ("Get Me Endpoint", self.test_get_me_endpoint),
+            ("Complete Onboarding Endpoint", self.test_complete_onboarding_endpoint)
         ]
         
         for test_name, test_func in tests:
@@ -696,7 +410,7 @@ class MisFigusAuthOnboardingTester:
         return len(failed_tests) == 0
 
 def main():
-    tester = MisFigusAlbumTester()
+    tester = MisFigusAuthOnboardingTester()
     success = tester.run_all_tests()
     
     # Save detailed test results
@@ -706,7 +420,7 @@ def main():
         'tests_passed': tester.tests_passed,
         'success_rate': (tester.tests_passed/tester.tests_run*100) if tester.tests_run > 0 else 0,
         'results': tester.test_results,
-        'qatar_album_id': tester.qatar_album_id,
+        'test_email': tester.test_email,
         'token_obtained': tester.token is not None
     }
     
