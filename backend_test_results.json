@@ -1,100 +1,140 @@
 {
-  "timestamp": "2026-01-04T23:20:21.771785",
-  "tests_run": 18,
-  "tests_passed": 18,
-  "success_rate": 100.0,
+  "timestamp": "2026-01-24T22:35:09.612344",
+  "tests_run": 26,
+  "tests_passed": 25,
+  "success_rate": 96.15384615384616,
   "results": [
     {
-      "test": "Send OTP",
+      "test": "Send OTP - Valid Email",
       "success": true,
       "details": ""
     },
     {
-      "test": "Verify OTP",
+      "test": "Send OTP - Response has message",
+      "success": true,
+      "details": "Missing 'message' field"
+    },
+    {
+      "test": "Send OTP - Response has email",
+      "success": true,
+      "details": "Missing or incorrect 'email' field"
+    },
+    {
+      "test": "Send OTP - OTP not exposed",
+      "success": true,
+      "details": "OTP should not be in response"
+    },
+    {
+      "test": "Send OTP - Invalid Email Format",
+      "success": false,
+      "details": "Status: 200, Response: {'message': 'OTP sent', 'email': 'invalid-email'}"
+    },
+    {
+      "test": "Verify OTP - Valid Code",
       "success": true,
       "details": ""
     },
     {
-      "test": "GET /api/albums",
+      "test": "Verify OTP - Response has token",
       "success": true,
-      "details": "Retrieved 6 albums"
+      "details": "Missing 'token' field"
     },
     {
-      "test": "All albums have user_state field",
+      "test": "Verify OTP - Response has user",
+      "success": true,
+      "details": "Missing 'user' field"
+    },
+    {
+      "test": "Verify OTP - User has onboarding_completed field",
+      "success": true,
+      "details": "Missing 'onboarding_completed' field"
+    },
+    {
+      "test": "Verify OTP - New user onboarding_completed is false",
+      "success": true,
+      "details": "onboarding_completed should be false for new users"
+    },
+    {
+      "test": "Verify OTP - Invalid Code",
+      "success": true,
+      "details": "Correctly rejected invalid OTP"
+    },
+    {
+      "test": "Verify OTP - Non-existent Email",
+      "success": true,
+      "details": "Correctly rejected non-existent email"
+    },
+    {
+      "test": "GET /auth/me - Valid Token",
       "success": true,
       "details": ""
     },
     {
-      "test": "New user sees albums as INACTIVE",
+      "test": "GET /auth/me - Response has id",
       "success": true,
-      "details": "Found 5 inactive albums"
+      "details": "Missing 'id' field"
     },
     {
-      "test": "FIFA 2026 is coming_soon",
+      "test": "GET /auth/me - Response has email",
       "success": true,
-      "details": "FIFA 2026 state: coming_soon"
+      "details": "Missing 'email' field"
     },
     {
-      "test": "Qatar 2022 initially inactive",
+      "test": "GET /auth/me - Response has onboarding_completed",
       "success": true,
-      "details": "Qatar 2022 state: inactive"
+      "details": "Missing 'onboarding_completed' field"
     },
     {
-      "test": "FIFA 2026 activation blocked",
+      "test": "GET /auth/me - No Token",
       "success": true,
-      "details": "Correctly blocked with: {'detail': 'Album not available yet'}"
+      "details": "Correctly rejected request without token"
     },
     {
-      "test": "Qatar 2022 activation success",
+      "test": "Complete Onboarding - Valid Data",
       "success": true,
-      "details": "Album activated successfully"
+      "details": ""
     },
     {
-      "test": "Duplicate activation blocked",
+      "test": "Complete Onboarding - Response has message",
       "success": true,
-      "details": "Correctly blocked with: {'detail': 'Album already activated'}"
+      "details": "Missing 'message' field"
     },
     {
-      "test": "Qatar 2022 now ACTIVE",
+      "test": "Complete Onboarding - Response has user",
       "success": true,
-      "details": "Qatar 2022 state after activation: active"
+      "details": "Missing 'user' field"
     },
     {
-      "test": "Qatar 2022 has 100 stickers",
+      "test": "Complete Onboarding - User onboarding completed",
       "success": true,
-      "details": "Found 100 stickers, expected 100"
+      "details": "onboarding_completed should be true"
     },
     {
-      "test": "All stickers have required fields",
+      "test": "Complete Onboarding - User full name set",
       "success": true,
-      "details": "Some stickers missing required fields (number, name, team, category)"
+      "details": "full_name not set correctly"
     },
     {
-      "test": "Sticker #61 is Lionel Messi from Argentina",
+      "test": "Complete Onboarding - User location set",
       "success": true,
-      "details": "Sticker #61: Lionel Messi from Argentina"
+      "details": "location not set correctly"
     },
     {
-      "test": "Sticker numbers are sequential 1-100",
+      "test": "Complete Onboarding - User terms accepted",
       "success": true,
-      "details": "Number range: 1-100, gaps: set()"
+      "details": "terms_accepted should be true"
     },
     {
-      "test": "Contains real team names",
+      "test": "Complete Onboarding - Already Completed",
       "success": true,
-      "details": "Found teams: ['Argentina', 'Denmark', 'Ecuador', 'England', 'FIFA', 'France', 'Iran', 'Mexico', 'Netherlands', 'Poland', 'Qatar', 'Saudi Arabia', 'Senegal', 'Tunisia', 'USA']"
+      "details": "Correctly rejected re-onboarding"
     },
     {
-      "test": "All stickers have owned_qty field",
+      "test": "Complete Onboarding - Valid Radius Values",
       "success": true,
-      "details": "Some stickers missing owned_qty field"
-    },
-    {
-      "test": "Invalid album ID returns 404",
-      "success": true,
-      "details": "Correctly returned error: {'detail': 'Album not found'}"
+      "details": "Valid values: [3, 5, 10, 15, 20]"
     }
   ],
-  "qatar_album_id": "bc32fecb-f640-4d00-880d-5043bc112d4b",
+  "test_email": "misfigus.auth.test.20260124223507@gmail.com",
   "token_obtained": true
 }
