@@ -24,16 +24,16 @@ import { TermsView, TermsAcceptance } from './pages/Terms';
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
-// Default language fallback
-const DEFAULT_LANGUAGE = 'en';
+// Default language fallback - Spanish for initial screens
+const DEFAULT_LANGUAGE = 'es';
 
-// Helper to safely get language with fallback
+// Helper to safely get language with fallback to Spanish
 const getSafeLanguage = (lang) => {
   const supportedLanguages = ['es', 'en', 'pt', 'fr', 'de', 'it'];
   if (lang && supportedLanguages.includes(lang)) {
     return lang;
   }
-  return DEFAULT_LANGUAGE;
+  return DEFAULT_LANGUAGE; // Spanish
 };
 
 export const api = axios.create({
