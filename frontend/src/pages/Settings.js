@@ -1,33 +1,46 @@
 import React, { useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { AuthContext } from '../App';
+import { AuthContext, api } from '../App';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ArrowLeft, Globe, LogOut, User } from 'lucide-react';
-
-const languages = [
-  { code: 'es', name: 'Español' },
-  { code: 'en', name: 'English' },
-  { code: 'pt', name: 'Português' },
-  { code: 'fr', name: 'Français' },
-  { code: 'de', name: 'Deutsch' },
-  { code: 'it', name: 'Italiano' }
-];
+import { toast } from 'sonner';
+import { SUPPORTED_LANGUAGES } from '../i18n';
 
 export const Settings = () => {
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
-  const { user, logout } = useContext(AuthContext);
+  const { user, logout, setUser } = useContext(AuthContext);
 
   const handleLogout = () => {
     logout();
     navigate('/');
   };
 
-  const changeLanguage = (lang) => {
+  const changeLanguage = async (lang) => {
+    // Update UI immediately
     i18n.changeLanguage(lang);
+    
+    // Persist to backend
+    try {
+      await api.patch('/auth/me', { language: lang });
+      
+      // Update cached user
+      const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+      const updatedUser = { ...currentUser, language: lang };
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+      
+      // Update context if setUser is available
+      if (setUser) {
+        setUser(updatedUser);
+      }
+      
+      toast.success(t('settings.languageChanged'));
+    } catch (error) {
+      console.error('Failed to save language:', error);
+    }
   };
 
   return (
@@ -60,7 +73,7 @@ export const Settings = () => {
                 className="w-full"
                 onClick={() => navigate('/profile')}
               >
-                {t('profile.title')}
+                {t('profilePage.title')}
               </Button>
             </CardContent>
           </Card>
@@ -87,13 +100,16 @@ export const Settings = () => {
                   <SelectValue placeholder={t('settings.language')} />
                 </SelectTrigger>
                 <SelectContent>
-                  {languages.map((lang) => (
+                  {SUPPORTED_LANGUAGES.map((lang) => (
                     <SelectItem 
                       key={lang.code} 
                       value={lang.code}
                       data-testid={`lang-${lang.code}`}
                     >
-                      {lang.name}
+                      <span className="flex items-center gap-2">
+                        <span>{lang.flag}</span>
+                        <span>{lang.name}</span>
+                      </span>
                     </SelectItem>
                   ))}
                 </SelectContent>
