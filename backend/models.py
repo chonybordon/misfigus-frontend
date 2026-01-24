@@ -67,6 +67,22 @@ class RadiusUpdate(BaseModel):
 class TermsAcceptance(BaseModel):
     version: str  # Terms version being accepted
 
+class OnboardingComplete(BaseModel):
+    """Complete onboarding in one step - all fields required"""
+    full_name: str
+    # Location fields
+    country_code: str
+    region_name: str
+    city_name: str
+    place_id: str
+    latitude: float
+    longitude: float
+    neighborhood_text: Optional[str] = None
+    # Radius
+    radius_km: int = 5  # 3, 5, 10, 15, or 20
+    # Terms
+    terms_version: str
+
 class OTPVerify(BaseModel):
     email: str
     otp: str
