@@ -2228,7 +2228,8 @@ i18n
   .use(initReactI18next)
   .init({
     resources,
-    fallbackLng: 'en',
+    fallbackLng: ['es', 'en'], // Spanish first, then English
+    lng: 'es', // Default to Spanish
     supportedLngs: ['es', 'en', 'pt', 'fr', 'de', 'it'],
     nonExplicitSupportedLngs: false,
     load: 'languageOnly',
