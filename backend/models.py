@@ -15,6 +15,9 @@ class User(BaseModel):
     verified: bool = False
     language: str = 'es'
     
+    # Onboarding status
+    onboarding_completed: bool = False
+    
     # Structured Location Fields (globally scalable)
     country_code: Optional[str] = None  # ISO-3166 alpha-2 (e.g., "AR", "US", "ES")
     region_name: Optional[str] = None   # State / Province / Prefecture
@@ -25,7 +28,7 @@ class User(BaseModel):
     neighborhood_text: Optional[str] = None  # User-provided, display only, NEVER for matching
     
     # Search radius
-    radius_km: int = 5  # Default 5km, allowed: 3, 5, 10
+    radius_km: int = 5  # Default 5km, allowed: 3, 5, 10, 15, 20
     
     # Cooldown control timestamps
     location_change_allowed_at: Optional[datetime] = None
@@ -79,7 +82,7 @@ class PlaceSearchResult(BaseModel):
     longitude: float
 
 # Allowed search radius values
-ALLOWED_RADIUS_VALUES = [3, 5, 10]
+ALLOWED_RADIUS_VALUES = [3, 5, 10, 15, 20]
 # Cooldown for location changes (14 days - anti-abuse)
 LOCATION_CHANGE_COOLDOWN_DAYS = 14
 # Cooldown for radius changes (7 days)
