@@ -9,18 +9,19 @@ import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { User, MapPin, Compass, FileText, Search, ChevronRight } from 'lucide-react';
+import { User, MapPin, Compass, FileText, Search, ChevronRight, Globe } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
+import { SUPPORTED_LANGUAGES } from '../i18n';
 
 const RADIUS_OPTIONS = [3, 5, 10, 15, 20];
+const TOTAL_STEPS = 5;
 
 // City search component with typeahead
-const CitySearch = ({ country, onSelect, value, disabled }) => {
+const CitySearch = ({ country, onSelect, value, disabled, t }) => {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
-  const { t } = useTranslation();
 
   const searchCities = useCallback(async (searchQuery) => {
     if (searchQuery.length < 2 || !country) {
@@ -108,6 +109,7 @@ const CitySearch = ({ country, onSelect, value, disabled }) => {
 
 export const Onboarding = ({ onComplete }) => {
   const [step, setStep] = useState(1);
+  const [selectedLanguage, setSelectedLanguage] = useState('');
   const [fullName, setFullName] = useState('');
   const [countries, setCountries] = useState([]);
   const [selectedCountry, setSelectedCountry] = useState('');
@@ -119,10 +121,19 @@ export const Onboarding = ({ onComplete }) => {
   const [saving, setSaving] = useState(false);
   const { t, i18n } = useTranslation();
 
+  // Fetch countries when language changes or step 3 is reached
   useEffect(() => {
-    fetchCountries();
-    fetchTerms();
-  }, [i18n.language]);
+    if (step >= 3) {
+      fetchCountries();
+    }
+  }, [step, i18n.language]);
+
+  // Fetch terms when step 5 is reached
+  useEffect(() => {
+    if (step === 5) {
+      fetchTerms();
+    }
+  }, [step, i18n.language]);
 
   const fetchCountries = async () => {
     try {
@@ -142,8 +153,29 @@ export const Onboarding = ({ onComplete }) => {
     }
   };
 
-  const canProceedToStep2 = fullName.trim().length >= 2;
-  const canProceedToStep3 = selectedPlace !== null;
+  // Handle language selection - immediately update UI and save to backend
+  const handleLanguageSelect = async (langCode) => {
+    setSelectedLanguage(langCode);
+    
+    // Change i18n language immediately
+    i18n.changeLanguage(langCode);
+    
+    // Save language to backend
+    try {
+      await api.patch('/auth/me', { language: langCode });
+      // Update cached user
+      const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+      currentUser.language = langCode;
+      localStorage.setItem('user', JSON.stringify(currentUser));
+    } catch (error) {
+      console.error('Failed to save language:', error);
+    }
+  };
+
+  const canProceedToStep2 = selectedLanguage !== '';
+  const canProceedToStep3 = fullName.trim().length >= 2;
+  const canProceedToStep4 = selectedPlace !== null;
+  const canProceedToStep5 = true; // Radius has a default value
   const canComplete = termsAccepted;
 
   const handleComplete = async () => {
@@ -177,7 +209,47 @@ export const Onboarding = ({ onComplete }) => {
     }
   };
 
-  const renderStep1 = () => (
+  // Step 1: Language Selection
+  const renderLanguageStep = () => (
+    <div className="space-y-6">
+      <div className="text-center mb-6">
+        <div className="mx-auto h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+          <Globe className="h-8 w-8 text-primary" />
+        </div>
+        <h2 className="text-xl font-bold">{t('onboarding.languageTitle')}</h2>
+        <p className="text-muted-foreground text-sm">{t('onboarding.languageSubtitle')}</p>
+      </div>
+      
+      <div className="grid grid-cols-2 gap-3">
+        {SUPPORTED_LANGUAGES.map((lang) => (
+          <button
+            key={lang.code}
+            onClick={() => handleLanguageSelect(lang.code)}
+            className={`p-4 rounded-lg border-2 transition-all text-left flex items-center gap-3 ${
+              selectedLanguage === lang.code
+                ? 'border-primary bg-primary/5'
+                : 'border-border hover:border-primary/50'
+            }`}
+          >
+            <span className="text-2xl">{lang.flag}</span>
+            <span className="font-medium">{lang.name}</span>
+          </button>
+        ))}
+      </div>
+      
+      <Button
+        onClick={() => setStep(2)}
+        disabled={!canProceedToStep2}
+        className="w-full"
+      >
+        {t('onboarding.continue')}
+        <ChevronRight className="h-4 w-4 ml-2" />
+      </Button>
+    </div>
+  );
+
+  // Step 2: Full Name
+  const renderNameStep = () => (
     <div className="space-y-6">
       <div className="text-center mb-6">
         <div className="mx-auto h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
@@ -201,18 +273,24 @@ export const Onboarding = ({ onComplete }) => {
         <p className="text-xs text-muted-foreground">{t('onboarding.fullNameHelp')}</p>
       </div>
       
-      <Button
-        onClick={() => setStep(2)}
-        disabled={!canProceedToStep2}
-        className="w-full"
-      >
-        {t('onboarding.continue')}
-        <ChevronRight className="h-4 w-4 ml-2" />
-      </Button>
+      <div className="flex gap-2">
+        <Button variant="outline" onClick={() => setStep(1)} className="flex-1">
+          {t('common.back')}
+        </Button>
+        <Button
+          onClick={() => setStep(3)}
+          disabled={!canProceedToStep3}
+          className="flex-1"
+        >
+          {t('onboarding.continue')}
+          <ChevronRight className="h-4 w-4 ml-2" />
+        </Button>
+      </div>
     </div>
   );
 
-  const renderStep2 = () => (
+  // Step 3: Location
+  const renderLocationStep = () => (
     <div className="space-y-6">
       <div className="text-center mb-6">
         <div className="mx-auto h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
@@ -249,6 +327,7 @@ export const Onboarding = ({ onComplete }) => {
           country={selectedCountry}
           onSelect={setSelectedPlace}
           value={selectedPlace}
+          t={t}
         />
       </div>
       
@@ -263,34 +342,13 @@ export const Onboarding = ({ onComplete }) => {
         />
       </div>
       
-      {/* Radius Selection */}
-      <div className="space-y-2">
-        <Label className="flex items-center gap-2">
-          <Compass className="h-4 w-4" />
-          {t('onboarding.searchRadius')} *
-        </Label>
-        <Select value={selectedRadius.toString()} onValueChange={(value) => setSelectedRadius(parseInt(value))}>
-          <SelectTrigger>
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {RADIUS_OPTIONS.map((radius) => (
-              <SelectItem key={radius} value={radius.toString()}>
-                {radius} km
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <p className="text-xs text-muted-foreground">{t('onboarding.radiusHelp')}</p>
-      </div>
-      
       <div className="flex gap-2">
-        <Button variant="outline" onClick={() => setStep(1)} className="flex-1">
+        <Button variant="outline" onClick={() => setStep(2)} className="flex-1">
           {t('common.back')}
         </Button>
         <Button
-          onClick={() => setStep(3)}
-          disabled={!canProceedToStep3}
+          onClick={() => setStep(4)}
+          disabled={!canProceedToStep4}
           className="flex-1"
         >
           {t('onboarding.continue')}
@@ -300,7 +358,55 @@ export const Onboarding = ({ onComplete }) => {
     </div>
   );
 
-  const renderStep3 = () => (
+  // Step 4: Search Radius
+  const renderRadiusStep = () => (
+    <div className="space-y-6">
+      <div className="text-center mb-6">
+        <div className="mx-auto h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+          <Compass className="h-8 w-8 text-primary" />
+        </div>
+        <h2 className="text-xl font-bold">{t('onboarding.searchRadius')}</h2>
+        <p className="text-muted-foreground text-sm">{t('onboarding.radiusHelp')}</p>
+      </div>
+      
+      {/* Radius Selection */}
+      <div className="space-y-4">
+        <Label>{t('onboarding.searchRadius')} *</Label>
+        <div className="grid grid-cols-5 gap-2">
+          {RADIUS_OPTIONS.map((radius) => (
+            <button
+              key={radius}
+              onClick={() => setSelectedRadius(radius)}
+              className={`p-3 rounded-lg border-2 transition-all ${
+                selectedRadius === radius
+                  ? 'border-primary bg-primary/5 font-bold'
+                  : 'border-border hover:border-primary/50'
+              }`}
+            >
+              {radius} km
+            </button>
+          ))}
+        </div>
+      </div>
+      
+      <div className="flex gap-2">
+        <Button variant="outline" onClick={() => setStep(3)} className="flex-1">
+          {t('common.back')}
+        </Button>
+        <Button
+          onClick={() => setStep(5)}
+          disabled={!canProceedToStep5}
+          className="flex-1"
+        >
+          {t('onboarding.continue')}
+          <ChevronRight className="h-4 w-4 ml-2" />
+        </Button>
+      </div>
+    </div>
+  );
+
+  // Step 5: Terms & Conditions
+  const renderTermsStep = () => (
     <div className="space-y-6">
       <div className="text-center mb-4">
         <div className="mx-auto h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
@@ -312,7 +418,7 @@ export const Onboarding = ({ onComplete }) => {
       
       {/* Terms Content */}
       <Card className="border-2">
-        <ScrollArea className="h-[250px] p-4">
+        <ScrollArea className="h-[200px] p-4">
           <div className="prose prose-sm max-w-none">
             <ReactMarkdown>{termsContent}</ReactMarkdown>
           </div>
@@ -336,7 +442,7 @@ export const Onboarding = ({ onComplete }) => {
       </div>
       
       <div className="flex gap-2">
-        <Button variant="outline" onClick={() => setStep(2)} className="flex-1">
+        <Button variant="outline" onClick={() => setStep(4)} className="flex-1">
           {t('common.back')}
         </Button>
         <Button
@@ -353,10 +459,10 @@ export const Onboarding = ({ onComplete }) => {
   // Progress indicator
   const renderProgress = () => (
     <div className="flex justify-center gap-2 mb-6">
-      {[1, 2, 3].map((s) => (
+      {Array.from({ length: TOTAL_STEPS }, (_, i) => i + 1).map((s) => (
         <div
           key={s}
-          className={`h-2 w-16 rounded-full transition-colors ${
+          className={`h-2 w-12 rounded-full transition-colors ${
             s <= step ? 'bg-primary' : 'bg-muted'
           }`}
         />
@@ -377,9 +483,11 @@ export const Onboarding = ({ onComplete }) => {
         </CardHeader>
         <CardContent>
           {renderProgress()}
-          {step === 1 && renderStep1()}
-          {step === 2 && renderStep2()}
-          {step === 3 && renderStep3()}
+          {step === 1 && renderLanguageStep()}
+          {step === 2 && renderNameStep()}
+          {step === 3 && renderLocationStep()}
+          {step === 4 && renderRadiusStep()}
+          {step === 5 && renderTermsStep()}
         </CardContent>
       </Card>
     </div>
