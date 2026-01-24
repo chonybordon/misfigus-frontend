@@ -370,6 +370,7 @@ async def send_otp(user_input: UserCreate):
 async def verify_otp_endpoint(otp_data: OTPVerify):
     """
     Verify OTP code. Validates against stored hash.
+    Returns user with onboarding_completed status for navigation.
     """
     email_lower = otp_data.email.lower()
     stored = OTP_STORE.get(email_lower)
@@ -391,10 +392,17 @@ async def verify_otp_endpoint(otp_data: OTPVerify):
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     
+    # Ensure onboarding_completed field exists (for existing users)
+    if 'onboarding_completed' not in user:
+        user['onboarding_completed'] = False
+    
     await db.users.update_one(
         {"email": otp_data.email},
         {"$set": {"verified": True}}
     )
+    
+    # Refetch user to get updated data
+    user = await db.users.find_one({"email": otp_data.email}, {"_id": 0})
     
     token = create_token(user['id'])
     return {"token": token, "user": user}
