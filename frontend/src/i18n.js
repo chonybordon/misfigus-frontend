@@ -2229,12 +2229,20 @@ i18n
   .init({
     resources,
     fallbackLng: 'en',
+    supportedLngs: ['es', 'en', 'pt', 'fr', 'de', 'it'],
+    nonExplicitSupportedLngs: false,
+    load: 'languageOnly',
     interpolation: {
       escapeValue: false,
     },
     detection: {
       order: ['localStorage', 'navigator'],
       caches: ['localStorage'],
+    },
+    returnEmptyString: false,
+    returnNull: false,
+    missingKeyHandler: (lng, ns, key) => {
+      console.warn(`Missing translation: ${key} for language: ${lng}`);
     },
   });
 
