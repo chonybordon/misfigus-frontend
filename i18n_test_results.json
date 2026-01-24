@@ -1,0 +1,24 @@
+{
+  "timestamp": "2026-01-24T23:16:03.113645",
+  "test_type": "i18n_language_functionality",
+  "tests_run": 1,
+  "tests_passed": 0,
+  "success_rate": 0.0,
+  "results": [
+    {
+      "test": "Setup - Extract OTP",
+      "success": false,
+      "details": "Could not find OTP in backend logs"
+    }
+  ],
+  "test_email": "misfigus.i18n.test.20260124231602@gmail.com",
+  "supported_languages": [
+    "es",
+    "en",
+    "pt",
+    "fr",
+    "de",
+    "it"
+  ],
+  "token_obtained": false
+}
