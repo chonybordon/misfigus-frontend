@@ -3,15 +3,18 @@
 backend:
   - task: "New Onboarding Flow Implementation"
     implemented: true
-    working: NA
+    working: true
     file: "/app/backend/server.py, /app/backend/models.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: NA
         agent: "main"
         comment: "Implemented POST /api/user/complete-onboarding endpoint. Added onboarding_completed field to User model. Updated verify-otp to return onboarding_completed status. Added 15km and 20km to ALLOWED_RADIUS_VALUES."
+      - working: true
+        agent: "testing"
+        comment: "✅ BACKEND AUTHENTICATION & ONBOARDING FLOW WORKING: Tested all 4 main endpoints: 1) POST /api/auth/send-otp - correctly sends OTP via Resend email service, returns proper response structure without exposing OTP. 2) POST /api/auth/verify-otp - validates OTP, returns token and user with onboarding_completed field. 3) GET /api/auth/me - requires valid token, returns user data with onboarding status. 4) POST /api/user/complete-onboarding - validates all required fields (full_name, location, radius_km, terms_version), sets onboarding_completed=true, prevents re-onboarding. Radius validation working correctly for values [3,5,10,15,20]. Terms version validation working for v1.0. Real Resend email integration functional. Minor: Empty email validation could be stricter but doesn't affect core functionality."
 
   - task: "Onboarding Frontend"
     implemented: true
