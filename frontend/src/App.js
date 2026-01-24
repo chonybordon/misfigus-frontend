@@ -50,11 +50,10 @@ api.interceptors.response.use(
 
 export const AuthContext = React.createContext(null);
 
-// Private route that also checks for terms acceptance and profile completion
+// Private route that checks for onboarding completion
 const PrivateRoute = ({ children }) => {
   const token = localStorage.getItem('token');
-  const [needsTerms, setNeedsTerms] = useState(false);
-  const [needsProfile, setNeedsProfile] = useState(false);
+  const [needsOnboarding, setNeedsOnboarding] = useState(false);
   const [checkingStatus, setCheckingStatus] = useState(true);
   
   useEffect(() => {
@@ -67,59 +66,33 @@ const PrivateRoute = ({ children }) => {
   
   const checkStatus = async () => {
     try {
-      // Check cached terms status first to avoid repeated API calls
-      const cachedTermsVersion = localStorage.getItem('termsAcceptedVersion');
-      const currentVersion = '1.0'; // Must match backend CURRENT_TERMS_VERSION
-      
-      // Check user profile for displayName
+      // Check user profile for onboarding_completed
       const userResponse = await api.get('/auth/me');
       const userData = userResponse.data;
       
       // Update cached user data
       localStorage.setItem('user', JSON.stringify(userData));
       
-      // Check if profile needs completion (no display_name)
-      if (!userData.display_name) {
-        setNeedsProfile(true);
+      // Check if onboarding is needed
+      if (!userData.onboarding_completed) {
+        setNeedsOnboarding(true);
         setCheckingStatus(false);
         return;
       }
       
-      if (cachedTermsVersion === currentVersion) {
-        // Already accepted current version
-        setNeedsTerms(false);
-        setCheckingStatus(false);
-        return;
-      }
-      
-      // Check with backend
-      const response = await api.get('/user/terms-status');
-      const needsAcceptance = response.data.needs_acceptance;
-      
-      // Cache the result if accepted
-      if (!needsAcceptance && response.data.terms_version) {
-        localStorage.setItem('termsAcceptedVersion', response.data.terms_version);
-      }
-      
-      setNeedsTerms(needsAcceptance);
+      // User is fully onboarded
+      setNeedsOnboarding(false);
     } catch (error) {
       console.error('Failed to check status:', error);
-      setNeedsTerms(false);
-      setNeedsProfile(false);
+      setNeedsOnboarding(false);
     } finally {
       setCheckingStatus(false);
     }
   };
   
-  const handleProfileComplete = (updatedUser) => {
-    // User has completed their profile
-    setNeedsProfile(false);
-  };
-  
-  const handleTermsAccepted = () => {
-    // Cache the acceptance
-    localStorage.setItem('termsAcceptedVersion', '1.0');
-    setNeedsTerms(false);
+  const handleOnboardingComplete = (updatedUser) => {
+    // User has completed onboarding
+    setNeedsOnboarding(false);
   };
   
   if (!token) return <Navigate to="/" />;
@@ -132,13 +105,9 @@ const PrivateRoute = ({ children }) => {
     );
   }
   
-  // Profile completion takes priority over terms
-  if (needsProfile) {
-    return <CompleteProfile onComplete={handleProfileComplete} />;
-  }
-  
-  if (needsTerms) {
-    return <TermsAcceptance onAccepted={handleTermsAccepted} />;
+  // Show onboarding if not completed
+  if (needsOnboarding) {
+    return <Onboarding onComplete={handleOnboardingComplete} />;
   }
   
   return children;
