@@ -1,0 +1,138 @@
+{
+  "timestamp": "2026-01-24T22:37:22.546272",
+  "tests_run": 26,
+  "tests_passed": 25,
+  "success_rate": 96.15384615384616,
+  "results": [
+    {
+      "test": "Send OTP - Valid Email",
+      "success": true,
+      "details": ""
+    },
+    {
+      "test": "Send OTP - Response has message field",
+      "success": true,
+      "details": "Missing 'message' field"
+    },
+    {
+      "test": "Send OTP - Response has email field",
+      "success": true,
+      "details": "Missing or incorrect 'email' field"
+    },
+    {
+      "test": "Send OTP - OTP not exposed in response",
+      "success": true,
+      "details": "OTP should never be in response"
+    },
+    {
+      "test": "Send OTP - Missing Email Field",
+      "success": true,
+      "details": "Correctly rejected missing email"
+    },
+    {
+      "test": "Send OTP - Empty Email",
+      "success": false,
+      "details": "Status: 200, Response: {'message': 'OTP sent', 'email': ''}"
+    },
+    {
+      "test": "Verify OTP - Invalid OTP Format (5 digits)",
+      "success": true,
+      "details": "Correctly rejected 5-digit OTP"
+    },
+    {
+      "test": "Verify OTP - Non-numeric OTP",
+      "success": true,
+      "details": "Correctly rejected non-numeric OTP"
+    },
+    {
+      "test": "Verify OTP - Missing Email Field",
+      "success": true,
+      "details": "Correctly rejected missing email"
+    },
+    {
+      "test": "Verify OTP - Missing OTP Field",
+      "success": true,
+      "details": "Correctly rejected missing OTP"
+    },
+    {
+      "test": "Verify OTP - Non-existent Email",
+      "success": true,
+      "details": "Correctly rejected non-existent email"
+    },
+    {
+      "test": "GET /auth/me - No Auth Header",
+      "success": true,
+      "details": "Correctly rejected request without auth"
+    },
+    {
+      "test": "GET /auth/me - Invalid Auth Format",
+      "success": true,
+      "details": "Correctly rejected invalid auth format"
+    },
+    {
+      "test": "GET /auth/me - Invalid Token",
+      "success": true,
+      "details": "Correctly rejected invalid token"
+    },
+    {
+      "test": "Complete Onboarding - No Auth Header",
+      "success": true,
+      "details": "Correctly rejected request without auth"
+    },
+    {
+      "test": "Complete Onboarding - Missing Required Fields",
+      "success": true,
+      "details": "Correctly rejected incomplete data"
+    },
+    {
+      "test": "Complete Onboarding - Invalid Radius",
+      "success": true,
+      "details": "Correctly rejected invalid radius"
+    },
+    {
+      "test": "Complete Onboarding - Invalid Terms Version",
+      "success": true,
+      "details": "Correctly rejected invalid terms version"
+    },
+    {
+      "test": "Valid radius 3km - No validation error",
+      "success": true,
+      "details": "Radius 3km passed validation (got expected auth error)"
+    },
+    {
+      "test": "Valid radius 5km - No validation error",
+      "success": true,
+      "details": "Radius 5km passed validation (got expected auth error)"
+    },
+    {
+      "test": "Valid radius 10km - No validation error",
+      "success": true,
+      "details": "Radius 10km passed validation (got expected auth error)"
+    },
+    {
+      "test": "Valid radius 15km - No validation error",
+      "success": true,
+      "details": "Radius 15km passed validation (got expected auth error)"
+    },
+    {
+      "test": "Valid radius 20km - No validation error",
+      "success": true,
+      "details": "Radius 20km passed validation (got expected auth error)"
+    },
+    {
+      "test": "Invalid radius 1km - Properly rejected",
+      "success": true,
+      "details": "Radius 1km correctly rejected"
+    },
+    {
+      "test": "Invalid radius 2km - Properly rejected",
+      "success": true,
+      "details": "Radius 2km correctly rejected"
+    },
+    {
+      "test": "Invalid radius 4km - Properly rejected",
+      "success": true,
+      "details": "Radius 4km correctly rejected"
+    }
+  ]
+}
