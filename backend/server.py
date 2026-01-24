@@ -13,7 +13,7 @@ from uuid import uuid4
 
 from models import (
     User, UserCreate, UserUpdate, OTPVerify, 
-    StructuredLocationUpdate, RadiusUpdate, TermsAcceptance,
+    StructuredLocationUpdate, RadiusUpdate, TermsAcceptance, OnboardingComplete,
     Album, Group, GroupMember, GroupCreate,
     EmailInvite, EmailInviteCreate, EmailInviteAccept,
     Sticker, UserInventory, InventoryUpdate,
