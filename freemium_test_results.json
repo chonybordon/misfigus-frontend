@@ -1,0 +1,15 @@
+{
+  "timestamp": "2026-01-25T01:22:18.213080",
+  "tests_run": 1,
+  "tests_passed": 0,
+  "success_rate": 0.0,
+  "results": [
+    {
+      "test": "Setup - Extract OTP",
+      "success": false,
+      "details": "Could not find OTP in logs"
+    }
+  ],
+  "test_email": "freemium.test.20260125012217@gmail.com",
+  "token_obtained": false
+}
