@@ -1901,6 +1901,7 @@ async def create_or_get_exchange(
     Creates an exchange record and enables chat between users.
     
     UPSERT: If exchange already exists, returns it instead of error.
+    FREEMIUM: Free users limited to 1 new match per day.
     """
     # Verify user has activated this album
     activation = await db.user_album_activations.find_one({
@@ -1936,9 +1937,24 @@ async def create_or_get_exchange(
         ]
     }, {"_id": 0})
     
-    # If exchange already exists, return it (NO ERROR)
+    # If exchange already exists, return it (NO ERROR, no daily limit cost)
     if existing:
         return {"message": "EXCHANGE_EXISTS", "exchange": existing, "is_existing": True}
+    
+    # FREEMIUM GATING: Check if user can create a new match
+    can_match, reason, user = await can_user_create_match(user_id)
+    if not can_match:
+        if reason == "DAILY_MATCH_LIMIT":
+            raise HTTPException(
+                status_code=403,
+                detail={
+                    "code": "DAILY_MATCH_LIMIT",
+                    "message": "Free plan allows only 1 match per day. Upgrade to Premium for unlimited matches.",
+                    "matches_used": user.get('matches_used_today', 0),
+                    "limit": FREE_PLAN_MAX_MATCHES_PER_DAY
+                }
+            )
+        raise HTTPException(status_code=400, detail=reason)
     
     # Verify mutual match exists
     stickers = await db.stickers.find({"album_id": album_id}, {"_id": 0, "id": 1}).to_list(1000)
@@ -1966,6 +1982,11 @@ async def create_or_get_exchange(
     
     if not i_can_give or not i_can_get:
         raise HTTPException(status_code=400, detail="NO_MUTUAL_MATCH")
+    
+    # FREEMIUM: Increment daily match counter for free users
+    user_plan = user.get('plan', 'free') if user else 'free'
+    if user_plan == 'free':
+        await increment_user_match_count(user_id)
     
     # Create exchange
     now = datetime.now(timezone.utc)
