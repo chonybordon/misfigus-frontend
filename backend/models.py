@@ -18,6 +18,12 @@ class User(BaseModel):
     # Onboarding status
     onboarding_completed: bool = False
     
+    # Freemium plan fields
+    plan: str = 'free'  # 'free' or 'premium'
+    matches_used_today: int = 0  # Daily match counter for free users
+    matches_used_date: Optional[str] = None  # YYYY-MM-DD format for daily reset
+    premium_until: Optional[datetime] = None  # Future: subscription expiry
+    
     # Structured Location Fields (globally scalable)
     country_code: Optional[str] = None  # ISO-3166 alpha-2 (e.g., "AR", "US", "ES")
     region_name: Optional[str] = None   # State / Province / Prefecture
@@ -42,6 +48,10 @@ class User(BaseModel):
     terms_version: Optional[str] = None
     terms_accepted_at: Optional[datetime] = None
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+# Freemium constants
+FREE_PLAN_MAX_ALBUMS = 1
+FREE_PLAN_MAX_MATCHES_PER_DAY = 1
 
 class UserCreate(BaseModel):
     email: str
