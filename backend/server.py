@@ -241,7 +241,7 @@ def can_change_setting(allowed_at: datetime, max_days: int) -> tuple:
     return False, days_remaining
 
 def can_change_location(allowed_at: datetime) -> tuple:
-    """Check if user can change location (14-day cooldown)."""
+    """Check if user can change location (7-day cooldown)."""
     return can_change_setting(allowed_at, LOCATION_CHANGE_COOLDOWN_DAYS)
 
 def can_change_radius(allowed_at: datetime) -> tuple:
@@ -695,7 +695,7 @@ async def update_structured_location(location_data: StructuredLocationUpdate, us
             detail=f"Invalid radius. Allowed values: {ALLOWED_RADIUS_VALUES}"
         )
     
-    # Check location cooldown (14 days)
+    # Check location cooldown (7 days)
     location_can_change, location_days = can_change_location(user.get('location_change_allowed_at'))
     if not location_can_change:
         raise HTTPException(
@@ -780,7 +780,7 @@ async def get_structured_location_status(user_id: str = Depends(get_current_user
     """
     Get user's complete location status including:
     - Structured location data
-    - Cooldown status (14 days for location, 7 days for radius)
+    - Cooldown status (7 days for both location and radius)
     - Whether location is properly configured
     """
     user = await db.users.find_one({"id": user_id}, {"_id": 0})
@@ -813,7 +813,7 @@ async def get_structured_location_status(user_id: str = Depends(get_current_user
             "label": location_label,
             "can_change": location_can_change,
             "days_until_change": location_days,
-            "cooldown_days": LOCATION_CHANGE_COOLDOWN_DAYS  # 14 days
+            "cooldown_days": LOCATION_CHANGE_COOLDOWN_DAYS  # 7 days
         },
         "radius": {
             "km": user.get('radius_km', 5),
