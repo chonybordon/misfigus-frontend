@@ -67,7 +67,10 @@ const FAILURE_REASONS_SERIOUS = [
 export const Exchanges = () => {
   const { albumId } = useParams();
   const [exchanges, setExchanges] = useState([]);
+  const [matches, setMatches] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [checkingMatches, setCheckingMatches] = useState(false);
+  const [hasCheckedMatches, setHasCheckedMatches] = useState(false);
   const navigate = useNavigate();
   const { t } = useTranslation();
 
@@ -79,15 +82,40 @@ export const Exchanges = () => {
     try {
       const response = await api.get(`/albums/${albumId}/exchanges`);
       setExchanges(response.data);
+      
+      // If no exchanges exist, automatically check for matches
+      if (response.data.length === 0) {
+        await fetchMatches();
+      }
     } catch (error) {
       // Empty result is NOT an error - don't show error toast for 404 or empty
       // Only show toast for actual errors (500, network, etc.)
       if (error.response?.status >= 500) {
         toast.error(t('common.error'));
       }
-      // For 404 or any other case, just show empty state
+      // For 404 or any other case, check for matches
+      await fetchMatches();
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchMatches = async () => {
+    setCheckingMatches(true);
+    try {
+      const response = await api.get(`/albums/${albumId}/matches`);
+      setMatches(response.data);
+      setHasCheckedMatches(true);
+      
+      // If matches exist and no exchanges, navigate to matches screen
+      if (response.data.length > 0) {
+        navigate(`/albums/${albumId}/matches`, { replace: true });
+      }
+    } catch (error) {
+      console.error('Failed to fetch matches:', error);
+      setHasCheckedMatches(true);
+    } finally {
+      setCheckingMatches(false);
     }
   };
 
@@ -95,13 +123,22 @@ export const Exchanges = () => {
   const hasNewExchanges = exchanges.some(ex => ex.is_new && ex.status === 'pending');
   const hasUnreadMessages = exchanges.some(ex => ex.has_unread && ex.status === 'pending');
 
-  if (loading) {
+  // Show loading while fetching exchanges or checking matches
+  if (loading || checkingMatches) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-2xl font-bold">{t('common.loading')}</div>
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-center">
+          <div className="text-2xl font-bold text-primary mb-2">{t('common.loading')}</div>
+          <p className="text-muted-foreground">
+            {checkingMatches ? t('exchange.findMatches') + '...' : ''}
+          </p>
+        </div>
       </div>
     );
   }
+
+  // Only show empty state if we've checked both exchanges AND matches
+  const showEmptyState = exchanges.length === 0 && hasCheckedMatches && matches.length === 0;
 
   return (
     <div className="min-h-screen sticker-album-pattern pb-20">
