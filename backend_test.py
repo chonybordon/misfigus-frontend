@@ -573,7 +573,8 @@ class MisFigusAuthOnboardingTester:
             ("Send OTP Endpoint", self.test_send_otp_endpoint),
             ("Verify OTP Endpoint", self.test_verify_otp_endpoint),
             ("Get Me Endpoint", self.test_get_me_endpoint),
-            ("Complete Onboarding Endpoint", self.test_complete_onboarding_endpoint)
+            ("Complete Onboarding Endpoint", self.test_complete_onboarding_endpoint),
+            ("Exchanges Flow", self.test_exchanges_flow)
         ]
         
         for test_name, test_func in tests:
