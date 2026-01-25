@@ -1,15 +1,270 @@
 {
-  "timestamp": "2026-01-25T01:22:18.213080",
-  "tests_run": 1,
-  "tests_passed": 0,
-  "success_rate": 0.0,
+  "timestamp": "2026-01-25T01:22:51.915325",
+  "tests_run": 52,
+  "tests_passed": 52,
+  "success_rate": 100.0,
   "results": [
     {
-      "test": "Setup - Extract OTP",
-      "success": false,
-      "details": "Could not find OTP in logs"
+      "test": "Setup - User Authentication Complete",
+      "success": true,
+      "details": "User ID: 0d8116ee-760a-4547-a637-e8e3208bfc81"
+    },
+    {
+      "test": "GET /user/plan-status - Basic Request",
+      "success": true,
+      "details": ""
+    },
+    {
+      "test": "Plan Status - Has plan field",
+      "success": true,
+      "details": "Missing 'plan' field"
+    },
+    {
+      "test": "Plan Status - Has is_premium field",
+      "success": true,
+      "details": "Missing 'is_premium' field"
+    },
+    {
+      "test": "Plan Status - Has matches_used_today field",
+      "success": true,
+      "details": "Missing 'matches_used_today' field"
+    },
+    {
+      "test": "Plan Status - Has matches_limit field",
+      "success": true,
+      "details": "Missing 'matches_limit' field"
+    },
+    {
+      "test": "Plan Status - Has can_match field",
+      "success": true,
+      "details": "Missing 'can_match' field"
+    },
+    {
+      "test": "Plan Status - Has active_albums field",
+      "success": true,
+      "details": "Missing 'active_albums' field"
+    },
+    {
+      "test": "Plan Status - Has albums_limit field",
+      "success": true,
+      "details": "Missing 'albums_limit' field"
+    },
+    {
+      "test": "Plan Status - Has can_activate_album field",
+      "success": true,
+      "details": "Missing 'can_activate_album' field"
+    },
+    {
+      "test": "Plan Status - Default plan is free",
+      "success": true,
+      "details": "Expected 'free', got 'free'"
+    },
+    {
+      "test": "Plan Status - is_premium is false",
+      "success": true,
+      "details": "Expected false, got False"
+    },
+    {
+      "test": "Plan Status - matches_used_today is 0",
+      "success": true,
+      "details": "Expected 0, got 0"
+    },
+    {
+      "test": "Plan Status - matches_limit is 1",
+      "success": true,
+      "details": "Expected 1, got 1"
+    },
+    {
+      "test": "Plan Status - can_match is true",
+      "success": true,
+      "details": "Expected true, got True"
+    },
+    {
+      "test": "Plan Status - active_albums is 0",
+      "success": true,
+      "details": "Expected 0, got 0"
+    },
+    {
+      "test": "Plan Status - albums_limit is 1",
+      "success": true,
+      "details": "Expected 1, got 1"
+    },
+    {
+      "test": "Plan Status - can_activate_album is true",
+      "success": true,
+      "details": "Expected true, got True"
+    },
+    {
+      "test": "POST /user/upgrade-premium - Basic Request",
+      "success": true,
+      "details": ""
+    },
+    {
+      "test": "Upgrade Premium - Response has message",
+      "success": true,
+      "details": "Missing 'message' field"
+    },
+    {
+      "test": "Upgrade Premium - Response has user",
+      "success": true,
+      "details": "Missing 'user' field"
+    },
+    {
+      "test": "Upgrade Premium - User plan set to premium",
+      "success": true,
+      "details": "Expected 'premium', got 'premium'"
+    },
+    {
+      "test": "After Upgrade - Plan is premium",
+      "success": true,
+      "details": "Expected 'premium', got 'premium'"
+    },
+    {
+      "test": "After Upgrade - is_premium is true",
+      "success": true,
+      "details": "Expected true, got True"
+    },
+    {
+      "test": "After Upgrade - matches_limit is null",
+      "success": true,
+      "details": "Expected null, got None"
+    },
+    {
+      "test": "After Upgrade - albums_limit is null",
+      "success": true,
+      "details": "Expected null, got None"
+    },
+    {
+      "test": "After Upgrade - can_match is true",
+      "success": true,
+      "details": "Expected true, got True"
+    },
+    {
+      "test": "After Upgrade - can_activate_album is true",
+      "success": true,
+      "details": "Expected true, got True"
+    },
+    {
+      "test": "POST /user/downgrade-free - Basic Request",
+      "success": true,
+      "details": ""
+    },
+    {
+      "test": "Downgrade Free - Response has message",
+      "success": true,
+      "details": "Missing 'message' field"
+    },
+    {
+      "test": "Downgrade Free - Response has user",
+      "success": true,
+      "details": "Missing 'user' field"
+    },
+    {
+      "test": "Downgrade Free - User plan set to free",
+      "success": true,
+      "details": "Expected 'free', got 'free'"
+    },
+    {
+      "test": "Downgrade Free - Daily matches reset",
+      "success": true,
+      "details": "Expected 0, got 0"
+    },
+    {
+      "test": "After Downgrade - Plan is free",
+      "success": true,
+      "details": "Expected 'free', got 'free'"
+    },
+    {
+      "test": "After Downgrade - is_premium is false",
+      "success": true,
+      "details": "Expected false, got False"
+    },
+    {
+      "test": "After Downgrade - matches_limit is 1",
+      "success": true,
+      "details": "Expected 1, got 1"
+    },
+    {
+      "test": "After Downgrade - albums_limit is 1",
+      "success": true,
+      "details": "Expected 1, got 1"
+    },
+    {
+      "test": "Free User - Activate First Album",
+      "success": true,
+      "details": ""
+    },
+    {
+      "test": "Free User - Activate Second Album (Should Fail)",
+      "success": true,
+      "details": ""
+    },
+    {
+      "test": "Free User - Correct Error Code (ALBUM_LIMIT)",
+      "success": true,
+      "details": "Expected ALBUM_LIMIT, got {'detail': {'code': 'ALBUM_LIMIT', 'message': 'Free plan allows only 1 active album. Upgrade to Premium for unlimited albums.', 'active_albums': 1, 'limit': 1}}"
+    },
+    {
+      "test": "Premium User - Activate Second Album",
+      "success": true,
+      "details": ""
+    },
+    {
+      "test": "Premium User - Unlimited matches (limit is null)",
+      "success": true,
+      "details": "Expected null, got None"
+    },
+    {
+      "test": "Premium User - Can always match",
+      "success": true,
+      "details": "Expected true, got True"
+    },
+    {
+      "test": "Daily Reset - Matches used reset to 0",
+      "success": true,
+      "details": "Expected 0, got 0"
+    },
+    {
+      "test": "Full Flow - User starts as free",
+      "success": true,
+      "details": "Expected 'free', got 'free'"
+    },
+    {
+      "test": "Full Flow - Activate first album succeeds",
+      "success": true,
+      "details": ""
+    },
+    {
+      "test": "Full Flow - Second album activation fails",
+      "success": true,
+      "details": ""
+    },
+    {
+      "test": "Full Flow - Upgrade to premium",
+      "success": true,
+      "details": ""
+    },
+    {
+      "test": "Full Flow - Second album activation succeeds after upgrade",
+      "success": true,
+      "details": ""
+    },
+    {
+      "test": "Full Flow - Downgrade to free",
+      "success": true,
+      "details": ""
+    },
+    {
+      "test": "Full Flow - Back to free plan",
+      "success": true,
+      "details": "Expected 'free', got 'free'"
+    },
+    {
+      "test": "Full Flow - Limits restored",
+      "success": true,
+      "details": "Expected limits of 1, got albums: 1, matches: 1"
     }
   ],
-  "test_email": "freemium.test.20260125012217@gmail.com",
-  "token_obtained": false
+  "test_email": "freemium.test.20260125012250@gmail.com",
+  "token_obtained": true
 }
