@@ -981,6 +981,7 @@ async def activate_album(album_id: str, user_id: str = Depends(get_current_user)
     """
     Activate an album for the user.
     Creates activation record and adds user as album member.
+    Free users can only have 1 active album.
     """
     # Check album exists and is available
     album = await db.albums.find_one({"id": album_id}, {"_id": 0})
@@ -997,6 +998,21 @@ async def activate_album(album_id: str, user_id: str = Depends(get_current_user)
     })
     if existing:
         raise HTTPException(status_code=400, detail="Album already activated")
+    
+    # FREEMIUM GATING: Check if user can activate another album
+    can_activate, reason, active_count = await can_user_activate_album(user_id)
+    if not can_activate:
+        if reason == "ALBUM_LIMIT":
+            raise HTTPException(
+                status_code=403,
+                detail={
+                    "code": "ALBUM_LIMIT",
+                    "message": "Free plan allows only 1 active album. Upgrade to Premium for unlimited albums.",
+                    "active_albums": active_count,
+                    "limit": FREE_PLAN_MAX_ALBUMS
+                }
+            )
+        raise HTTPException(status_code=400, detail=reason)
     
     # Create activation record
     activation = {
