@@ -341,6 +341,195 @@ class MisFigusAuthOnboardingTester:
         
         return True
 
+    def test_exchanges_flow(self):
+        """Test the exchanges flow endpoints"""
+        print("\n" + "="*60)
+        print("TESTING EXCHANGES FLOW")
+        print("="*60)
+        
+        if not self.token:
+            print("❌ Skipping exchanges test - no auth token")
+            return False
+        
+        # First, we need to get available albums
+        success, albums_response = self.make_request("GET", "albums", expected_status=200)
+        
+        if not success:
+            self.log_test("Get Albums for Exchanges Test", False, albums_response)
+            return False
+        
+        # Find an active album to test with
+        active_albums = [album for album in albums_response if album.get('status') == 'active']
+        
+        if not active_albums:
+            self.log_test("Find Active Album for Testing", False, "No active albums found")
+            return False
+        
+        test_album = active_albums[0]
+        album_id = test_album['id']
+        
+        print(f"✅ Testing with album: {test_album['name']} (ID: {album_id})")
+        
+        # Activate the album if not already activated
+        if test_album.get('user_state') != 'active':
+            success, activate_response = self.make_request(
+                "POST", 
+                f"albums/{album_id}/activate", 
+                expected_status=200
+            )
+            
+            if not success:
+                self.log_test("Activate Album for Testing", False, activate_response)
+                return False
+            
+            print(f"✅ Album activated successfully")
+        
+        # Test 1: GET /api/albums/{album_id}/exchanges
+        success, exchanges_response = self.make_request(
+            "GET", 
+            f"albums/{album_id}/exchanges", 
+            expected_status=200
+        )
+        
+        self.log_test("GET /albums/{album_id}/exchanges", success, str(exchanges_response) if not success else "")
+        
+        if success:
+            # Verify response is a list
+            is_list = isinstance(exchanges_response, list)
+            self.log_test("Exchanges response is list", is_list, "Response should be a list")
+            
+            # For new users, should be empty
+            is_empty_for_new_user = len(exchanges_response) == 0
+            self.log_test("Exchanges empty for new user", is_empty_for_new_user, "New user should have no existing exchanges")
+        
+        # Test 2: GET /api/albums/{album_id}/matches
+        success, matches_response = self.make_request(
+            "GET", 
+            f"albums/{album_id}/matches", 
+            expected_status=200
+        )
+        
+        self.log_test("GET /albums/{album_id}/matches", success, str(matches_response) if not success else "")
+        
+        if success:
+            # Verify response is a list
+            is_list = isinstance(matches_response, list)
+            self.log_test("Matches response is list", is_list, "Response should be a list")
+            
+            # For new users with no inventory, should be empty
+            is_empty_for_new_user = len(matches_response) == 0
+            self.log_test("Matches empty for new user", is_empty_for_new_user, "New user with no inventory should have no matches")
+        
+        # Test 3: GET /api/albums/{album_id} (Album detail with exchange counts)
+        success, album_detail_response = self.make_request(
+            "GET", 
+            f"albums/{album_id}", 
+            expected_status=200
+        )
+        
+        self.log_test("GET /albums/{album_id} (Album Detail)", success, str(album_detail_response) if not success else "")
+        
+        if success:
+            # Verify required fields are present
+            has_exchange_count = "exchange_count" in album_detail_response
+            has_pending_exchanges = "pending_exchanges" in album_detail_response
+            has_unread_exchanges = "has_unread_exchanges" in album_detail_response
+            
+            self.log_test("Album detail has exchange_count", has_exchange_count, "Missing 'exchange_count' field")
+            self.log_test("Album detail has pending_exchanges", has_pending_exchanges, "Missing 'pending_exchanges' field")
+            self.log_test("Album detail has has_unread_exchanges", has_unread_exchanges, "Missing 'has_unread_exchanges' field")
+            
+            if has_exchange_count and has_pending_exchanges and has_unread_exchanges:
+                # Verify data types
+                exchange_count_is_int = isinstance(album_detail_response["exchange_count"], int)
+                pending_exchanges_is_int = isinstance(album_detail_response["pending_exchanges"], int)
+                has_unread_is_bool = isinstance(album_detail_response["has_unread_exchanges"], bool)
+                
+                self.log_test("exchange_count is integer", exchange_count_is_int, "exchange_count should be an integer")
+                self.log_test("pending_exchanges is integer", pending_exchanges_is_int, "pending_exchanges should be an integer")
+                self.log_test("has_unread_exchanges is boolean", has_unread_is_bool, "has_unread_exchanges should be a boolean")
+                
+                # Verify logic: exchange_count should match matches count
+                if success and isinstance(matches_response, list):
+                    matches_count = len(matches_response)
+                    exchange_count = album_detail_response["exchange_count"]
+                    counts_match = matches_count == exchange_count
+                    
+                    self.log_test(
+                        "Exchange count matches matches endpoint", 
+                        counts_match, 
+                        f"Matches count ({matches_count}) != exchange_count ({exchange_count})"
+                    )
+                
+                # For new user, all counts should be 0 and unread should be false
+                new_user_values_correct = (
+                    album_detail_response["exchange_count"] == 0 and
+                    album_detail_response["pending_exchanges"] == 0 and
+                    album_detail_response["has_unread_exchanges"] == False
+                )
+                
+                self.log_test(
+                    "New user exchange values correct", 
+                    new_user_values_correct, 
+                    f"Expected all 0/false, got: exchange_count={album_detail_response['exchange_count']}, pending_exchanges={album_detail_response['pending_exchanges']}, has_unread_exchanges={album_detail_response['has_unread_exchanges']}"
+                )
+        
+        # Test 4: Test with inventory to verify matching logic
+        print(f"\n🔍 Testing matching logic with inventory...")
+        
+        # Get stickers for this album
+        success, inventory_response = self.make_request(
+            "GET", 
+            f"inventory?album_id={album_id}", 
+            expected_status=200
+        )
+        
+        if success and isinstance(inventory_response, list) and len(inventory_response) > 0:
+            # Add some stickers to inventory to test matching
+            test_sticker = inventory_response[0]
+            sticker_id = test_sticker['id']
+            
+            # Update inventory to have 2 of this sticker (1 needed + 1 duplicate)
+            success, update_response = self.make_request(
+                "PUT", 
+                "inventory", 
+                {"sticker_id": sticker_id, "owned_qty": 2},
+                expected_status=200
+            )
+            
+            if success:
+                print(f"✅ Added inventory: 2x sticker {sticker_id}")
+                
+                # Re-test matches endpoint to see if logic works
+                success, updated_matches_response = self.make_request(
+                    "GET", 
+                    f"albums/{album_id}/matches", 
+                    expected_status=200
+                )
+                
+                if success:
+                    self.log_test("Matches after inventory update", True, f"Found {len(updated_matches_response)} matches")
+                    
+                    # Re-test album detail to verify counts update
+                    success, updated_album_response = self.make_request(
+                        "GET", 
+                        f"albums/{album_id}", 
+                        expected_status=200
+                    )
+                    
+                    if success:
+                        updated_exchange_count = updated_album_response.get("exchange_count", 0)
+                        updated_matches_count = len(updated_matches_response)
+                        
+                        counts_still_match = updated_exchange_count == updated_matches_count
+                        self.log_test(
+                            "Exchange count still matches after inventory update", 
+                            counts_still_match, 
+                            f"Updated matches count ({updated_matches_count}) != updated exchange_count ({updated_exchange_count})"
+                        )
+        
+        return True
+
     def extract_otp_from_logs(self):
         """Extract OTP from backend logs"""
         try:
