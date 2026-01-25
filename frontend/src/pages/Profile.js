@@ -12,7 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogD
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ArrowLeft, User, MapPin, Compass, FileText, Clock, AlertCircle, Search, Globe, Building, Home } from 'lucide-react';
 
-const RADIUS_OPTIONS = [3, 5, 10];
+const RADIUS_OPTIONS = [3, 5, 10, 15, 20];
 
 // City search component with typeahead
 const CitySearch = ({ country, onSelect, value }) => {
