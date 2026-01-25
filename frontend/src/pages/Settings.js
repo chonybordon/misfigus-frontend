@@ -73,7 +73,7 @@ export const Settings = () => {
                 className="w-full"
                 onClick={() => navigate('/profile')}
               >
-                {t('profilePage.title')}
+                {t('profile.title')}
               </Button>
             </CardContent>
           </Card>
