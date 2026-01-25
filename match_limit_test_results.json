@@ -1,0 +1,65 @@
+{
+  "timestamp": "2026-01-25T01:23:37.043775",
+  "tests_run": 11,
+  "tests_passed": 11,
+  "success_rate": 100.0,
+  "results": [
+    {
+      "test": "Setup - User Authentication Complete",
+      "success": true,
+      "details": "User ID: 9788e906-d915-4792-9a95-3500705a68db, Album ID: bc32fecb-f640-4d00-880d-5043bc112d4b"
+    },
+    {
+      "test": "Initial State - Free plan active",
+      "success": true,
+      "details": "Expected 'free', got 'free'"
+    },
+    {
+      "test": "Initial State - Matches used is 0",
+      "success": true,
+      "details": "Expected 0, got 0"
+    },
+    {
+      "test": "Initial State - Can match is true",
+      "success": true,
+      "details": "Expected true, got True"
+    },
+    {
+      "test": "Initial State - Matches limit is 1",
+      "success": true,
+      "details": "Expected 1, got 1"
+    },
+    {
+      "test": "Get Matches - Endpoint works",
+      "success": true,
+      "details": "Found 0 potential matches"
+    },
+    {
+      "test": "Daily Limit - No matches used yet",
+      "success": true,
+      "details": "Exchange attempt didn't increment counter (expected for invalid data)"
+    },
+    {
+      "test": "Premium - Plan is premium",
+      "success": true,
+      "details": "Expected 'premium', got 'premium'"
+    },
+    {
+      "test": "Premium - is_premium is true",
+      "success": true,
+      "details": "Expected true, got True"
+    },
+    {
+      "test": "Premium - matches_limit is null",
+      "success": true,
+      "details": "Expected null, got None"
+    },
+    {
+      "test": "Premium - can_match is true",
+      "success": true,
+      "details": "Expected true, got True"
+    }
+  ],
+  "test_email": "match.limit.test.20260125012336@gmail.com",
+  "token_obtained": true
+}
