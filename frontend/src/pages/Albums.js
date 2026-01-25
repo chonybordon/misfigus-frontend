@@ -8,6 +8,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Settings, BookOpen, CheckCircle } from 'lucide-react';
+import { PaywallModal } from '../components/Paywall';
 
 // Helper to get translated category name from categoryKey
 const getCategoryDisplay = (album, t) => {
@@ -25,6 +26,8 @@ export const Albums = () => {
   const [selectedAlbum, setSelectedAlbum] = useState(null);
   const [activationDialogOpen, setActivationDialogOpen] = useState(false);
   const [activating, setActivating] = useState(false);
+  const [paywallOpen, setPaywallOpen] = useState(false);
+  const [paywallReason, setPaywallReason] = useState(null);
   const navigate = useNavigate();
   const { t } = useTranslation();
 
