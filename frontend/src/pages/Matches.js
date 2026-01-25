@@ -107,8 +107,16 @@ export const Matches = () => {
       // Always navigate to the exchange
       navigate(`/exchanges/${response.data.exchange.id}`);
     } catch (error) {
+      // Check for freemium limit error
+      const errorDetail = error.response?.data?.detail;
+      if (errorDetail?.code === 'DAILY_MATCH_LIMIT') {
+        setPaywallReason('DAILY_MATCH_LIMIT');
+        setPaywallOpen(true);
+        return;
+      }
+      
       // Translate backend error codes to user-friendly messages
-      const errorCode = error.response?.data?.detail;
+      const errorCode = typeof errorDetail === 'string' ? errorDetail : errorDetail?.code;
       const errorMessages = {
         'ALBUM_NOT_ACTIVATED': t('errors.albumNotActivated'),
         'PARTNER_NOT_FOUND': t('errors.partnerNotFound'),
@@ -118,6 +126,11 @@ export const Matches = () => {
       };
       toast.error(errorMessages[errorCode] || t('common.error'));
     }
+  };
+
+  const handlePaywallUpgrade = () => {
+    // After upgrade, user can retry the match
+    setPaywallOpen(false);
   };
 
   if (loading) {
