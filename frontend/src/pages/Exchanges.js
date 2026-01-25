@@ -160,7 +160,7 @@ export const Exchanges = () => {
           )}
         </div>
 
-        {exchanges.length === 0 ? (
+        {showEmptyState ? (
           <div className="text-center py-20">
             <MessageCircle className="h-24 w-24 mx-auto text-muted-foreground mb-4" />
             <h2 className="text-2xl font-bold mb-2">{t('exchange.noExchangesInArea')}</h2>
@@ -168,6 +168,12 @@ export const Exchanges = () => {
             <Button onClick={() => navigate(`/albums/${albumId}/matches`)}>
               {t('exchange.findMatches')}
             </Button>
+          </div>
+        ) : exchanges.length === 0 ? (
+          // Still loading matches, show loading indicator
+          <div className="text-center py-20">
+            <div className="animate-spin h-12 w-12 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4" />
+            <p className="text-muted-foreground">{t('exchange.findMatches')}...</p>
           </div>
         ) : (
           <div className="space-y-4">
