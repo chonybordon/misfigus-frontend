@@ -1,7 +1,7 @@
 {
   "timestamp": "2026-01-04T01:09:38.524233",
   "test_type": "MisFigus Production Member Count Consistency",
-  "base_url": "https://trade-stickers.preview.emergentagent.com",
+  "base_url": "https://translate-profile.preview.emergentagent.com",
   "test_email": "verifytest@gmail.com",
   "qatar_album_id": "bc32fecb-f640-4d00-880d-5043bc112d4b",
   "tests_run": 10,

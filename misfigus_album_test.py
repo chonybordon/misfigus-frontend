@@ -14,7 +14,7 @@ import os
 class MisFigusAlbumTester:
     def __init__(self):
         # Use the production URL from frontend/.env
-        self.base_url = "https://trade-stickers.preview.emergentagent.com"
+        self.base_url = "https://translate-profile.preview.emergentagent.com"
         self.api_url = f"{self.base_url}/api"
         self.token = None
         self.user_id = None

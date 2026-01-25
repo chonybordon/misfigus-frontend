@@ -1,165 +1,138 @@
 <analysis>**original_problem_statement:**
-The user is building a sticker trading app called MisFigus. The goal is to fix three high-priority issues identified during testing in a single implementation pass.
+The user wants to fix untranslated technical keys appearing on the Profile screen. They have provided a comprehensive list of user-friendly translations for all required keys across six supported languages (Spanish, English, Portuguese, French, German, Italian). The goal is to make the Profile screen fully localized, clean, and professional, ensuring a consistent experience for international users.
 
 **PRODUCT REQUIREMENTS (from the latest user request):**
+1.  **Translate Profile Keys:** Add user-friendly translations for all specified  keys into the  file for all six supported languages.
+2.  **Default Language:** Spanish () must be the default language for any user who has not yet selected a language.
+3.  **Fallback Logic:** Implement a translation fallback order: 1st) selected language, 2nd) Spanish (), 3rd) English (). The app must never display raw translation keys.
+4.  **Date Formatting:** Ensure dates (like the Terms & Conditions acceptance date) are formatted in a human-readable, locale-friendly way.
+5.  **Verification:** Confirm that after the fix, the Profile screen is fully translated, language switching works correctly, and the UI appears polished in all languages.
 
-1.  **Fix User Name Display:**
-    *   Currently, other users are displayed as a generic Usuario.
-    *   This needs to be replaced with the user's actual .
-    *   A Complete your profile flow must be enforced on first login if  is missing, requiring a name/nickname.
-    *   If a name is not set, the UI should display a fallback like Sin nombre (es) / No name (en), not Usuario.
-    *   All parts of the UI (exchanges list, chat, etc.) must use a consistent helper to display the correct name.
-
-2.  **Fix Chat i18n Leak:**
-    *   The system message Exchange started. Coordinate your in-person exchange here appears in English, even when the app language is Spanish.
-    *   This must be fixed by storing a translatable key (e.g., ) in the database for system messages, instead of the final rendered text. The frontend should then use  to render the correct translation at runtime.
-
-3.  **Fix Album Screen i18n Leaks:**
-    *   On the main albums screen, the subtitle (Selecciona un álbum) and category labels (Fútbol, Anime, etc.) remain in Spanish when the language is switched to English.
-    *   The hardcoded subtitle must be replaced with an  key.
-    *   The backend must be modified to provide a stable  (e.g., , ) for each album, and the frontend must use this key to look up the translated category name.
-
-**User's preferred language**: English. The application's UI is primarily in Spanish, but with English translations. The next agent must respond in **English**.
+**User's preferred language**: English
 
 **what currently exists?**
-The application is a full-stack React/FastAPI/MongoDB project. In the last session, the agent implemented a large number of fixes based on user feedback, including:
-- A message visibility system with unread indicators on the Exchanges list and a badge on the Album Home page.
-- A fix for a navigation loop when going back from the chat screen.
-- The addition of non-penalizing failure reasons for exchanges.
-- Extensive additions to the  translation files.
+The application is a full-stack sticker trading app (MisFigus) with a React frontend, FastAPI backend, and MongoDB database.
 
-The agent ran both backend and frontend testing sub-agents on these fixes, and they passed. However, immediately after, the user provided a new, higher-priority list of three critical issues to be fixed.
+The following major features were implemented and tested in the last session:
+-   **Freemium Model:** A free vs premium plan structure with feature gating. Free users are limited to 1 active album and 1 trade match per day. A paywall UI is shown when these limits are hit.
+-   **Full Data Reset:** All user data, trades, and inventories were wiped from the database to prepare for real-user testing. The app is in a fresh start state.
+-   **Trade Flow Fix:** A logic issue causing a false no trades available message was resolved. The app now correctly directs users to potential matches.
+-   **Language & i18n:**
+    -   Full internationalization for 6 languages (es, en, pt, fr, de, it) was implemented.
+    -   Spanish () is now the default and primary fallback language.
+    -   A blank screen issue on startup was fixed by implementing a safe language initialization flow.
+-   **Onboarding & Auth:** A new, multi-step onboarding flow was created, starting with mandatory language selection. The flow guides new users through setting up their profile (name, location, radius, terms acceptance).
 
 **Last working item**:
-The agent just began work on a new, three-part task from the user to fix critical UI and i18n issues.
-
--   **Last item agent was working:** Analyzing the codebase to address the three new high-priority issues: (1) user names displaying as Usuario, (2) English system text leaking into the chat, and (3) untranslated text on the Albums screen. The agent has reviewed  and was about to start implementation.
+-   **Last item agent was working:** The agent was tasked with translating all visible keys on the Profile screen for all six supported languages. The agent had just begun analyzing the  file to plan the implementation.
 -   **Status:** NOT STARTED
 -   **Agent Testing Done:** N
--   **Which testing method agent to use?** both (Backend changes are needed for data models and API responses; frontend changes are needed for UI rendering and i18n logic).
+-   **Which testing method agent to use?** Frontend testing agent (to verify UI in different languages) and screenshot tool.
 -   **User Testing Done:** N
 
 **All Pending/In progress Issue list**:
-*   **Issue 1: Implement Three Critical Fixes (P0)**
-    *   **Description:** The user has mandated that three issues—User Name Display, Chat i18n Leak, and Album Screen i18n—be fixed in a single pass. This is the top priority.
-    *   **Status:** NOT STARTED
-    *   **Is recurring issue?** Yes (Chat i18n leak).
-    *   **Blocked on other issue:** None.
-    *   **Issues Detail:** See  section for a breakdown.
-
-*   **Issue 2: Full Verification of Previous Fixes (P1)**
-    *   **Description:** A large batch of 7 fixes (message visibility, nav loop, etc.) was coded and passed automated tests, but the user has not verified them. A full, manual end-to-end check of these features is still required after the current P0 task is complete.
-    *   **Status:** USER VERIFICATION PENDING
-    *   **Is recurring issue?** N
-    *   **Should Test frontend/backend/both after fix?** both
-    *   **Blocked on other issue:** Implement Three Critical Fixes.
-
-*   **Issue 3: Old Navigation Issue from  (P2)**
-    *   **Description:** A low-priority navigation issue was reported in an old test report and has not been addressed.
+*   **Issue 1: Implement Profile Screen Translations (P0)**
+    *   **Description:** The Profile screen currently shows raw translation keys (e.g., ) instead of user-friendly text. This needs to be fixed by adding the complete set of translations provided by the user to the central  file.
     *   **Status:** NOT STARTED
     *   **Is recurring issue?** N
     *   **Should Test frontend/backend/both after fix?** frontend
     *   **Blocked on other issue:** None.
+    *   **Issues Detail:**
+        *   **Attempted fixes:** None.
+        *   **Next debug checklist:**
+            1.  Locate the  section within each language's translation object in .
+            2.  Use  to add the user-provided translations for all six languages (es, en, pt, fr, de, it).
+            3.  View  to confirm it uses  for all text elements.
+            4.  Test by taking screenshots of the Profile screen after changing the language in the Settings page to verify the translations appear correctly.
 
 **In progress Task List**:
-*   None. The current work is defined by the P0 issue.
+*   None.
 
 **Upcoming and Future Tasks**
-
-*   **Upcoming Tasks (Current P0 Task):**
-    *   **Task 1 (P0): Fix User Name Display:**
-        *   **Backend:** Add  to the  model.
-        *   **Backend:** Create a new endpoint or modify an existing one to update the .
-        *   **Frontend:** Implement a Complete Profile modal/page that is enforced if  is missing.
-        *   **Frontend:** Update all components that show a user's name (, , etc.) to use  with a fallback to an i18n key ().
-    *   **Task 2 (P0): Fix Chat i18n Leak:**
-        *   **Backend:** Modify the  data structure within an  to store a system message  (e.g., ) instead of hardcoded English text.
-        *   **Frontend:** In , check if a message is a system message and use the  to render the text via .
-    *   **Task 3 (P0): Fix Album Screen i18n:**
-        *   **Backend:** Modify the  endpoint. For each album, return a  (e.g., sports) instead of or in addition to the Spanish category name. Implement a mapping from old Spanish names (Fútbol) to the new keys.
-        *   **Frontend:** In , replace the hardcoded Selecciona un álbum subtitle with .
-        *   **Frontend:** In , use  to display the translated category name.
-        *   **Frontend:** Add all new keys to  for English and Spanish.
+*   **Upcoming Tasks:**
+    *   **Task 1 (P0): Fully translate the Profile screen.**
+        *   **Files:** , .
+        *   **Action:** Implement the translations as described in Issue 1 above. This is the only remaining task before the user considers the project ready for export.
 
 *   **Future Tasks:**
-    *   Address the old navigation issue from .
+    *   None. The user has indicated they will export the project after this final fix.
 
 **Completed work in this session**
-- **Message Visibility Feature:** Implemented backend support ( flags in  model) and two new endpoints (, ). Updated the frontend to show a New Message indicator on exchange cards and a notification badge on the Album home page.
-- **Navigation Loop Fix:** Corrected a bug in  that caused a loop when navigating back from the chat screen.
-- **Rating Flow Improvement:** Added non-penalizing failure reasons to the backend model.
-- **i18n Expansion:** Added a large number of new translation keys to .
-- **Automated Testing:** Ran and passed both backend and frontend testing sub-agents for the above fixes.
+-   **Freemium Monetization Model:** Implemented plan-based gating for albums and matches, with a paywall UI.
+-   **Full Database Reset:** Wiped all transactional and user data, leaving a clean slate.
+-   **Trade Flow Logic Fix:** Corrected the user flow to prevent false no trades available messages.
+-   **Default Language to Spanish:** Set  as the default and primary fallback language.
+-   **Blank Screen on Startup Fix:** Implemented a safe language initialization sequence.
+-   **Full i18n & Onboarding Overhaul:** Added support for 6 languages and made language selection the first step of a new, comprehensive onboarding flow.
+-   **Critical Bug Fixes:** Resolved issues with user name display, chat i18n, and album category translations.
 
 **Earlier issues found/mentioned but not fixed**
--   **Issue 1: Chat system message localization.**
-    -   **Debug checklist:** This was reported in the previous user request. The agent added i18n keys but failed to address the root cause. The user has now specified that the backend is storing the *final text* in the database instead of a *translatable key*. The fix requires changing the data model for system messages.
-    -   **Why to solve this issue and what will be achieved with this?** To ensure the chat UI is fully localized and respects the user's language preference.
-    -   **Should Test frontend/backend/both after fix:** both
-    -   **Is recurring issue?** Y
+*   None. All previously identified issues have been addressed.
 
 **Known issue recurrence from previous fork**
-- None.
+*   None.
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
-*   **i18n Strategy:** The critical concept for the next task is moving from storing rendered text in the database to storing translatable keys, which are then rendered on the client-side. This applies to both chat messages and album categories.
-*   **User Onboarding:** A light Complete Profile flow needs to be implemented.
+*   **i18n Strategy:** Centralized JSON file () with nested keys for each language. The app uses  with a fallback chain ( ->  -> ).
+*   **Freemium Gating:** Backend-enforced limits on key API endpoints (, ) based on the user's  field.
+*   **State-Driven Onboarding:** A conditional router () checks the  flag to direct new users to the mandatory onboarding flow.
 
 **key DB schema**
--   **users:** Will require a new  field (string).
--   **exchanges:** Contains  (bool) and  (bool). The  array within will need to be updated to support system message keys.
--   **albums:** The data source for albums will need to be updated to include a  (string).
+*   **users:** 
 
 **changes in tech stack**
-- None in the last session.
+*   None.
 
 **All files of reference**
-*   : Will need changes for user profile updates and album category keys.
-*   : Will need changes for the  model.
-*   : Target for i18n fixes.
-*   : Target for chat system message fix.
-*   : Will need new translation keys.
-*   Any component that displays a username will need to be updated (e.g., , ).
+*   : **Primary file to be modified.** Contains all UI translation strings.
+*   : The screen where the untranslated keys are visible. Needs to be reviewed to ensure it uses  correctly.
+*   : Handles top-level language state and initialization.
+*   : Contains the API logic.
+*   : Defines the database schema for users.
+
+**Areas that need refactoring**:
+*   Several components (, , ) have persistent linter warnings related to  dependency arrays. While not critical, resolving these would improve code quality.
 
 **key api endpoints**
-*   : Marks messages in a chat as read by the current user.
-*   : Gets the number of exchanges with unread messages for an album.
-*   : Will need to be modified to return a .
-*   A new endpoint will be needed to update a user's .
+*   : Updates user data, including .
+*   : An admin/test endpoint to toggle a user's plan to .
+*   : Endpoint gated by the 1-album limit for free users.
+*   : Endpoint gated by the 1-match-per-day limit for free users.
 
 **Critical Info for New Agent**
-*   **Your immediate and only priority is to implement the three fixes from the user's last message (message #87) in a single pass.** Do not work on anything else until this is done.
-*   The **chat i18n issue is recurring**. The previous agent's fix was insufficient. The correct solution, as specified by the user, is to change the database to store a translatable *key* for system messages, not the rendered English text.
-*   The **user name fix** requires both backend ( field) and frontend (profile completion flow, UI updates) changes. The fallback for a missing name must be Sin nombre / No name, not Usuario.
-*   The **album category fix** requires the backend to send a  and the frontend to use it for translation lookups.
+*   Your sole priority is to implement the translations for the Profile screen using the exact keys and text provided by the user.
+*   The file to edit is .
+*   The default and primary fallback language for the entire application is Spanish ().
+*   The user considers this the final task before they export the project. Do not introduce any new features or perform unrelated refactoring.
 
 **documents and test reports created in this job**
-*    (Updated for the previous set of fixes).
+*   
 
 **Last 10 User Messages and any pending HUMAN messages**
-1.  **USER (Message #5):** Interrupted the agent to report 7 new critical bugs found in testing (A-G), including chat i18n leaks and message visibility issues. Demanded these be fixed first. (COMPLETED by agent, pending user verification).
-2.  **USER (Message #8):** Approved the plan to fix the 7 critical bugs and provided strict execution rules and deliverables. (COMPLETED by agent, pending user verification).
-3.  **USER (Message #87):** Ignored the agent's completion summary and submitted a new, high-priority request to fix 3 critical issues in one pass: user names showing as Usuario, the recurring chat i18n leak, and i18n leaks on the Albums screen. (PENDING - This is the current task).
+1.  **USER (msg #226):** Reported a logic issue in the Trades flow. (COMPLETED)
+2.  **USER (msg #250):** Requested a full reset of all demo data. (COMPLETED)
+3.  **USER (msg #269):** Requested implementation of a Freemium monetization model and a Paywall UI. (COMPLETED)
+4.  **USER (msg #376):** Reported untranslated keys on the Profile screen and provided complete translations for all 6 languages. **(PENDING - This is the current task)**.
 
 **Project Health Check:**
-*   **Broken:** The UI currently has significant visual and internationalization bugs that harm the user experience (incorrect names, untranslated text).
-*   **Mocked:** No features are currently mocked.
+*   **Broken:** The Profile screen is unprofessional due to visible raw translation keys, negatively impacting user experience.
+*   **Mocked:** The Upgrade button on the paywall is mocked for testing and does not integrate with a real payment provider.
 
 **3rd Party Integrations**
-*   **Resend:** For OTP and transactional emails.
-*   **react-markdown:** For rendering T&C content.
+*   **Resend:** Used for sending OTP emails.
+*   **react-markdown:** Used for rendering Terms & Conditions.
 
 **Testing status**
--   **Testing agent used after significant changes:** YES (on the previous batch of fixes).
--   **Troubleshoot agent used after agent stuck in loop:** NO.
--   **Test files created:** None.
--   **Known regressions:** The chat system message i18n issue is a known regression/incomplete fix.
+*   **Testing agent used after significant changes:** YES, on all previous major features.
+*   **Troubleshoot agent used after agent stuck in loop:** NO.
+*   **Test files created:** None. Testing has been conducted via testing sub-agents.
+*   **Known regressions:** None.
 
 **Credentials to test flow:**
-*   Use any real email address for OTP login. The code will be sent from .
+*   Use any real email for OTP login. The system will send a code from . All previous user accounts have been deleted, so any login will be treated as a new user and will trigger the onboarding flow.
 
 **What agent forgot to execute**
-*   The previous agent failed to correctly diagnose and fix the root cause of the chat system message i18n leak, which required a change to the data being stored in the database.</analysis>
+*   Nothing was forgotten. The agent is about to start the latest user request.</analysis>
