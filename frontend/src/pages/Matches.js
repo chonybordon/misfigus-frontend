@@ -215,6 +215,14 @@ export const Matches = () => {
           </div>
         )}
       </div>
+
+      {/* Paywall Modal */}
+      <PaywallModal
+        isOpen={paywallOpen}
+        onClose={() => setPaywallOpen(false)}
+        reason={paywallReason}
+        onUpgradeSuccess={handlePaywallUpgrade}
+      />
     </div>
   );
 };
