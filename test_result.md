@@ -35,7 +35,7 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Trades Flow Logic Fix"
+    - "Freemium Monetization System"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
