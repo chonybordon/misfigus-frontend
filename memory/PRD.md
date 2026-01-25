@@ -21,9 +21,9 @@ MisFigus is a sticker trading platform that allows collectors to manage their st
 
 ### User Profile
 - Display name, email, location (country/city/neighborhood)
-- Search radius configuration (3, 5, 10 km)
+- Search radius configuration (3, 5, 10, 15, 20 km)
 - Terms & Conditions acceptance tracking
-- Location/radius change cooldowns (7 days)
+- Location/radius change cooldowns (7 days for both)
 
 ### Albums & Inventory
 - Multiple album support with activation system
