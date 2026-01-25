@@ -492,6 +492,151 @@ async def complete_onboarding(onboarding_data: OnboardingComplete, user_id: str 
     return {"message": "Onboarding completed", "user": updated_user}
 
 # ============================================
+# FREEMIUM PLAN ENDPOINTS
+# ============================================
+
+def get_today_date_str():
+    """Get today's date as YYYY-MM-DD string."""
+    return datetime.now(timezone.utc).strftime('%Y-%m-%d')
+
+async def check_and_reset_daily_matches(user_id: str):
+    """
+    Check if the user's daily match counter needs reset.
+    Returns the updated user data.
+    """
+    user = await db.users.find_one({"id": user_id}, {"_id": 0})
+    if not user:
+        return None
+    
+    today = get_today_date_str()
+    user_date = user.get('matches_used_date')
+    
+    # Reset if date has changed or never set
+    if user_date != today:
+        await db.users.update_one(
+            {"id": user_id},
+            {"$set": {"matches_used_today": 0, "matches_used_date": today}}
+        )
+        user['matches_used_today'] = 0
+        user['matches_used_date'] = today
+    
+    return user
+
+async def can_user_create_match(user_id: str):
+    """
+    Check if user can create a new match based on their plan.
+    Returns (can_create: bool, reason: str, user: dict)
+    """
+    user = await check_and_reset_daily_matches(user_id)
+    if not user:
+        return False, "USER_NOT_FOUND", None
+    
+    plan = user.get('plan', 'free')
+    
+    # Premium users have unlimited matches
+    if plan == 'premium':
+        return True, None, user
+    
+    # Free users: check daily limit
+    matches_used = user.get('matches_used_today', 0)
+    if matches_used >= FREE_PLAN_MAX_MATCHES_PER_DAY:
+        return False, "DAILY_MATCH_LIMIT", user
+    
+    return True, None, user
+
+async def increment_user_match_count(user_id: str):
+    """Increment the user's daily match counter."""
+    today = get_today_date_str()
+    await db.users.update_one(
+        {"id": user_id},
+        {"$inc": {"matches_used_today": 1}, "$set": {"matches_used_date": today}}
+    )
+
+async def can_user_activate_album(user_id: str):
+    """
+    Check if user can activate another album based on their plan.
+    Returns (can_activate: bool, reason: str, active_count: int)
+    """
+    user = await db.users.find_one({"id": user_id}, {"_id": 0})
+    if not user:
+        return False, "USER_NOT_FOUND", 0
+    
+    plan = user.get('plan', 'free')
+    
+    # Count currently active albums
+    active_count = await db.user_album_activations.count_documents({"user_id": user_id})
+    
+    # Premium users have unlimited albums
+    if plan == 'premium':
+        return True, None, active_count
+    
+    # Free users: check album limit
+    if active_count >= FREE_PLAN_MAX_ALBUMS:
+        return False, "ALBUM_LIMIT", active_count
+    
+    return True, None, active_count
+
+@api_router.get("/user/plan-status")
+async def get_plan_status(user_id: str = Depends(get_current_user)):
+    """
+    Get user's current plan status and usage.
+    Includes daily match reset check.
+    """
+    user = await check_and_reset_daily_matches(user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    plan = user.get('plan', 'free')
+    
+    # Count active albums
+    active_albums = await db.user_album_activations.count_documents({"user_id": user_id})
+    
+    return {
+        "plan": plan,
+        "is_premium": plan == 'premium',
+        "matches_used_today": user.get('matches_used_today', 0),
+        "matches_limit": None if plan == 'premium' else FREE_PLAN_MAX_MATCHES_PER_DAY,
+        "can_match": plan == 'premium' or user.get('matches_used_today', 0) < FREE_PLAN_MAX_MATCHES_PER_DAY,
+        "active_albums": active_albums,
+        "albums_limit": None if plan == 'premium' else FREE_PLAN_MAX_ALBUMS,
+        "can_activate_album": plan == 'premium' or active_albums < FREE_PLAN_MAX_ALBUMS,
+        "premium_until": user.get('premium_until')
+    }
+
+@api_router.post("/user/upgrade-premium")
+async def upgrade_to_premium(user_id: str = Depends(get_current_user)):
+    """
+    Upgrade user to premium plan.
+    FOR TESTING ONLY - In production, this would be called after payment verification.
+    """
+    await db.users.update_one(
+        {"id": user_id},
+        {"$set": {"plan": "premium"}}
+    )
+    
+    user = await db.users.find_one({"id": user_id}, {"_id": 0})
+    return {"message": "Upgraded to Premium", "user": user}
+
+@api_router.post("/user/downgrade-free")
+async def downgrade_to_free(user_id: str = Depends(get_current_user)):
+    """
+    Downgrade user to free plan.
+    FOR TESTING ONLY - In production, this would be called when subscription expires.
+    """
+    today = get_today_date_str()
+    await db.users.update_one(
+        {"id": user_id},
+        {"$set": {
+            "plan": "free",
+            "matches_used_today": 0,
+            "matches_used_date": today
+        }}
+    )
+    
+    user = await db.users.find_one({"id": user_id}, {"_id": 0})
+    return {"message": "Downgraded to Free", "user": user}
+
+# ============================================
 # LOCATION ENDPOINTS (Structured, Global)
 # ============================================
 @api_router.get("/locations/countries")
