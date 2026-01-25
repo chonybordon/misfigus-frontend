@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowLeft, TrendingUp } from 'lucide-react';
+import { PaywallModal } from '../components/Paywall';
 
 const maskEmail = (email) => {
   if (!email) return '';
