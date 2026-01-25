@@ -55,6 +55,8 @@ export const Matches = () => {
   const isGroupContext = !!groupId;
   const [matches, setMatches] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [paywallOpen, setPaywallOpen] = useState(false);
+  const [paywallReason, setPaywallReason] = useState(null);
   const navigate = useNavigate();
   const { t } = useTranslation();
 
