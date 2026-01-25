@@ -269,6 +269,14 @@ export const Albums = () => {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+
+        {/* Paywall Modal */}
+        <PaywallModal
+          isOpen={paywallOpen}
+          onClose={() => setPaywallOpen(false)}
+          reason={paywallReason}
+          onUpgradeSuccess={handlePaywallUpgrade}
+        />
       </div>
     </div>
   );
