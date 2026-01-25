@@ -73,9 +73,26 @@ export const Albums = () => {
       setActivationDialogOpen(false);
       navigate(`/albums/${selectedAlbum.id}`);
     } catch (error) {
-      toast.error(error.response?.data?.detail || t('common.error'));
+      // Check for freemium limit error
+      const errorDetail = error.response?.data?.detail;
+      if (errorDetail?.code === 'ALBUM_LIMIT') {
+        setActivationDialogOpen(false);
+        setPaywallReason('ALBUM_LIMIT');
+        setPaywallOpen(true);
+      } else {
+        toast.error(typeof errorDetail === 'string' ? errorDetail : t('common.error'));
+      }
     } finally {
       setActivating(false);
+    }
+  };
+
+  const handlePaywallUpgrade = () => {
+    // Refresh albums to reflect premium status
+    fetchAlbums();
+    // Try activating again
+    if (selectedAlbum) {
+      handleActivateAlbum();
     }
   };
 
