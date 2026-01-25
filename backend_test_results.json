@@ -1,8 +1,8 @@
 {
-  "timestamp": "2026-01-24T22:35:09.612344",
-  "tests_run": 26,
-  "tests_passed": 25,
-  "success_rate": 96.15384615384616,
+  "timestamp": "2026-01-25T00:05:04.314855",
+  "tests_run": 43,
+  "tests_passed": 42,
+  "success_rate": 97.67441860465115,
   "results": [
     {
       "test": "Send OTP - Valid Email",
@@ -133,8 +133,93 @@
       "test": "Complete Onboarding - Valid Radius Values",
       "success": true,
       "details": "Valid values: [3, 5, 10, 15, 20]"
+    },
+    {
+      "test": "GET /albums/{album_id}/exchanges",
+      "success": true,
+      "details": ""
+    },
+    {
+      "test": "Exchanges response is list",
+      "success": true,
+      "details": "Response should be a list"
+    },
+    {
+      "test": "Exchanges empty for new user",
+      "success": true,
+      "details": "New user should have no existing exchanges"
+    },
+    {
+      "test": "GET /albums/{album_id}/matches",
+      "success": true,
+      "details": ""
+    },
+    {
+      "test": "Matches response is list",
+      "success": true,
+      "details": "Response should be a list"
+    },
+    {
+      "test": "Matches empty for new user",
+      "success": true,
+      "details": "New user with no inventory should have no matches"
+    },
+    {
+      "test": "GET /albums/{album_id} (Album Detail)",
+      "success": true,
+      "details": ""
+    },
+    {
+      "test": "Album detail has exchange_count",
+      "success": true,
+      "details": "Missing 'exchange_count' field"
+    },
+    {
+      "test": "Album detail has pending_exchanges",
+      "success": true,
+      "details": "Missing 'pending_exchanges' field"
+    },
+    {
+      "test": "Album detail has has_unread_exchanges",
+      "success": true,
+      "details": "Missing 'has_unread_exchanges' field"
+    },
+    {
+      "test": "exchange_count is integer",
+      "success": true,
+      "details": "exchange_count should be an integer"
+    },
+    {
+      "test": "pending_exchanges is integer",
+      "success": true,
+      "details": "pending_exchanges should be an integer"
+    },
+    {
+      "test": "has_unread_exchanges is boolean",
+      "success": true,
+      "details": "has_unread_exchanges should be a boolean"
+    },
+    {
+      "test": "Exchange count matches matches endpoint",
+      "success": true,
+      "details": "Matches count (0) != exchange_count (0)"
+    },
+    {
+      "test": "New user exchange values correct",
+      "success": true,
+      "details": "Expected all 0/false, got: exchange_count=0, pending_exchanges=0, has_unread_exchanges=False"
+    },
+    {
+      "test": "Matches after inventory update",
+      "success": true,
+      "details": "Found 2 matches"
+    },
+    {
+      "test": "Exchange count still matches after inventory update",
+      "success": true,
+      "details": "Updated matches count (2) != updated exchange_count (2)"
     }
   ],
-  "test_email": "misfigus.auth.test.20260124223507@gmail.com",
+  "test_email": "misfigus.auth.test.20260125000501@gmail.com",
   "token_obtained": true
 }
