@@ -245,34 +245,35 @@ export const Profile = () => {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-2xl font-bold">{t('common.loading')}</div>
+        <div className="text-xl sm:text-2xl font-bold">{t('common.loading')}</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen sticker-album-pattern">
-      <div className="max-w-2xl mx-auto p-6">
-        <div className="flex items-center gap-4 mb-8">
+    <div className="min-h-screen sticker-album-pattern overflow-x-hidden">
+      <div className="w-full max-w-2xl mx-auto px-4 sm:px-6 py-4 sm:py-6">
+        <div className="flex items-center gap-3 sm:gap-4 mb-6 sm:mb-8">
           <Button
             data-testid="back-btn"
             variant="outline"
             size="icon"
             onClick={() => navigate('/settings')}
+            className="flex-shrink-0"
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          <h1 className="text-3xl font-black tracking-tight text-primary">{t('profile.title')}</h1>
+          <h1 className="text-xl sm:text-3xl font-black tracking-tight text-primary truncate">{t('profile.title')}</h1>
         </div>
 
         {/* Location Setup Required Warning */}
         {locationStatus?.needs_location_setup && (
-          <Card className="mb-6 border-amber-300 bg-amber-50">
-            <CardContent className="p-4 flex items-start gap-3">
-              <AlertCircle className="h-6 w-6 text-amber-600 flex-shrink-0 mt-0.5" />
-              <div>
-                <p className="font-medium text-amber-800">{t('profile.locationRequired')}</p>
-                <p className="text-sm text-amber-700 mt-1">{t('profile.locationRequiredDesc')}</p>
+          <Card className="mb-4 sm:mb-6 border-amber-300 bg-amber-50">
+            <CardContent className="p-3 sm:p-4 flex items-start gap-2 sm:gap-3">
+              <AlertCircle className="h-5 w-5 sm:h-6 sm:w-6 text-amber-600 flex-shrink-0 mt-0.5" />
+              <div className="min-w-0">
+                <p className="font-medium text-amber-800 text-sm sm:text-base">{t('profile.locationRequired')}</p>
+                <p className="text-xs sm:text-sm text-amber-700 mt-1">{t('profile.locationRequiredDesc')}</p>
                 <Button
                   onClick={() => setShowLocationDialog(true)}
                   className="mt-3"
