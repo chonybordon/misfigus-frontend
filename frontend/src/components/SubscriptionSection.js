@@ -310,16 +310,16 @@ export const SubscriptionSection = ({ onPlanChange }) => {
 
 // Benefit item component
 const BenefitItem = ({ icon: Icon, text, included, comingSoon, small }) => (
-  <div className={`flex items-center gap-2 ${small ? 'text-sm' : ''}`}>
+  <div className={`flex items-center gap-1.5 sm:gap-2 ${small ? 'text-xs sm:text-sm' : 'text-xs sm:text-base'}`}>
     {included ? (
-      <Check className={`${small ? 'w-3 h-3' : 'w-4 h-4'} text-green-500`} />
+      <Check className={`${small ? 'w-3 h-3' : 'w-3.5 h-3.5 sm:w-4 sm:h-4'} text-green-500 flex-shrink-0`} />
     ) : (
-      <X className={`${small ? 'w-3 h-3' : 'w-4 h-4'} text-gray-300`} />
+      <X className={`${small ? 'w-3 h-3' : 'w-3.5 h-3.5 sm:w-4 sm:h-4'} text-gray-300 flex-shrink-0`} />
     )}
-    <Icon className={`${small ? 'w-3 h-3' : 'w-4 h-4'} text-muted-foreground`} />
-    <span className={included ? '' : 'text-muted-foreground'}>
+    <Icon className={`${small ? 'w-3 h-3' : 'w-3.5 h-3.5 sm:w-4 sm:h-4'} text-muted-foreground flex-shrink-0`} />
+    <span className={`${included ? '' : 'text-muted-foreground'} truncate`}>
       {text}
-      {comingSoon && <span className="text-xs text-muted-foreground ml-1">*</span>}
+      {comingSoon && <span className="text-[10px] sm:text-xs text-muted-foreground ml-1">*</span>}
     </span>
   </div>
 );
