@@ -12,6 +12,9 @@ MisFigus is a sticker trading platform that allows collectors to manage their st
 ### Authentication
 - OTP-based email authentication via Resend
 - No password required - magic link style login
+- **Email normalization**: All emails are trimmed and lowercased to prevent duplicate users
+- **Single point of user creation**: Users are ONLY created during OTP verification (not during OTP send)
+- **Unique index** on email field to enforce uniqueness at DB level
 
 ### Internationalization (i18n)
 - **Supported Languages**: Spanish (es), English (en), Portuguese (pt), French (fr), German (de), Italian (it)
