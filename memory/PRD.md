@@ -56,6 +56,7 @@ MisFigus is a sticker trading platform that allows collectors to manage their st
 - Shadcn/UI components
 - i18next for internationalization
 - Tailwind CSS
+- **Mobile-first responsive design** - tested at 360px, 390px, 430px viewports
 
 ### Backend
 - FastAPI (Python)
