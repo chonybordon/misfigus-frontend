@@ -343,29 +343,29 @@ def get_terms_content(language: str = 'es') -> str:
 async def send_otp(user_input: UserCreate):
     """
     Send OTP via email. OTP is NEVER returned in response.
+    Email is normalized (trim + lowercase) to prevent duplicate users.
     """
+    # Normalize email: trim whitespace and convert to lowercase
+    normalized_email = user_input.email.strip().lower()
+    
     otp = generate_otp_code()
     otp_hash = hash_otp(otp)
     
-    # Store hashed OTP with expiry
-    OTP_STORE[user_input.email.lower()] = {
+    # Store hashed OTP with expiry (using normalized email)
+    OTP_STORE[normalized_email] = {
         "hash": otp_hash,
         "expires": datetime.now(timezone.utc) + timedelta(minutes=10)
     }
     
-    # Create user if doesn't exist
-    user = await db.users.find_one({"email": user_input.email}, {"_id": 0})
-    if not user:
-        new_user = User(email=user_input.email, full_name=user_input.email.split('@')[0], verified=False)
-        doc = new_user.model_dump()
-        doc['created_at'] = doc['created_at'].isoformat()
-        await db.users.insert_one(doc)
+    # Check if user exists (using normalized email)
+    # Do NOT create user here - only create on successful OTP verification
+    user = await db.users.find_one({"email": normalized_email}, {"_id": 0})
     
     # Send OTP via email (logged to console if Resend not configured)
-    send_otp_email(user_input.email, otp)
+    send_otp_email(normalized_email, otp)
     
     # NEVER return OTP in response
-    return {"message": "OTP sent", "email": user_input.email}
+    return {"message": "OTP sent", "email": normalized_email}
 
 @api_router.post("/auth/verify-otp")
 async def verify_otp_endpoint(otp_data: OTPVerify):
