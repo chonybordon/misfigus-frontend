@@ -71,7 +71,20 @@ export const Matches = () => {
         ? `/groups/${contextId}/matches`
         : `/albums/${contextId}/matches`;
       const response = await api.get(endpoint);
-      setMatches(response.data);
+      
+      // Deduplicate matches by user ID (safety net in case backend returns duplicates)
+      const uniqueMatches = [];
+      const seenUserIds = new Set();
+      
+      for (const match of response.data) {
+        const userId = match.user?.id;
+        if (userId && !seenUserIds.has(userId)) {
+          seenUserIds.add(userId);
+          uniqueMatches.push(match);
+        }
+      }
+      
+      setMatches(uniqueMatches);
     } catch (error) {
       toast.error(error.response?.data?.detail || t('common.error'));
     } finally {
