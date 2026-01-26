@@ -85,11 +85,11 @@ export const Settings = () => {
                 {t('settings.profile')}
               </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="px-4 sm:px-6 pb-4 sm:pb-6">
               <Button
                 data-testid="profile-btn"
                 variant="outline"
-                className="w-full"
+                className="w-full text-sm sm:text-base"
                 onClick={() => navigate('/profile')}
               >
                 {t('profile.title')}
@@ -98,22 +98,22 @@ export const Settings = () => {
           </Card>
 
           <Card data-testid="user-info-card">
-            <CardHeader>
-              <CardTitle>{user?.display_name || user?.email}</CardTitle>
+            <CardHeader className="pb-2 sm:pb-4 px-4 sm:px-6 pt-4 sm:pt-6">
+              <CardTitle className="text-base sm:text-lg truncate">{user?.display_name || user?.email}</CardTitle>
             </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">{user?.email}</p>
+            <CardContent className="px-4 sm:px-6 pb-4 sm:pb-6">
+              <p className="text-sm sm:text-base text-muted-foreground truncate">{user?.email}</p>
             </CardContent>
           </Card>
 
           <Card data-testid="language-card">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Globe className="h-5 w-5" />
+            <CardHeader className="pb-2 sm:pb-4 px-4 sm:px-6 pt-4 sm:pt-6">
+              <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                <Globe className="h-4 w-4 sm:h-5 sm:w-5" />
                 {t('settings.language')}
               </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="px-4 sm:px-6 pb-4 sm:pb-6">
               <Select value={i18n.language} onValueChange={changeLanguage}>
                 <SelectTrigger data-testid="language-select" className="w-full">
                   <SelectValue placeholder={t('settings.language')} />
@@ -137,11 +137,11 @@ export const Settings = () => {
           </Card>
 
           <Card data-testid="logout-card">
-            <CardContent className="pt-6">
+            <CardContent className="pt-4 sm:pt-6 px-4 sm:px-6 pb-4 sm:pb-6">
               <Button
                 data-testid="logout-btn"
                 variant="destructive"
-                className="w-full"
+                className="w-full text-sm sm:text-base"
                 onClick={handleLogout}
               >
                 <LogOut className="h-5 w-5 mr-2" />
