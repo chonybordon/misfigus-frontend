@@ -2376,6 +2376,147 @@ if DEV_MODE:
             "message": "Dev endpoints enabled"
         }
 
+# ============================================
+# ADMIN: Duplicate User Detection & Cleanup
+# ============================================
+@api_router.get("/admin/duplicate-users")
+async def detect_duplicate_users():
+    """
+    Detect duplicate users by normalized email.
+    Returns groups of users that share the same email (after normalization).
+    """
+    all_users = await db.users.find({}, {"_id": 0}).to_list(10000)
+    
+    # Group by normalized email
+    email_to_users = {}
+    for user in all_users:
+        email = (user.get('email') or '').strip().lower()
+        if email:
+            if email not in email_to_users:
+                email_to_users[email] = []
+            email_to_users[email].append({
+                "id": user.get('id'),
+                "email": user.get('email'),
+                "display_name": user.get('display_name'),
+                "created_at": user.get('created_at'),
+                "verified": user.get('verified'),
+                "onboarding_completed": user.get('onboarding_completed')
+            })
+    
+    # Filter to only duplicates
+    duplicates = {email: users for email, users in email_to_users.items() if len(users) > 1}
+    
+    return {
+        "total_users": len(all_users),
+        "unique_emails": len(email_to_users),
+        "duplicate_email_count": len(duplicates),
+        "duplicates": duplicates
+    }
+
+@api_router.post("/admin/merge-duplicate-users")
+async def merge_duplicate_users():
+    """
+    Merge duplicate users by normalized email.
+    Keeps the oldest user (by created_at) as master, migrates all data, removes duplicates.
+    """
+    all_users = await db.users.find({}, {"_id": 0}).to_list(10000)
+    
+    # Group by normalized email
+    email_to_users = {}
+    for user in all_users:
+        email = (user.get('email') or '').strip().lower()
+        if email:
+            if email not in email_to_users:
+                email_to_users[email] = []
+            email_to_users[email].append(user)
+    
+    merge_results = []
+    
+    for email, users in email_to_users.items():
+        if len(users) <= 1:
+            continue
+        
+        # Sort by created_at to find oldest (master)
+        users_sorted = sorted(users, key=lambda u: u.get('created_at', ''))
+        master = users_sorted[0]
+        duplicates = users_sorted[1:]
+        
+        master_id = master['id']
+        duplicate_ids = [u['id'] for u in duplicates]
+        
+        # Collections to migrate
+        collections_to_migrate = [
+            ("user_inventory", "user_id"),
+            ("user_album_activations", "user_id"),
+            ("album_members", "user_id"),
+            ("group_members", "user_id"),
+            ("exchanges", "user_a_id"),
+            ("exchanges", "user_b_id"),
+            ("chat_messages", "sender_id"),
+            ("user_reputation", "user_id"),
+            ("offers", "from_user_id"),
+            ("offers", "to_user_id"),
+        ]
+        
+        migrated_counts = {}
+        
+        for dup_id in duplicate_ids:
+            for collection_name, field_name in collections_to_migrate:
+                collection = db[collection_name]
+                result = await collection.update_many(
+                    {field_name: dup_id},
+                    {"$set": {field_name: master_id}}
+                )
+                key = f"{collection_name}.{field_name}"
+                migrated_counts[key] = migrated_counts.get(key, 0) + result.modified_count
+        
+        # Delete duplicate users
+        for dup_id in duplicate_ids:
+            await db.users.delete_one({"id": dup_id})
+        
+        # Update master user with normalized email
+        await db.users.update_one(
+            {"id": master_id},
+            {"$set": {"email": email}}
+        )
+        
+        merge_results.append({
+            "email": email,
+            "master_id": master_id,
+            "merged_count": len(duplicate_ids),
+            "merged_ids": duplicate_ids,
+            "migrated_counts": migrated_counts
+        })
+    
+    return {
+        "merged_email_count": len(merge_results),
+        "details": merge_results
+    }
+
+@api_router.post("/admin/normalize-emails")
+async def normalize_all_emails():
+    """
+    Normalize all user emails (trim + lowercase).
+    Should be run after merge to ensure consistency.
+    """
+    all_users = await db.users.find({}, {"_id": 0, "id": 1, "email": 1}).to_list(10000)
+    
+    updated_count = 0
+    for user in all_users:
+        email = user.get('email', '')
+        normalized = email.strip().lower()
+        if email != normalized:
+            await db.users.update_one(
+                {"id": user['id']},
+                {"$set": {"email": normalized}}
+            )
+            updated_count += 1
+    
+    return {
+        "total_users": len(all_users),
+        "normalized_count": updated_count
+    }
+
 app.include_router(api_router)
 
 app.add_middleware(
