@@ -892,6 +892,36 @@ const resources = {
         freePlanNote: 'You can continue using the free plan with 1 album and 1 trade per day.',
         upgradeSuccess: 'You are now Premium!'
       },
+      subscription: {
+        title: 'My subscription',
+        currentPlan: 'Current plan',
+        freePlan: 'Free Plan',
+        premiumPlan: 'Premium Plan',
+        monthly: 'Monthly',
+        annual: 'Annual',
+        activeUntil: 'Active until',
+        benefits: 'Your plan benefits',
+        freeBenefits: {
+          albums: '1 active album',
+          matches: '1 trade per day',
+          inventory: 'Unlimited inventory'
+        },
+        premiumBenefits: {
+          albums: 'Unlimited albums',
+          matches: 'Unlimited trades',
+          noAds: 'No ads (coming soon)'
+        },
+        changePlan: 'Change plan',
+        upgradeToPremium: 'Upgrade to Premium',
+        downgradeToFree: 'Switch to free plan',
+        downgradeWarning: 'When switching to the free plan, you will keep your data but have free plan limitations.',
+        downgradeBlocked: 'To switch to the free plan, you must have only 1 active album.',
+        currentlyActive: 'You have {{count}} active albums.',
+        deactivateFirst: 'Deactivate extra albums from the Albums screen.',
+        downgradeSuccess: 'You have switched to the free plan',
+        confirmDowngrade: 'Are you sure you want to switch to the free plan?',
+        confirmDowngradeDesc: 'You will lose access to Premium features but keep all your data.'
+      },
       common: {
         loading: 'Loading...',
         error: 'Error',
