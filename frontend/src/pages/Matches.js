@@ -183,8 +183,8 @@ export const Matches = () => {
           </div>
         ) : (
           <div className="space-y-4" data-testid="matches-list">
-            {matches.map((match, index) => (
-              <Card key={index} data-testid={`match-card-${index}`} className="hover:shadow-lg transition-all">
+            {matches.map((match) => (
+              <Card key={match.user.id} data-testid={`match-card-${match.user.id}`} className="hover:shadow-lg transition-all">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <div className="h-10 w-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold">
