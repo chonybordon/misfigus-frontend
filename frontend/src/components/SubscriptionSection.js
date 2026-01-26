@@ -166,14 +166,14 @@ export const SubscriptionSection = ({ onPlanChange }) => {
 
           {/* Usage Stats for Free Users */}
           {!isPremium && (
-            <div className="bg-gray-50 p-4 rounded-lg space-y-2">
-              <div className="flex justify-between text-sm">
+            <div className="bg-gray-50 p-3 sm:p-4 rounded-lg space-y-1.5 sm:space-y-2">
+              <div className="flex justify-between text-xs sm:text-sm">
                 <span>{t('subscription.freeBenefits.albums')}</span>
                 <span className="font-medium">
                   {planStatus.active_albums} / {planStatus.albums_limit}
                 </span>
               </div>
-              <div className="flex justify-between text-sm">
+              <div className="flex justify-between text-xs sm:text-sm">
                 <span>{t('subscription.freeBenefits.matches')}</span>
                 <span className="font-medium">
                   {planStatus.matches_used_today} / {planStatus.matches_limit}
@@ -183,11 +183,11 @@ export const SubscriptionSection = ({ onPlanChange }) => {
           )}
 
           {/* Action Buttons */}
-          <div className="space-y-3 pt-2">
+          <div className="space-y-2 sm:space-y-3 pt-2">
             {!isPremium ? (
               <Button
                 data-testid="upgrade-btn"
-                className="w-full bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600"
+                className="w-full bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-sm sm:text-base"
                 onClick={() => setShowUpgradeDialog(true)}
               >
                 <Crown className="w-4 h-4 mr-2" />
@@ -197,7 +197,7 @@ export const SubscriptionSection = ({ onPlanChange }) => {
               <Button
                 data-testid="downgrade-btn"
                 variant="outline"
-                className="w-full"
+                className="w-full text-sm sm:text-base"
                 onClick={() => setShowDowngradeDialog(true)}
                 disabled={!canDowngrade}
               >
@@ -207,9 +207,9 @@ export const SubscriptionSection = ({ onPlanChange }) => {
             
             {/* Downgrade blocked message */}
             {isPremium && !canDowngrade && (
-              <div className="flex items-start gap-2 p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-sm">
+              <div className="flex items-start gap-2 p-2 sm:p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-xs sm:text-sm">
                 <AlertTriangle className="w-4 h-4 text-yellow-600 mt-0.5 flex-shrink-0" />
-                <div className="text-yellow-800">
+                <div className="text-yellow-800 min-w-0">
                   <p className="font-medium">{t('subscription.downgradeBlocked')}</p>
                   <p className="text-yellow-700 mt-1">
                     {t('subscription.currentlyActive', { count: planStatus.active_albums })} {t('subscription.deactivateFirst')}
