@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { ArrowLeft, Globe, LogOut, User } from 'lucide-react';
 import { toast } from 'sonner';
 import { SUPPORTED_LANGUAGES } from '../i18n';
+import { SubscriptionSection } from '../components/SubscriptionSection';
 
 export const Settings = () => {
   const navigate = useNavigate();
@@ -43,6 +44,20 @@ export const Settings = () => {
     }
   };
 
+  const handlePlanChange = () => {
+    // Refresh user data after plan change
+    const refreshUser = async () => {
+      try {
+        const response = await api.get('/auth/me');
+        setUser(response.data);
+        localStorage.setItem('user', JSON.stringify(response.data));
+      } catch (error) {
+        console.error('Failed to refresh user:', error);
+      }
+    };
+    refreshUser();
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <div className="max-w-4xl mx-auto p-6">
@@ -59,6 +74,9 @@ export const Settings = () => {
         </div>
 
         <div className="space-y-6">
+          {/* Subscription Section - Prominent placement */}
+          <SubscriptionSection onPlanChange={handlePlanChange} />
+
           <Card data-testid="profile-card">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
