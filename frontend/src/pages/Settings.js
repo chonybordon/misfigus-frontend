@@ -59,28 +59,29 @@ export const Settings = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="max-w-4xl mx-auto p-6">
-        <div className="flex items-center gap-4 mb-8">
+    <div className="min-h-screen bg-background overflow-x-hidden">
+      <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 py-4 sm:py-6">
+        <div className="flex items-center gap-3 sm:gap-4 mb-6 sm:mb-8">
           <Button
             data-testid="back-btn"
             variant="outline"
             size="icon"
             onClick={() => navigate('/albums')}
+            className="flex-shrink-0"
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          <h1 className="text-3xl font-black tracking-tight text-primary">{t('settings.title')}</h1>
+          <h1 className="text-xl sm:text-3xl font-black tracking-tight text-primary truncate">{t('settings.title')}</h1>
         </div>
 
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
           {/* Subscription Section - Prominent placement */}
           <SubscriptionSection onPlanChange={handlePlanChange} />
 
           <Card data-testid="profile-card">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <User className="h-5 w-5" />
+            <CardHeader className="pb-2 sm:pb-4 px-4 sm:px-6 pt-4 sm:pt-6">
+              <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                <User className="h-4 w-4 sm:h-5 sm:w-5" />
                 {t('settings.profile')}
               </CardTitle>
             </CardHeader>
