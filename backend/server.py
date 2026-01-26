@@ -616,12 +616,17 @@ async def get_plan_status(user_id: str = Depends(get_current_user)):
         raise HTTPException(status_code=404, detail="User not found")
     
     plan = user.get('plan', 'free')
+    plan_type = user.get('plan_type', 'monthly')  # 'monthly' or 'annual'
     
     # Count active albums
     active_albums = await db.user_album_activations.count_documents({"user_id": user_id})
     
+    # Check if user can downgrade (only if 1 or fewer active albums)
+    can_downgrade = active_albums <= FREE_PLAN_MAX_ALBUMS
+    
     return {
         "plan": plan,
+        "plan_type": plan_type if plan == 'premium' else None,
         "is_premium": plan == 'premium',
         "matches_used_today": user.get('matches_used_today', 0),
         "matches_limit": None if plan == 'premium' else FREE_PLAN_MAX_MATCHES_PER_DAY,
@@ -629,18 +634,32 @@ async def get_plan_status(user_id: str = Depends(get_current_user)):
         "active_albums": active_albums,
         "albums_limit": None if plan == 'premium' else FREE_PLAN_MAX_ALBUMS,
         "can_activate_album": plan == 'premium' or active_albums < FREE_PLAN_MAX_ALBUMS,
-        "premium_until": user.get('premium_until')
+        "premium_until": user.get('premium_until'),
+        "can_downgrade": can_downgrade,
+        "downgrade_blocked_reason": None if can_downgrade else "TOO_MANY_ALBUMS"
     }
 
 @api_router.post("/user/upgrade-premium")
-async def upgrade_to_premium(user_id: str = Depends(get_current_user)):
+async def upgrade_to_premium(plan_type: str = "monthly", user_id: str = Depends(get_current_user)):
     """
     Upgrade user to premium plan.
     FOR TESTING ONLY - In production, this would be called after payment verification.
     """
+    # Calculate premium_until based on plan type
+    now = datetime.now(timezone.utc)
+    if plan_type == "annual":
+        premium_until = (now + timedelta(days=365)).isoformat()
+    else:
+        premium_until = (now + timedelta(days=30)).isoformat()
+    
     await db.users.update_one(
         {"id": user_id},
-        {"$set": {"plan": "premium"}}
+        {"$set": {
+            "plan": "premium",
+            "plan_type": plan_type,
+            "premium_until": premium_until,
+            "upgraded_at": now.isoformat()
+        }}
     )
     
     user = await db.users.find_one({"id": user_id}, {"_id": 0})
@@ -650,13 +669,29 @@ async def upgrade_to_premium(user_id: str = Depends(get_current_user)):
 async def downgrade_to_free(user_id: str = Depends(get_current_user)):
     """
     Downgrade user to free plan.
-    FOR TESTING ONLY - In production, this would be called when subscription expires.
+    Only allowed if user has 1 or fewer active albums.
     """
+    # Count active albums
+    active_albums = await db.user_album_activations.count_documents({"user_id": user_id})
+    
+    if active_albums > FREE_PLAN_MAX_ALBUMS:
+        raise HTTPException(
+            status_code=400,
+            detail={
+                "code": "TOO_MANY_ALBUMS",
+                "message": f"To switch to the free plan, you must keep only {FREE_PLAN_MAX_ALBUMS} active album.",
+                "active_albums": active_albums,
+                "max_allowed": FREE_PLAN_MAX_ALBUMS
+            }
+        )
+    
     today = get_today_date_str()
     await db.users.update_one(
         {"id": user_id},
         {"$set": {
             "plan": "free",
+            "plan_type": None,
+            "premium_until": None,
             "matches_used_today": 0,
             "matches_used_date": today
         }}
