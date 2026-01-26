@@ -67,6 +67,14 @@ OTP_STORE = {}  # {email: {hash: str, expires: datetime}}
 async def startup_event():
     logger.info("Starting MisFigus API server...")
     check_resend_config()
+    
+    # Ensure unique index on email to prevent duplicate users
+    try:
+        await db.users.create_index("email", unique=True, sparse=True)
+        logger.info("Unique index on users.email ensured")
+    except Exception as e:
+        logger.warning(f"Could not create unique index on email: {e}")
+    
     logger.info("Server startup complete")
 
 # ============================================
