@@ -2278,6 +2278,36 @@ const resources = {
         freePlanNote: 'Du kannst den kostenlosen Plan mit 1 Album und 1 Tausch pro Tag weiter nutzen.',
         upgradeSuccess: 'Du bist jetzt Premium!'
       },
+      subscription: {
+        title: 'Mein Abonnement',
+        currentPlan: 'Aktueller Plan',
+        freePlan: 'Kostenloser Plan',
+        premiumPlan: 'Premium Plan',
+        monthly: 'Monatlich',
+        annual: 'Jährlich',
+        activeUntil: 'Aktiv bis',
+        benefits: 'Vorteile deines Plans',
+        freeBenefits: {
+          albums: '1 aktives Album',
+          matches: '1 Tausch pro Tag',
+          inventory: 'Unbegrenztes Inventar'
+        },
+        premiumBenefits: {
+          albums: 'Unbegrenzte Alben',
+          matches: 'Unbegrenzte Tausche',
+          noAds: 'Keine Werbung (bald)'
+        },
+        changePlan: 'Plan ändern',
+        upgradeToPremium: 'Zu Premium wechseln',
+        downgradeToFree: 'Zum kostenlosen Plan wechseln',
+        downgradeWarning: 'Beim Wechsel zum kostenlosen Plan behältst du deine Daten, hast aber die Einschränkungen des kostenlosen Plans.',
+        downgradeBlocked: 'Um zum kostenlosen Plan zu wechseln, musst du nur 1 aktives Album haben.',
+        currentlyActive: 'Du hast {{count}} aktive Alben.',
+        deactivateFirst: 'Deaktiviere zusätzliche Alben auf dem Alben-Bildschirm.',
+        downgradeSuccess: 'Du bist zum kostenlosen Plan gewechselt',
+        confirmDowngrade: 'Bist du sicher, dass du zum kostenlosen Plan wechseln möchtest?',
+        confirmDowngradeDesc: 'Du verlierst den Zugang zu Premium-Funktionen, behältst aber alle deine Daten.'
+      },
       common: {
         loading: 'Wird geladen...',
         error: 'Fehler',
