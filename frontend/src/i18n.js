@@ -1816,6 +1816,36 @@ const resources = {
         freePlanNote: 'Vous pouvez continuer avec le plan gratuit avec 1 album et 1 échange par jour.',
         upgradeSuccess: 'Vous êtes maintenant Premium!'
       },
+      subscription: {
+        title: 'Mon abonnement',
+        currentPlan: 'Plan actuel',
+        freePlan: 'Plan Gratuit',
+        premiumPlan: 'Plan Premium',
+        monthly: 'Mensuel',
+        annual: 'Annuel',
+        activeUntil: 'Actif jusqu\'au',
+        benefits: 'Avantages de votre plan',
+        freeBenefits: {
+          albums: '1 album actif',
+          matches: '1 échange par jour',
+          inventory: 'Inventaire illimité'
+        },
+        premiumBenefits: {
+          albums: 'Albums illimités',
+          matches: 'Échanges illimités',
+          noAds: 'Sans publicité (bientôt)'
+        },
+        changePlan: 'Changer de plan',
+        upgradeToPremium: 'Passer à Premium',
+        downgradeToFree: 'Passer au plan gratuit',
+        downgradeWarning: 'En passant au plan gratuit, vous conserverez vos données mais aurez les limitations du plan gratuit.',
+        downgradeBlocked: 'Pour passer au plan gratuit, vous devez avoir seulement 1 album actif.',
+        currentlyActive: 'Vous avez {{count}} albums actifs.',
+        deactivateFirst: 'Désactivez les albums supplémentaires depuis l\'écran Albums.',
+        downgradeSuccess: 'Vous êtes passé au plan gratuit',
+        confirmDowngrade: 'Êtes-vous sûr de vouloir passer au plan gratuit?',
+        confirmDowngradeDesc: 'Vous perdrez l\'accès aux fonctionnalités Premium mais conserverez toutes vos données.'
+      },
       common: {
         loading: 'Chargement...',
         error: 'Erreur',
