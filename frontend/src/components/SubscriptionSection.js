@@ -90,9 +90,9 @@ export const SubscriptionSection = ({ onPlanChange }) => {
   if (loading) {
     return (
       <Card data-testid="subscription-section">
-        <CardContent className="p-6">
-          <div className="animate-pulse space-y-4">
-            <div className="h-6 bg-gray-200 rounded w-1/3"></div>
+        <CardContent className="p-4 sm:p-6">
+          <div className="animate-pulse space-y-3 sm:space-y-4">
+            <div className="h-5 sm:h-6 bg-gray-200 rounded w-1/3"></div>
             <div className="h-4 bg-gray-200 rounded w-2/3"></div>
           </div>
         </CardContent>
@@ -108,34 +108,34 @@ export const SubscriptionSection = ({ onPlanChange }) => {
   return (
     <>
       <Card data-testid="subscription-section" className="border-2 border-primary/20">
-        <CardHeader className="pb-3">
-          <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center gap-2">
-              <Crown className={`w-5 h-5 ${isPremium ? 'text-yellow-500' : 'text-gray-400'}`} />
-              {t('subscription.title')}
+        <CardHeader className="pb-2 sm:pb-3 px-4 sm:px-6 pt-4 sm:pt-6">
+          <div className="flex items-center justify-between gap-2">
+            <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+              <Crown className={`w-4 h-4 sm:w-5 sm:h-5 ${isPremium ? 'text-yellow-500' : 'text-gray-400'}`} />
+              <span className="truncate">{t('subscription.title')}</span>
             </CardTitle>
             {isPremium && (
-              <Badge className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white">
+              <Badge className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white text-xs flex-shrink-0">
                 <Sparkles className="w-3 h-3 mr-1" />
                 Premium
               </Badge>
             )}
           </div>
-          <CardDescription>
+          <CardDescription className="text-xs sm:text-sm">
             {t('subscription.currentPlan')}: {isPremium ? t('subscription.premiumPlan') : t('subscription.freePlan')}
             {isPremium && planStatus.plan_type && (
-              <span className="ml-2">
+              <span className="ml-1 sm:ml-2">
                 ({planStatus.plan_type === 'annual' ? t('subscription.annual') : t('subscription.monthly')})
               </span>
             )}
           </CardDescription>
         </CardHeader>
         
-        <CardContent className="space-y-6">
+        <CardContent className="space-y-4 sm:space-y-6 px-4 sm:px-6 pb-4 sm:pb-6">
           {/* Premium Until */}
           {isPremium && planStatus.premium_until && (
-            <div className="flex items-center gap-2 text-sm text-muted-foreground bg-green-50 p-3 rounded-lg">
-              <Calendar className="w-4 h-4 text-green-600" />
+            <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground bg-green-50 p-2 sm:p-3 rounded-lg">
+              <Calendar className="w-4 h-4 text-green-600 flex-shrink-0" />
               <span className="text-green-700">
                 {t('subscription.activeUntil')}: <strong>{formatDate(planStatus.premium_until)}</strong>
               </span>
@@ -144,10 +144,10 @@ export const SubscriptionSection = ({ onPlanChange }) => {
 
           {/* Benefits Section */}
           <div>
-            <h4 className="font-medium mb-3 text-sm text-muted-foreground uppercase tracking-wide">
+            <h4 className="font-medium mb-2 sm:mb-3 text-xs sm:text-sm text-muted-foreground uppercase tracking-wide">
               {t('subscription.benefits')}
             </h4>
-            <div className="space-y-2">
+            <div className="space-y-1.5 sm:space-y-2">
               {isPremium ? (
                 <>
                   <BenefitItem icon={Album} text={t('subscription.premiumBenefits.albums')} included />
