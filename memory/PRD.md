@@ -41,7 +41,12 @@ MisFigus is a sticker trading platform that allows collectors to manage their st
 
 ### Freemium Model
 - **Free Plan**: 1 active album, 1 trade match per day
-- **Premium Plan**: Unlimited albums and trades
+- **Premium Plan**: Unlimited albums and trades, no ads (future)
+- Plan types: Monthly (30 days), Annual (365 days)
+- Subscription management UI in Settings with:
+  - Current plan display with benefits
+  - Upgrade to Premium option
+  - Downgrade to Free (blocked if >1 active album)
 - Paywall UI when limits hit (MOCKED - no real payment integration)
 
 ## Technical Architecture
