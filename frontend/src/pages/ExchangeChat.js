@@ -192,7 +192,11 @@ export const ExchangeChat = () => {
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div 
+        ref={messagesContainerRef}
+        onScroll={checkIfAtBottom}
+        className="flex-1 overflow-y-auto p-4 space-y-4"
+      >
         {messages.map((msg) => {
           const isSystem = msg.is_system;
           const isMe = msg.sender_id === user?.id;
