@@ -160,24 +160,25 @@ export const Albums = () => {
   }
 
   return (
-    <div className="min-h-screen sticker-album-pattern">
-      <div className="max-w-4xl mx-auto p-6">
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-3xl font-black tracking-tight text-primary">{t('albums.title')}</h1>
-            <p className="text-muted-foreground">{t('albums.subtitle')}</p>
+    <div className="min-h-screen sticker-album-pattern overflow-x-hidden">
+      <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 py-4 sm:py-6">
+        <div className="flex items-center justify-between gap-3 mb-6 sm:mb-8">
+          <div className="min-w-0 flex-1">
+            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-primary truncate">{t('albums.title')}</h1>
+            <p className="text-sm sm:text-base text-muted-foreground">{t('albums.subtitle')}</p>
           </div>
           <Button
             data-testid="settings-btn"
             variant="outline"
             size="icon"
             onClick={() => navigate('/settings')}
+            className="flex-shrink-0"
           >
             <Settings className="h-5 w-5" />
           </Button>
         </div>
 
-        <div className="space-y-4">
+        <div className="space-y-3 sm:space-y-4">
           {albums.map((album) => (
             <Card
               key={album.id}
@@ -185,49 +186,51 @@ export const Albums = () => {
               className={`transition-all border-2 ${getCardStyles(album)}`}
               onClick={() => handleAlbumClick(album)}
             >
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className={`h-16 w-16 rounded-xl flex items-center justify-center ${
+              <CardContent className="p-4 sm:p-6">
+                <div className="flex items-start sm:items-center justify-between gap-3">
+                  <div className="flex items-start sm:items-center gap-3 sm:gap-4 min-w-0 flex-1">
+                    <div className={`h-12 w-12 sm:h-16 sm:w-16 rounded-xl flex items-center justify-center flex-shrink-0 ${
                       album.user_state === 'coming_soon' || album.user_state === 'inactive'
                         ? 'bg-gray-100'
                         : 'bg-gradient-to-br from-primary/20 to-primary/5'
                     }`}>
-                      <BookOpen className={`h-8 w-8 ${
+                      <BookOpen className={`h-6 w-6 sm:h-8 sm:w-8 ${
                         album.user_state === 'coming_soon' || album.user_state === 'inactive'
                           ? 'text-gray-400'
                           : 'text-primary'
                       }`} />
                     </div>
-                    <div>
+                    <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
-                        <h3 className={`text-xl font-bold ${getTitleStyles(album)}`}>{album.name}</h3>
+                        <h3 className={`text-base sm:text-xl font-bold truncate ${getTitleStyles(album)}`}>{album.name}</h3>
                         {/* Completion checkmark for 100% completed albums */}
                         {album.is_member && album.progress === 100 && (
-                          <CheckCircle className="h-5 w-5 text-green-700 flex-shrink-0" />
+                          <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 text-green-700 flex-shrink-0" />
                         )}
                       </div>
-                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                      <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs sm:text-sm text-muted-foreground">
                         <span>{album.year}</span>
-                        <span>•</span>
+                        <span className="hidden sm:inline">•</span>
                         <span>{getCategoryDisplay(album, t)}</span>
                         {/* Show progress for active albums */}
                         {album.is_member && album.progress !== undefined && (
                           <>
-                            <span>•</span>
+                            <span className="hidden sm:inline">•</span>
                             <span className={`font-semibold ${
                               album.progress === 100 
                                 ? 'text-green-700' 
                                 : 'text-primary'
                             }`}>
-                              {Math.round(album.progress)}% {t('albumHome.completed')}
+                              {Math.round(album.progress)}%
                             </span>
                           </>
                         )}
                       </div>
                     </div>
                   </div>
-                  {getStateBadge(album)}
+                  <div className="flex-shrink-0">
+                    {getStateBadge(album)}
+                  </div>
                 </div>
               </CardContent>
             </Card>
