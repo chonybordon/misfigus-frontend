@@ -1771,6 +1771,7 @@ async def update_inventory(group_id: str, update: InventoryUpdate, user_id: str 
 async def get_matches(group_id: str, user_id: str = Depends(get_current_user)):
     """
     Get potential exchange matches within the group.
+    Returns ONE entry per user with aggregated match info.
     Users from different groups NEVER see each other.
     EXCLUDES test/seed users from results.
     """
@@ -1789,14 +1790,28 @@ async def get_matches(group_id: str, user_id: str = Depends(get_current_user)):
     # Get other members (ONLY from this group)
     members, _ = await get_group_members_excluding_user(group_id, user_id)
     
-    matches = []
-    
+    # Deduplicate members by user ID
+    seen_user_ids = set()
+    unique_members = []
     for member in members:
+        uid = member['id']
+        if uid not in seen_user_ids:
+            seen_user_ids.add(uid)
+            unique_members.append(member)
+    
+    # Use dict to aggregate matches by user (prevents duplicates)
+    matches_by_user = {}
+    
+    for member in unique_members:
         # Skip test/seed users
         if is_test_user(member):
             continue
-            
+        
         other_user_id = member['id']
+        
+        # Skip if already processed (extra safety)
+        if other_user_id in matches_by_user:
+            continue
         
         other_inventory = await db.user_inventory.find({
             "user_id": other_user_id,
@@ -1805,7 +1820,7 @@ async def get_matches(group_id: str, user_id: str = Depends(get_current_user)):
         
         other_inv_map = {item['sticker_id']: item['owned_qty'] for item in other_inventory}
         
-        # Calculate what can be exchanged (but don't expose numbers in response)
+        # Calculate what can be exchanged
         my_duplicates = [sid for sid in sticker_ids if my_inv_map.get(sid, 0) >= 2]
         my_missing = [sid for sid in sticker_ids if my_inv_map.get(sid, 0) == 0]
         other_duplicates = [sid for sid in sticker_ids if other_inv_map.get(sid, 0) >= 2]
@@ -1815,19 +1830,22 @@ async def get_matches(group_id: str, user_id: str = Depends(get_current_user)):
         i_can_get = [sid for sid in other_duplicates if sid in my_missing]
         
         if i_can_give or i_can_get:
-            matches.append({
+            matches_by_user[other_user_id] = {
                 "user": {
                     "id": member['id'],
                     "email": member['email'],
                     "display_name": member.get('display_name'),
                     "full_name": member.get('full_name')
                 },
+                "you_need_count": len(i_can_get),
+                "they_need_count": len(i_can_give),
                 "has_stickers_i_need": len(i_can_get) > 0,
                 "needs_stickers_i_have": len(i_can_give) > 0,
                 "can_exchange": len(i_can_give) > 0 and len(i_can_get) > 0
-            })
+            }
     
-    return matches
+    # Return as list (guaranteed unique users)
+    return list(matches_by_user.values())
 
 # ============================================
 # EXCHANGE ENDPOINTS (Real Exchange Lifecycle)
