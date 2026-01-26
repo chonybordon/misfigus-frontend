@@ -1256,6 +1256,7 @@ async def compute_album_exchange_count(album_id: str, user_id: str) -> int:
 async def get_album_matches(album_id: str, user_id: str = Depends(get_current_user)):
     """
     Get potential exchange matches within the album.
+    Returns ONE entry per user with aggregated match info.
     Only returns users with MUTUAL matches (both can exchange).
     Does not expose user lists/directories - only real exchange opportunities.
     Filters by user's search radius (proximity-based matching).
@@ -1294,16 +1295,28 @@ async def get_album_matches(album_id: str, user_id: str = Depends(get_current_us
     my_duplicates = [sid for sid in sticker_ids if my_inv_map.get(sid, 0) >= 2]
     my_missing = [sid for sid in sticker_ids if my_inv_map.get(sid, 0) == 0]
     
-    # Get other album members
+    # Get other album members (deduplicated by user_id)
     other_members = await db.album_members.find(
         {"album_id": album_id, "user_id": {"$ne": user_id}},
         {"_id": 0, "user_id": 1}
     ).to_list(1000)
     
-    matches = []
-    
+    # Deduplicate member IDs in case of duplicate memberships
+    seen_user_ids = set()
+    unique_member_ids = []
     for member in other_members:
-        other_user_id = member['user_id']
+        uid = member['user_id']
+        if uid not in seen_user_ids:
+            seen_user_ids.add(uid)
+            unique_member_ids.append(uid)
+    
+    # Use dict to aggregate matches by user (prevents duplicates)
+    matches_by_user = {}
+    
+    for other_user_id in unique_member_ids:
+        # Skip if already processed (extra safety)
+        if other_user_id in matches_by_user:
+            continue
         
         # Get user info
         other_user = await db.users.find_one({"id": other_user_id}, {"_id": 0})
@@ -1334,18 +1347,21 @@ async def get_album_matches(album_id: str, user_id: str = Depends(get_current_us
         
         # Only include MUTUAL matches (both directions)
         if i_can_give and i_can_get:
-            matches.append({
+            matches_by_user[other_user_id] = {
                 "user": {
                     "id": other_user['id'],
                     "email": other_user.get('email'),
                     "display_name": other_user.get('display_name')
                 },
+                "you_need_count": len(i_can_get),
+                "they_need_count": len(i_can_give),
                 "has_stickers_i_need": len(i_can_get) > 0,
                 "needs_stickers_i_have": len(i_can_give) > 0,
                 "can_exchange": True  # Only true matches are included
-            })
+            }
     
-    return matches
+    # Return as list (guaranteed unique users)
+    return list(matches_by_user.values())
 
 @api_router.get("/inventory")
 async def get_inventory(album_id: str, user_id: str = Depends(get_current_user)):
