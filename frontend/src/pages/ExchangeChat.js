@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useContext } from 'react';
+import React, { useState, useEffect, useRef, useContext, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { api, AuthContext } from '../App';
@@ -8,6 +8,9 @@ import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Send, Lock } from 'lucide-react';
+
+// Polling interval in milliseconds
+const POLL_INTERVAL = 2000;
 
 // Helper to get display name with i18n fallback
 const getDisplayName = (user, t) => {
@@ -40,16 +43,71 @@ export const ExchangeChat = () => {
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const messagesEndRef = useRef(null);
+  const messagesContainerRef = useRef(null);
+  const isAtBottomRef = useRef(true);
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { user } = useContext(AuthContext);
 
+  // Check if user is scrolled to bottom
+  const checkIfAtBottom = useCallback(() => {
+    if (messagesContainerRef.current) {
+      const { scrollTop, scrollHeight, clientHeight } = messagesContainerRef.current;
+      // Consider "at bottom" if within 100px of the bottom
+      isAtBottomRef.current = scrollHeight - scrollTop - clientHeight < 100;
+    }
+  }, []);
+
+  // Initial data fetch
   useEffect(() => {
     fetchData();
   }, [exchangeId]);
 
+  // Polling for new messages
   useEffect(() => {
-    scrollToBottom();
+    if (loading) return; // Don't poll until initial load is complete
+    
+    const pollMessages = async () => {
+      try {
+        const chatRes = await api.get(`/exchanges/${exchangeId}/chat`);
+        const newMessages = chatRes.data.messages || [];
+        
+        // Only update if there are new messages
+        setMessages(prevMessages => {
+          // Create a Set of existing message IDs for O(1) lookup
+          const existingIds = new Set(prevMessages.map(m => m.id));
+          
+          // Find messages that don't exist yet
+          const messagesToAdd = newMessages.filter(m => !existingIds.has(m.id));
+          
+          if (messagesToAdd.length > 0) {
+            // Check if at bottom before adding new messages
+            checkIfAtBottom();
+            return [...prevMessages, ...messagesToAdd];
+          }
+          
+          return prevMessages;
+        });
+        
+        // Update chat data (for read-only status changes)
+        setChatData(chatRes.data);
+      } catch (error) {
+        // Silently fail on poll errors - don't spam user with toasts
+        console.error('Failed to poll messages:', error);
+      }
+    };
+
+    const intervalId = setInterval(pollMessages, POLL_INTERVAL);
+    
+    // Cleanup: stop polling when component unmounts or exchangeId changes
+    return () => clearInterval(intervalId);
+  }, [exchangeId, loading, checkIfAtBottom]);
+
+  // Auto-scroll when new messages arrive (only if user was at bottom)
+  useEffect(() => {
+    if (isAtBottomRef.current) {
+      scrollToBottom();
+    }
   }, [messages]);
 
   const fetchData = async () => {
