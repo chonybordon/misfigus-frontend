@@ -32,7 +32,7 @@ MisFigus is a sticker trading platform that allows collectors to manage their st
 
 ### Trading System
 - Location-based match finding
-- In-app chat for exchange coordination
+- In-app chat for exchange coordination with **real-time polling (2s interval)**
 - Exchange confirmation with success/failure reporting
 - Reputation system (trusted, under review, restricted)
 
