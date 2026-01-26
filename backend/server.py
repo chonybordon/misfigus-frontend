@@ -371,39 +371,60 @@ async def send_otp(user_input: UserCreate):
 async def verify_otp_endpoint(otp_data: OTPVerify):
     """
     Verify OTP code. Validates against stored hash.
+    Creates user ONLY here if they don't exist (single point of user creation).
     Returns user with onboarding_completed status for navigation.
     """
-    email_lower = otp_data.email.lower()
-    stored = OTP_STORE.get(email_lower)
+    # Normalize email: trim whitespace and convert to lowercase
+    normalized_email = otp_data.email.strip().lower()
+    
+    stored = OTP_STORE.get(normalized_email)
     
     if not stored:
         raise HTTPException(status_code=400, detail="No OTP requested for this email")
     
     if datetime.now(timezone.utc) > stored['expires']:
-        del OTP_STORE[email_lower]
+        del OTP_STORE[normalized_email]
         raise HTTPException(status_code=400, detail="OTP expired")
     
     if not verify_otp_hash(otp_data.otp, stored['hash']):
         raise HTTPException(status_code=400, detail="Invalid OTP")
     
     # Clear used OTP
-    del OTP_STORE[email_lower]
+    del OTP_STORE[normalized_email]
     
-    user = await db.users.find_one({"email": otp_data.email}, {"_id": 0})
+    # Find or create user (using normalized email)
+    user = await db.users.find_one({"email": normalized_email}, {"_id": 0})
+    
     if not user:
-        raise HTTPException(status_code=404, detail="User not found")
+        # CREATE USER ONLY HERE - single point of user creation
+        new_user = User(
+            email=normalized_email, 
+            full_name=normalized_email.split('@')[0], 
+            verified=True  # Already verified since OTP passed
+        )
+        doc = new_user.model_dump()
+        doc['created_at'] = doc['created_at'].isoformat()
+        doc['onboarding_completed'] = False
+        
+        # Use upsert to prevent race conditions
+        await db.users.update_one(
+            {"email": normalized_email},
+            {"$setOnInsert": doc},
+            upsert=True
+        )
+        user = await db.users.find_one({"email": normalized_email}, {"_id": 0})
+    else:
+        # Update existing user to verified
+        await db.users.update_one(
+            {"email": normalized_email},
+            {"$set": {"verified": True}}
+        )
+        # Refetch user to get updated data
+        user = await db.users.find_one({"email": normalized_email}, {"_id": 0})
     
     # Ensure onboarding_completed field exists (for existing users)
     if 'onboarding_completed' not in user:
         user['onboarding_completed'] = False
-    
-    await db.users.update_one(
-        {"email": otp_data.email},
-        {"$set": {"verified": True}}
-    )
-    
-    # Refetch user to get updated data
-    user = await db.users.find_one({"email": otp_data.email}, {"_id": 0})
     
     token = create_token(user['id'])
     return {"token": token, "user": user}
