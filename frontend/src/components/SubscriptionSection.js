@@ -15,7 +15,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Crown, Check, X, AlertTriangle, Sparkles, Calendar, Album, Repeat, Megaphone } from 'lucide-react';
+import { Crown, Check, X, AlertTriangle, Sparkles, Calendar, Album, MessageCircle, Megaphone } from 'lucide-react';
 
 export const SubscriptionSection = ({ onPlanChange }) => {
   const { t } = useTranslation();
