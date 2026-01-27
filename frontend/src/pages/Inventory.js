@@ -188,35 +188,50 @@ export const Inventory = () => {
                 <div className="text-xs text-muted-foreground mb-1">{sticker.team}</div>
                 <div className="text-sm font-semibold line-clamp-2 h-10">{sticker.name}</div>
               </div>
-              <div className="flex items-center justify-between gap-2 mt-3">
-                <Button
-                  data-testid={`decrease-qty-btn-${sticker.id}`}
-                  size="sm"
-                  variant="outline"
-                  className="h-8 w-8 p-0"
-                  onClick={() => updateQuantity(sticker.id, sticker.owned_qty - 1)}
-                  disabled={sticker.owned_qty === 0}
-                >
-                  <Minus className="h-4 w-4" />
-                </Button>
-                <div className="flex flex-col items-center">
-                  <div className="text-xl font-bold min-w-[2rem] text-center" data-testid={`sticker-qty-${sticker.id}`}>
-                    {getDisplayValue(sticker)}
+              {isEditingEnabled ? (
+                /* Editable view - only in "Mi inventario" tab */
+                <div className="flex items-center justify-between gap-2 mt-3">
+                  <Button
+                    data-testid={`decrease-qty-btn-${sticker.id}`}
+                    size="sm"
+                    variant="outline"
+                    className="h-8 w-8 p-0"
+                    onClick={() => updateQuantity(sticker.id, sticker.owned_qty - 1)}
+                    disabled={sticker.owned_qty === 0}
+                  >
+                    <Minus className="h-4 w-4" />
+                  </Button>
+                  <div className="flex flex-col items-center">
+                    <div className="text-xl font-bold min-w-[2rem] text-center" data-testid={`sticker-qty-${sticker.id}`}>
+                      {getDisplayValue(sticker)}
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      {t('inventory.owned')}
+                    </div>
                   </div>
-                  <div className="text-xs text-muted-foreground">
-                    {filter === 'duplicates' ? t('inventory.duplicate') : t('inventory.owned')}
+                  <Button
+                    data-testid={`increase-qty-btn-${sticker.id}`}
+                    size="sm"
+                    variant="outline"
+                    className="h-8 w-8 p-0"
+                    onClick={() => updateQuantity(sticker.id, sticker.owned_qty + 1)}
+                  >
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </div>
+              ) : (
+                /* Read-only view - for "Faltan" and "Duplicados" tabs */
+                <div className="flex items-center justify-center mt-3">
+                  <div className="flex flex-col items-center">
+                    <div className="text-xl font-bold min-w-[2rem] text-center" data-testid={`sticker-qty-${sticker.id}`}>
+                      {getDisplayValue(sticker)}
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      {filter === 'duplicates' ? t('inventory.duplicate') : t('inventory.owned')}
+                    </div>
                   </div>
                 </div>
-                <Button
-                  data-testid={`increase-qty-btn-${sticker.id}`}
-                  size="sm"
-                  variant="outline"
-                  className="h-8 w-8 p-0"
-                  onClick={() => updateQuantity(sticker.id, sticker.owned_qty + 1)}
-                >
-                  <Plus className="h-4 w-4" />
-                </Button>
-              </div>
+              )}
             </Card>
           ))}
         </div>
