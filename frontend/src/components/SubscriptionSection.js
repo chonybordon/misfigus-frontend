@@ -262,7 +262,7 @@ export const SubscriptionSection = ({ onPlanChange }) => {
               {/* Benefits preview */}
               <div className="bg-gray-50 p-4 rounded-lg space-y-2 mt-4">
                 <BenefitItem icon={Album} text={t('subscription.premiumBenefits.albums')} included small />
-                <BenefitItem icon={Repeat} text={t('subscription.premiumBenefits.matches')} included small />
+                <BenefitItem icon={MessageCircle} text={t('subscription.premiumBenefits.chats')} included small />
                 <BenefitItem icon={Megaphone} text={t('subscription.premiumBenefits.noAds')} included small comingSoon />
               </div>
             </AlertDialogDescription>
