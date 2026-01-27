@@ -28,7 +28,7 @@ class TestFreePlanLimits:
     
     def _request_otp(self, email):
         """Request OTP for email"""
-        response = self.session.post(f"{BASE_URL}/api/auth/otp", json={"email": email})
+        response = self.session.post(f"{BASE_URL}/api/auth/send-otp", json={"email": email})
         assert response.status_code == 200, f"OTP request failed: {response.text}"
         data = response.json()
         # In DEV_MODE, OTP is returned in response
@@ -38,7 +38,7 @@ class TestFreePlanLimits:
     
     def _verify_otp(self, email, otp):
         """Verify OTP and get token"""
-        response = self.session.post(f"{BASE_URL}/api/auth/verify", json={"email": email, "otp": otp})
+        response = self.session.post(f"{BASE_URL}/api/auth/verify-otp", json={"email": email, "otp": otp})
         assert response.status_code == 200, f"OTP verify failed: {response.text}"
         data = response.json()
         return data.get('token')
