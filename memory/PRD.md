@@ -21,6 +21,9 @@ MisFigus is a sticker trading platform that allows collectors to manage their st
 - **Default Language**: Spanish (es)
 - **Fallback Chain**: Selected language → Spanish → English
 - Language selection as first step of onboarding
+- **i18n-driven album names**: Albums use `name_key` field to look up translations
+- **i18n-driven categories**: Albums use `category_key` field for category translations
+- **Legal disclaimer**: Fan-made collection disclaimer translated in all 6 languages
 
 ### User Profile
 - Display name, email, location (country/city/neighborhood)
