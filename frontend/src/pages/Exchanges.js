@@ -7,7 +7,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, MessageCircle, CheckCircle, XCircle, Clock, AlertTriangle, Mail } from 'lucide-react';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { ArrowLeft, MessageCircle, CheckCircle, XCircle, Clock, AlertTriangle, Mail, Archive } from 'lucide-react';
 
 // Helper to get display name with i18n fallback
 const getDisplayName = (user, t) => {
