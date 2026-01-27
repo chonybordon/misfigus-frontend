@@ -111,9 +111,9 @@ export const JoinAlbum = () => {
             <div className="space-y-4">
               <div className="text-center">
                 <CheckCircle className="h-16 w-16 mx-auto text-green-500 mb-4" />
-                <h3 className="text-xl font-bold mb-2">{album?.name}</h3>
+                <h3 className="text-xl font-bold mb-2">{getAlbumNameDisplay(album, t)}</h3>
                 <p className="text-muted-foreground">
-                  {album?.year} • {album?.category}
+                  {album?.year} • {getCategoryDisplay(album, t)}
                 </p>
               </div>
               <div className="bg-muted p-4 rounded-lg space-y-2 text-sm">
