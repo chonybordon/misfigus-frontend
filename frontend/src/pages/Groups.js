@@ -10,6 +10,22 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Settings, BookOpen, Plus, Users } from 'lucide-react';
 
+// Helper to get translated album name from nameKey
+const getAlbumNameDisplay = (album, t) => {
+  if (album?.name_key) {
+    return t(`albumNames.${album.name_key}`);
+  }
+  return album?.name || '';
+};
+
+// Helper to get translated category from categoryKey
+const getCategoryDisplay = (album, t) => {
+  if (album?.category_key) {
+    return t(`categories.${album.category_key}`);
+  }
+  return album?.category || '';
+};
+
 export const Groups = () => {
   const [groups, setGroups] = useState([]);
   const [albums, setAlbums] = useState([]);
