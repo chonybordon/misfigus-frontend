@@ -257,7 +257,7 @@ export const Albums = () => {
               </DialogDescription>
             </DialogHeader>
             <div className="py-4">
-              <p className="font-semibold text-lg">{selectedAlbum?.name}</p>
+              <p className="font-semibold text-lg">{selectedAlbum && getAlbumNameDisplay(selectedAlbum, t)}</p>
               <p className="text-sm text-muted-foreground">
                 {selectedAlbum?.year} • {selectedAlbum && getCategoryDisplay(selectedAlbum, t)}
               </p>
