@@ -160,10 +160,9 @@ export const Inventory = () => {
         </div>
 
         <Tabs defaultValue="all" className="mb-6" onValueChange={setFilter}>
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger data-testid="filter-all" value="all">{t('inventory.all')}</TabsTrigger>
             <TabsTrigger data-testid="filter-missing" value="missing">{t('inventory.missing')}</TabsTrigger>
-            <TabsTrigger data-testid="filter-have" value="have">{t('inventory.have')}</TabsTrigger>
             <TabsTrigger data-testid="filter-duplicates" value="duplicates">{t('inventory.duplicates')}</TabsTrigger>
           </TabsList>
         </Tabs>
