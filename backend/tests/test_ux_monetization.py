@@ -183,17 +183,23 @@ class TestPlanStatusEndpoint:
         time.sleep(1)
         import subprocess
         result = subprocess.run(
-            ['tail', '-n', '50', '/var/log/supervisor/backend.err.log'],
+            ['tail', '-n', '100', '/var/log/supervisor/backend.err.log'],
             capture_output=True, text=True
         )
         otp = None
-        for line in reversed(result.stdout.split('\n')):
-            if 'OTP code' in line and test_email in line:
+        lines = result.stdout.split('\n')
+        found_email = False
+        for line in lines:
+            if f'[OTP] To: {test_email}' in line:
+                found_email = True
+                continue
+            if found_email and '[OTP] OTP:' in line:
                 import re
-                match = re.search(r'OTP code (\d{6})', line)
+                match = re.search(r'\[OTP\] OTP: (\d{6})', line)
                 if match:
                     otp = match.group(1)
                     break
+                found_email = False
         
         if not otp:
             pytest.skip("Could not get OTP from logs")
