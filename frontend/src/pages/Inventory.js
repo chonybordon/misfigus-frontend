@@ -100,10 +100,21 @@ export const Inventory = () => {
   };
 
   const getStickerClass = (sticker) => {
+    // Special styling for filtered views
+    if (filter === 'missing') {
+      return 'bg-red-50 border-red-200'; // Soft red for missing
+    }
+    if (filter === 'duplicates') {
+      return 'bg-yellow-50 border-yellow-300'; // Yellow for duplicates
+    }
+    // Default styling based on ownership (for "Mi inventario" tab)
     if (sticker.owned_qty === 0) return 'sticker-card-missing';
     if (sticker.owned_qty === 1) return 'sticker-card-have';
     return 'sticker-card-duplicate';
   };
+
+  // Editing is ONLY allowed in "Mi inventario" (all) tab
+  const isEditingEnabled = filter === 'all';
 
   const getDisplayValue = (sticker) => {
     // In "Duplicates" tab, show duplicate_count
