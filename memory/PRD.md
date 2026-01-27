@@ -47,14 +47,23 @@ MisFigus is a sticker trading platform that allows collectors to manage their st
   - "Restringido" (🔴) → 5+ serious failures (suspended)
 
 ### Freemium Model
-- **Free Plan**: 1 active album, 1 trade match per day
-- **Premium Plan**: Unlimited albums and trades, no ads (future)
+- **Free Plan**: 1 active album, 1 chat initiation per day
+- **Premium Plan**: Unlimited albums and chats, no ads (future)
 - Plan types: Monthly (30 days), Annual (365 days)
 - Subscription management UI in Settings with:
   - Current plan display with benefits
   - Upgrade to Premium option
   - Downgrade to Free (blocked if >1 active album)
 - Paywall UI when limits hit (MOCKED - no real payment integration)
+- **Chat limit enforcement**: Free users blocked after 1 chat/day with message "Alcanzaste el límite de tu versión gratuita"
+
+### Inventory UX
+- **3 tabs only**: "Mi inventario" (editable), "Faltan" (read-only, red styling), "Duplicados" (read-only, yellow styling)
+- Editing (+/- buttons) only available in "Mi inventario" tab
+
+### Exchanges UX
+- Default tab is "New exchanges" (not "Active")
+- 3-tab navigation: "Nuevos intercambios" | "Activos" | "Completados"
 
 ## Technical Architecture
 
