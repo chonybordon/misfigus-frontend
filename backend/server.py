@@ -983,6 +983,7 @@ CATEGORY_KEY_MAP = {
     "Fútbol": "sports",
     "Anime": "anime",
     "Trading Cards": "trading_cards",
+    "Cartas coleccionables": "trading_cards",
     "Superhéroes": "superheroes",
     "Entretenimiento": "entertainment"
 }
