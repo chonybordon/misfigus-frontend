@@ -1,1 +1,29 @@
-<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="0" skipped="0" tests="7" time="5.447" timestamp="2026-01-27T19:36:22.024413+00:00" hostname="agent-env-cd6ed750-2b47-467e-b9cd-04c7becfcb8f"><testcase classname="tests.test_ux_monetization.TestFreemiumChatLimits" name="test_free_user_plan_status" time="1.484" /><testcase classname="tests.test_ux_monetization.TestFreemiumChatLimits" name="test_premium_upgrade_mocked" time="1.315" /><testcase classname="tests.test_ux_monetization.TestFreemiumChatLimits" name="test_can_user_create_match_logic" time="1.281" /><testcase classname="tests.test_ux_monetization.TestFreemiumChatLimits" name="test_free_plan_max_matches_constant" time="0.059" /><testcase classname="tests.test_ux_monetization.TestExchangeCreationLimit" name="test_daily_match_limit_error_code" time="0.001" /><testcase classname="tests.test_ux_monetization.TestExchangeCreationLimit" name="test_exchange_endpoint_checks_limit" time="0.001" /><testcase classname="tests.test_ux_monetization.TestPlanStatusEndpoint" name="test_plan_status_response_structure" time="1.259" /></testsuite></testsuites>
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="4" skipped="0" tests="9" time="0.310" timestamp="2026-01-27T20:10:04.895058+00:00" hostname="agent-env-cd6ed750-2b47-467e-b9cd-04c7becfcb8f"><testcase classname="backend.tests.test_free_plan_limits.TestFreePlanLimits" name="test_plan_status_endpoint_structure" time="0.078"><failure message="AssertionError: OTP request failed: {&quot;detail&quot;:&quot;Not Found&quot;}&#10;assert 404 == 200&#10; +  where 404 = &lt;Response [404]&gt;.status_code">backend/tests/test_free_plan_limits.py:53: in test_plan_status_endpoint_structure
+    otp = self._request_otp(self.test_email)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/tests/test_free_plan_limits.py:32: in _request_otp
+    assert response.status_code == 200, f"OTP request failed: {response.text}"
+E   AssertionError: OTP request failed: {"detail":"Not Found"}
+E   assert 404 == 200
+E    +  where 404 = &lt;Response [404]&gt;.status_code</failure></testcase><testcase classname="backend.tests.test_free_plan_limits.TestFreePlanLimits" name="test_free_plan_limit_is_one" time="0.044"><failure message="AssertionError: OTP request failed: {&quot;detail&quot;:&quot;Not Found&quot;}&#10;assert 404 == 200&#10; +  where 404 = &lt;Response [404]&gt;.status_code">backend/tests/test_free_plan_limits.py:88: in test_free_plan_limit_is_one
+    otp = self._request_otp(email)
+          ^^^^^^^^^^^^^^^^^^^^^^^^
+backend/tests/test_free_plan_limits.py:32: in _request_otp
+    assert response.status_code == 200, f"OTP request failed: {response.text}"
+E   AssertionError: OTP request failed: {"detail":"Not Found"}
+E   assert 404 == 200
+E    +  where 404 = &lt;Response [404]&gt;.status_code</failure></testcase><testcase classname="backend.tests.test_free_plan_limits.TestFreePlanLimits" name="test_premium_user_unlimited_matches" time="0.038"><failure message="AssertionError: OTP request failed: {&quot;detail&quot;:&quot;Not Found&quot;}&#10;assert 404 == 200&#10; +  where 404 = &lt;Response [404]&gt;.status_code">backend/tests/test_free_plan_limits.py:106: in test_premium_user_unlimited_matches
+    otp = self._request_otp(email)
+          ^^^^^^^^^^^^^^^^^^^^^^^^
+backend/tests/test_free_plan_limits.py:32: in _request_otp
+    assert response.status_code == 200, f"OTP request failed: {response.text}"
+E   AssertionError: OTP request failed: {"detail":"Not Found"}
+E   assert 404 == 200
+E    +  where 404 = &lt;Response [404]&gt;.status_code</failure></testcase><testcase classname="backend.tests.test_free_plan_limits.TestFreePlanLimits" name="test_premium_downgrade_to_free" time="0.045"><failure message="AssertionError: OTP request failed: {&quot;detail&quot;:&quot;Not Found&quot;}&#10;assert 404 == 200&#10; +  where 404 = &lt;Response [404]&gt;.status_code">backend/tests/test_free_plan_limits.py:135: in test_premium_downgrade_to_free
+    otp = self._request_otp(email)
+          ^^^^^^^^^^^^^^^^^^^^^^^^
+backend/tests/test_free_plan_limits.py:32: in _request_otp
+    assert response.status_code == 200, f"OTP request failed: {response.text}"
+E   AssertionError: OTP request failed: {"detail":"Not Found"}
+E   assert 404 == 200
+E    +  where 404 = &lt;Response [404]&gt;.status_code</failure></testcase><testcase classname="backend.tests.test_free_plan_limits.TestI18nChatTranslations" name="test_i18n_file_has_chat_translations" time="0.002" /><testcase classname="backend.tests.test_free_plan_limits.TestI18nChatTranslations" name="test_match_limit_desc_mentions_chats" time="0.001" /><testcase classname="backend.tests.test_free_plan_limits.TestSubscriptionUIComponents" name="test_subscription_section_uses_chat_keys" time="0.000" /><testcase classname="backend.tests.test_free_plan_limits.TestSubscriptionUIComponents" name="test_subscription_section_uses_message_circle_icon" time="0.000" /><testcase classname="backend.tests.test_free_plan_limits.TestSubscriptionUIComponents" name="test_subscription_section_shows_usage_counter" time="0.001" /></testsuite></testsuites>
