@@ -20,6 +20,16 @@ const getCategoryDisplay = (album, t) => {
   return album.category;
 };
 
+// Helper to get translated album name from nameKey
+const getAlbumNameDisplay = (album, t) => {
+  // If album has nameKey, use i18n translation
+  if (album.name_key) {
+    return t(`albumNames.${album.name_key}`);
+  }
+  // Fallback to raw name (for backward compat with old data)
+  return album.name;
+};
+
 export const Albums = () => {
   const [albums, setAlbums] = useState([]);
   const [loading, setLoading] = useState(true);
