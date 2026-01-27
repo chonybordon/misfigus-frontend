@@ -380,28 +380,29 @@ export const ExchangeDetail = () => {
         {/* Confirmation Actions (only for pending exchanges) */}
         {exchange.status === 'pending' && !hasUserConfirmed() && (
           <Card className="border-2 border-dashed">
-            <CardHeader>
-              <CardTitle>{t('exchange.confirmTitle')}</CardTitle>
+            <CardHeader className="pb-2 sm:pb-4 px-4 sm:px-6 pt-4 sm:pt-6">
+              <CardTitle className="text-base sm:text-lg">{t('exchange.confirmTitle')}</CardTitle>
             </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground mb-4">
+            <CardContent className="px-4 sm:px-6 pb-4 sm:pb-6">
+              <p className="text-xs sm:text-sm text-muted-foreground mb-3 sm:mb-4">
                 {t('exchange.confirmDescription')}
               </p>
-              <div className="flex gap-4">
+              {/* Stack buttons on mobile, side by side on larger screens */}
+              <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
                 <Button 
-                  className="flex-1 bg-green-600 hover:bg-green-700"
+                  className="w-full sm:flex-1 bg-green-600 hover:bg-green-700 text-sm sm:text-base py-3"
                   onClick={() => { setConfirmType('success'); setConfirmDialogOpen(true); }}
                 >
-                  <CheckCircle className="h-5 w-5 mr-2" />
-                  {t('exchange.confirmSuccess')}
+                  <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 mr-2 flex-shrink-0" />
+                  <span className="truncate">{t('exchange.confirmSuccess')}</span>
                 </Button>
                 <Button 
                   variant="destructive"
-                  className="flex-1"
+                  className="w-full sm:flex-1 text-sm sm:text-base py-3"
                   onClick={() => { setConfirmType('failure'); setConfirmDialogOpen(true); }}
                 >
-                  <XCircle className="h-5 w-5 mr-2" />
-                  {t('exchange.confirmFailure')}
+                  <XCircle className="h-4 w-4 sm:h-5 sm:w-5 mr-2 flex-shrink-0" />
+                  <span className="truncate">{t('exchange.confirmFailure')}</span>
                 </Button>
               </div>
             </CardContent>
