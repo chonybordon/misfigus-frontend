@@ -590,6 +590,14 @@ const resources = {
         superheroes: 'Superheroes',
         entertainment: 'Entertainment'
       },
+      albumNames: {
+        mundial_2022: 'Football World Album 2022',
+        mundial_2026: 'Football World Album 2026',
+        criaturas_fantasticas: 'Fantastic Creatures',
+        guerreros_anime: 'Anime Warriors',
+        heroes_multiverso: 'Multiverse Heroes',
+        personajes_animados: 'Animated Characters'
+      },
       login: {
         title: 'MisFigus',
         subtitle: 'Trade stickers with your album',
