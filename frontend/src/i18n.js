@@ -100,7 +100,7 @@ const resources = {
       categories: {
         sports: 'Fútbol',
         anime: 'Anime',
-        trading_cards: 'Trading Cards',
+        trading_cards: 'Cartas coleccionables',
         superheroes: 'Superhéroes',
         entertainment: 'Entretenimiento'
       },
@@ -1054,7 +1054,7 @@ const resources = {
       categories: {
         sports: 'Futebol',
         anime: 'Anime',
-        trading_cards: 'Trading Cards',
+        trading_cards: 'Cartas colecionáveis',
         superheroes: 'Super-heróis',
         entertainment: 'Entretenimento'
       },
