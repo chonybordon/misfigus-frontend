@@ -21,11 +21,12 @@ const getDisplayName = (user, t) => {
 // Reputation badge component
 const ReputationBadge = ({ status, t }) => {
   const config = {
+    new: { color: 'bg-blue-100 text-blue-800', icon: '🔵', label: t('reputation.new') },
     trusted: { color: 'bg-green-100 text-green-800', icon: '🟢', label: t('reputation.trusted') },
     under_review: { color: 'bg-yellow-100 text-yellow-800', icon: '🟡', label: t('reputation.underReview') },
     restricted: { color: 'bg-red-100 text-red-800', icon: '🔴', label: t('reputation.restricted') }
   };
-  const c = config[status] || config.trusted;
+  const c = config[status] || config.new;  // Default to "new" instead of "trusted"
   return (
     <Badge className={c.color}>
       <span className="mr-1">{c.icon}</span>
