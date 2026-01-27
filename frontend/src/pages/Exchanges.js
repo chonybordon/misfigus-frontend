@@ -144,17 +144,13 @@ export const Exchanges = () => {
     fetchExchanges();
   }, [albumId]);
 
-  // Set default tab after data loads
+  // Set default tab after data loads - ALWAYS default to "New exchanges"
   useEffect(() => {
     if (!loading && activeTab === null) {
-      // Default: "Active" if there are active exchanges, otherwise "New"
-      if (activeExchanges.length > 0) {
-        setActiveTab('active');
-      } else {
-        setActiveTab('new');
-      }
+      // Always default to "New exchanges" tab per user feedback
+      setActiveTab('new');
     }
-  }, [loading, activeTab, activeExchanges.length]);
+  }, [loading, activeTab]);
 
   const fetchExchanges = async () => {
     try {
