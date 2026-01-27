@@ -120,7 +120,7 @@ export const Exchanges = () => {
   const [loading, setLoading] = useState(true);
   const [checkingMatches, setCheckingMatches] = useState(false);
   const [hasCheckedMatches, setHasCheckedMatches] = useState(false);
-  const [activeTab, setActiveTab] = useState('active'); // 'active' or 'completed'
+  const [activeTab, setActiveTab] = useState(null); // Will be set after data loads: 'new', 'active', or 'completed'
   const navigate = useNavigate();
   const { t } = useTranslation();
 
@@ -136,19 +136,33 @@ export const Exchanges = () => {
     .filter(ex => completedStatuses.includes(ex.status))
     .sort((a, b) => new Date(b.completed_at || b.created_at) - new Date(a.completed_at || a.created_at));
 
+  // Badge conditions
+  const hasNewMatches = matches.length > 0;
+  const hasUnreadMessages = activeExchanges.some(ex => ex.has_unread && ex.status === 'pending');
+
   useEffect(() => {
     fetchExchanges();
   }, [albumId]);
+
+  // Set default tab after data loads
+  useEffect(() => {
+    if (!loading && activeTab === null) {
+      // Default: "Active" if there are active exchanges, otherwise "New"
+      if (activeExchanges.length > 0) {
+        setActiveTab('active');
+      } else {
+        setActiveTab('new');
+      }
+    }
+  }, [loading, activeTab, activeExchanges.length]);
 
   const fetchExchanges = async () => {
     try {
       const response = await api.get(`/albums/${albumId}/exchanges`);
       setExchanges(response.data);
       
-      // If no exchanges exist, automatically check for matches
-      if (response.data.length === 0) {
-        await fetchMatches();
-      }
+      // Always fetch matches to show badge on "New" tab
+      await fetchMatches();
     } catch (error) {
       // Empty result is NOT an error - don't show error toast for 404 or empty
       // Only show toast for actual errors (500, network, etc.)
