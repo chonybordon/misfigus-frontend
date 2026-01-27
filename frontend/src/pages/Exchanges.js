@@ -73,8 +73,21 @@ export const Exchanges = () => {
   const [loading, setLoading] = useState(true);
   const [checkingMatches, setCheckingMatches] = useState(false);
   const [hasCheckedMatches, setHasCheckedMatches] = useState(false);
+  const [activeTab, setActiveTab] = useState('active'); // 'active' or 'completed'
   const navigate = useNavigate();
   const { t } = useTranslation();
+
+  // Filter exchanges by tab
+  const activeStatuses = ['pending', 'new', 'in_progress'];
+  const completedStatuses = ['completed', 'failed', 'expired'];
+  
+  const activeExchanges = exchanges
+    .filter(ex => activeStatuses.includes(ex.status))
+    .sort((a, b) => new Date(b.last_activity || b.created_at) - new Date(a.last_activity || a.created_at));
+  
+  const completedExchanges = exchanges
+    .filter(ex => completedStatuses.includes(ex.status))
+    .sort((a, b) => new Date(b.completed_at || b.created_at) - new Date(a.completed_at || a.created_at));
 
   useEffect(() => {
     fetchExchanges();
@@ -122,8 +135,8 @@ export const Exchanges = () => {
   };
 
   // Check if user has any new/unseen exchanges or unread messages
-  const hasNewExchanges = exchanges.some(ex => ex.is_new && ex.status === 'pending');
-  const hasUnreadMessages = exchanges.some(ex => ex.has_unread && ex.status === 'pending');
+  const hasNewExchanges = activeExchanges.some(ex => ex.is_new && ex.status === 'pending');
+  const hasUnreadMessages = activeExchanges.some(ex => ex.has_unread && ex.status === 'pending');
 
   // Show loading while fetching exchanges or checking matches
   if (loading || checkingMatches) {
