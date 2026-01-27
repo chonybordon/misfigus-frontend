@@ -37,7 +37,11 @@ MisFigus is a sticker trading platform that allows collectors to manage their st
 - Location-based match finding
 - In-app chat for exchange coordination with **real-time polling (2s interval)**
 - Exchange confirmation with success/failure reporting
-- Reputation system (trusted, under review, restricted)
+- **Dynamic reputation system**:
+  - "Nuevo" (🔵) → 0 successful exchanges
+  - "Confiable" (🟢) → 3+ successful exchanges, no serious failures
+  - "Con observaciones" (🟡) → any serious failure
+  - "Restringido" (🔴) → 5+ serious failures (suspended)
 
 ### Freemium Model
 - **Free Plan**: 1 active album, 1 trade match per day
