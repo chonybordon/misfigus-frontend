@@ -45,7 +45,7 @@ async def init_albums():
         # AVAILABLE albums - can be activated by users
         {
             "id": ALBUM_IDS["qatar_2022"],
-            "name": "FIFA World Cup Qatar 2022",
+            "name": "Álbum Mundial de Fútbol 2022",
             "year": 2022,
             "category": "Fútbol",
             "status": "active",
@@ -53,15 +53,15 @@ async def init_albums():
         },
         {
             "id": ALBUM_IDS["pokemon"],
-            "name": "Pokémon",
+            "name": "Criaturas Fantásticas",
             "year": 2024,
-            "category": "Trading Cards",
+            "category": "Cartas coleccionables",
             "status": "active",
             "has_placeholder": True
         },
         {
             "id": ALBUM_IDS["dragon_ball"],
-            "name": "Dragon Ball",
+            "name": "Guerreros del Anime",
             "year": 2024,
             "category": "Anime",
             "status": "active",
@@ -69,7 +69,7 @@ async def init_albums():
         },
         {
             "id": ALBUM_IDS["marvel"],
-            "name": "Marvel",
+            "name": "Héroes del Multiverso",
             "year": 2024,
             "category": "Superhéroes",
             "status": "active",
@@ -77,7 +77,7 @@ async def init_albums():
         },
         {
             "id": ALBUM_IDS["disney"],
-            "name": "Disney",
+            "name": "Personajes Animados",
             "year": 2024,
             "category": "Entretenimiento",
             "status": "active",
@@ -86,7 +86,7 @@ async def init_albums():
         # COMING SOON albums - not activable yet
         {
             "id": ALBUM_IDS["world_cup_2026"],
-            "name": "FIFA World Cup 2026",
+            "name": "Álbum Mundial de Fútbol 2026",
             "year": 2026,
             "category": "Fútbol",
             "status": "coming_soon",
