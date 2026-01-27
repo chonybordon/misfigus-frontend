@@ -91,8 +91,8 @@ export const AlbumHome = () => {
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div className="flex-1">
-            <h1 className="text-3xl font-black tracking-tight text-primary">{album?.name}</h1>
-            <p className="text-muted-foreground">{album?.year} • {album?.category}</p>
+            <h1 className="text-3xl font-black tracking-tight text-primary">{getAlbumNameDisplay(album, t)}</h1>
+            <p className="text-muted-foreground">{album?.year} • {getCategoryDisplay(album, t)}</p>
           </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
