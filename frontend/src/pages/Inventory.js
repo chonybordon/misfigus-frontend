@@ -58,8 +58,6 @@ export const Inventory = () => {
 
     if (filter === 'missing') {
       filtered = filtered.filter((s) => s.owned_qty === 0);
-    } else if (filter === 'have') {
-      filtered = filtered.filter((s) => s.owned_qty >= 1);
     } else if (filter === 'duplicates') {
       // ONLY show stickers where owned_qty >= 2
       filtered = filtered.filter((s) => s.owned_qty >= 2);
