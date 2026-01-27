@@ -2048,6 +2048,14 @@ const resources = {
         superheroes: 'Superhelden',
         entertainment: 'Unterhaltung'
       },
+      albumNames: {
+        mundial_2022: 'Fußball-Weltalbum 2022',
+        mundial_2026: 'Fußball-Weltalbum 2026',
+        criaturas_fantasticas: 'Fantastische Kreaturen',
+        guerreros_anime: 'Anime-Krieger',
+        heroes_multiverso: 'Multiversum-Helden',
+        personajes_animados: 'Animierte Charaktere'
+      },
       login: {
         title: 'MisFigus',
         subtitle: 'Tausche Sticker mit deinem Album',
