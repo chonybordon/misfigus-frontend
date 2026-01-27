@@ -182,11 +182,7 @@ export const Exchanges = () => {
       const response = await api.get(`/albums/${albumId}/matches`);
       setMatches(response.data);
       setHasCheckedMatches(true);
-      
-      // If matches exist and no exchanges, navigate to matches screen
-      if (response.data.length > 0) {
-        navigate(`/albums/${albumId}/matches`, { replace: true });
-      }
+      // Don't navigate away - let user see the tabs
     } catch (error) {
       console.error('Failed to fetch matches:', error);
       setHasCheckedMatches(true);
@@ -195,9 +191,7 @@ export const Exchanges = () => {
     }
   };
 
-  // Check if user has any new/unseen exchanges or unread messages
-  const hasNewExchanges = activeExchanges.some(ex => ex.is_new && ex.status === 'pending');
-  const hasUnreadMessages = activeExchanges.some(ex => ex.has_unread && ex.status === 'pending');
+  // Show loading while fetching exchanges or checking matches
 
   // Show loading while fetching exchanges or checking matches
   if (loading || checkingMatches) {
