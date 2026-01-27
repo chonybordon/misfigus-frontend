@@ -117,6 +117,31 @@ All the following keys are now translated in all 6 languages:
 - **Premium Upgrade**: The "Upgrade" button on the paywall is MOCKED (no Stripe/payment integration)
 - Dates use browser's `toLocaleDateString()` for locale-friendly formatting
 
+## Trademark Cleanup (January 2025)
+All trademarked content has been replaced with legally safe, generic alternatives:
+
+### Album Name Changes
+| Old Name | New Name |
+|----------|----------|
+| FIFA World Cup Qatar 2022 | Álbum Mundial de Fútbol 2022 |
+| FIFA World Cup 2026 | Álbum Mundial de Fútbol 2026 |
+| Pokémon | Criaturas Fantásticas |
+| Dragon Ball | Guerreros del Anime |
+| Marvel | Héroes del Multiverso |
+| Disney | Personajes Animados |
+
+### Sticker Label Changes (Football Albums)
+| Old Label | New Label |
+|-----------|-----------|
+| FWC 2022 Logo | Emblema del Torneo |
+| World Cup Trophy | Trofeo del Campeonato |
+| Qatar 2022 | Evento 2022 |
+| [Country] Badge | Emblema de [País] |
+| FIFA (team) | Torneo |
+
+### Legal Disclaimer
+A fan-made disclaimer is displayed on the album detail page in all 6 languages.
+
 ## File Structure
 ```
 /app
