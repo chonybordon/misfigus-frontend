@@ -225,8 +225,8 @@ export const Groups = () => {
                       }`}
                       onClick={() => setSelectedAlbum(album)}
                     >
-                      <p className="font-medium">{album.name}</p>
-                      <p className="text-sm text-muted-foreground">{album.year} • {album.category}</p>
+                      <p className="font-medium">{getAlbumNameDisplay(album, t)}</p>
+                      <p className="text-sm text-muted-foreground">{album.year} • {getCategoryDisplay(album, t)}</p>
                     </div>
                   ))}
                 </div>
