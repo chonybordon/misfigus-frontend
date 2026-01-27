@@ -46,40 +46,50 @@ async def init_albums():
         {
             "id": ALBUM_IDS["qatar_2022"],
             "name": "Álbum Mundial de Fútbol 2022",
+            "name_key": "mundial_2022",
             "year": 2022,
             "category": "Fútbol",
+            "category_key": "sports",
             "status": "active",
             "has_placeholder": False
         },
         {
             "id": ALBUM_IDS["pokemon"],
             "name": "Criaturas Fantásticas",
+            "name_key": "criaturas_fantasticas",
             "year": 2024,
             "category": "Cartas coleccionables",
+            "category_key": "trading_cards",
             "status": "active",
             "has_placeholder": True
         },
         {
             "id": ALBUM_IDS["dragon_ball"],
             "name": "Guerreros del Anime",
+            "name_key": "guerreros_anime",
             "year": 2024,
             "category": "Anime",
+            "category_key": "anime",
             "status": "active",
             "has_placeholder": True
         },
         {
             "id": ALBUM_IDS["marvel"],
             "name": "Héroes del Multiverso",
+            "name_key": "heroes_multiverso",
             "year": 2024,
             "category": "Superhéroes",
+            "category_key": "superheroes",
             "status": "active",
             "has_placeholder": True
         },
         {
             "id": ALBUM_IDS["disney"],
             "name": "Personajes Animados",
+            "name_key": "personajes_animados",
             "year": 2024,
             "category": "Entretenimiento",
+            "category_key": "entertainment",
             "status": "active",
             "has_placeholder": True
         },
@@ -87,8 +97,10 @@ async def init_albums():
         {
             "id": ALBUM_IDS["world_cup_2026"],
             "name": "Álbum Mundial de Fútbol 2026",
+            "name_key": "mundial_2026",
             "year": 2026,
             "category": "Fútbol",
+            "category_key": "sports",
             "status": "coming_soon",
             "has_placeholder": False
         }
