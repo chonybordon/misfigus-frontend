@@ -10,6 +10,22 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { ArrowLeft, Package, Settings, LogOut, MessageCircle } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 
+// Helper to get translated album name from nameKey
+const getAlbumNameDisplay = (album, t) => {
+  if (album?.name_key) {
+    return t(`albumNames.${album.name_key}`);
+  }
+  return album?.name || '';
+};
+
+// Helper to get translated category from categoryKey
+const getCategoryDisplay = (album, t) => {
+  if (album?.category_key) {
+    return t(`categories.${album.category_key}`);
+  }
+  return album?.category || '';
+};
+
 export const AlbumHome = () => {
   const { albumId } = useParams();
   const [album, setAlbum] = useState(null);
