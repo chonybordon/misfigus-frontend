@@ -194,7 +194,7 @@ export const Exchanges = () => {
   // Show loading while fetching exchanges or checking matches
 
   // Show loading while fetching exchanges or checking matches
-  if (loading || checkingMatches) {
+  if (loading || checkingMatches || activeTab === null) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center">
@@ -206,9 +206,6 @@ export const Exchanges = () => {
       </div>
     );
   }
-
-  // Only show empty state if we've checked both exchanges AND matches
-  const showEmptyState = exchanges.length === 0 && hasCheckedMatches && matches.length === 0;
 
   return (
     <div className="min-h-screen sticker-album-pattern pb-20 overflow-x-hidden">
@@ -223,31 +220,108 @@ export const Exchanges = () => {
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <h1 className="text-xl sm:text-3xl font-black tracking-tight text-primary truncate">{t('exchange.myExchanges')}</h1>
-          {(hasNewExchanges || hasUnreadMessages) && (
-            <Badge className="bg-red-500 text-white animate-pulse flex items-center gap-1 flex-shrink-0 text-xs">
-              <Mail className="h-3 w-3" />
-              <span className="hidden sm:inline">{hasNewExchanges ? t('exchange.newExchange') : t('exchange.hasNewMessage')}</span>
-            </Badge>
-          )}
         </div>
 
-        {showEmptyState ? (
-          <div className="text-center py-12 sm:py-20 px-4">
-            <MessageCircle className="h-16 w-16 sm:h-24 sm:w-24 mx-auto text-muted-foreground mb-4" />
-            <h2 className="text-xl sm:text-2xl font-bold mb-2">{t('exchange.noExchangesInArea')}</h2>
-            <p className="text-sm sm:text-base text-muted-foreground mb-6">{t('exchange.noExchangesHint')}</p>
-            <Button onClick={() => navigate(`/albums/${albumId}/matches`)}>
-              {t('exchange.findMatches')}
-            </Button>
-          </div>
-        ) : exchanges.length === 0 ? (
-          // Still loading matches, show loading indicator
-          <div className="text-center py-12 sm:py-20">
-            <div className="animate-spin h-10 w-10 sm:h-12 sm:w-12 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4" />
-            <p className="text-sm sm:text-base text-muted-foreground">{t('exchange.findMatches')}...</p>
-          </div>
-        ) : (
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        {/* 3-Tab Navigation */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          {/* Tab triggers - 3 equal sections */}
+          <TabsList className="grid w-full grid-cols-3 mb-4 sm:mb-6">
+            <TabsTrigger 
+              value="new" 
+              className="flex items-center justify-center gap-1 sm:gap-1.5 text-[11px] sm:text-sm px-1 sm:px-3"
+              data-testid="tab-new"
+            >
+              <Search className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />
+              <span className="truncate">{t('exchange.tabNew')}</span>
+              {hasNewMatches && (
+                <Badge className="ml-0.5 sm:ml-1 h-4 w-4 sm:h-5 sm:w-5 p-0 flex items-center justify-center text-[9px] sm:text-[10px] bg-green-500 text-white flex-shrink-0">
+                  {matches.length > 9 ? '9+' : matches.length}
+                </Badge>
+              )}
+            </TabsTrigger>
+            <TabsTrigger 
+              value="active" 
+              className="flex items-center justify-center gap-1 sm:gap-1.5 text-[11px] sm:text-sm px-1 sm:px-3"
+              data-testid="tab-active"
+            >
+              <MessageCircle className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />
+              <span className="truncate">{t('exchange.tabActive')}</span>
+              {hasUnreadMessages && (
+                <Badge className="ml-0.5 sm:ml-1 h-4 w-4 sm:h-5 sm:w-5 p-0 flex items-center justify-center text-[9px] sm:text-[10px] bg-red-500 text-white animate-pulse flex-shrink-0">
+                  !
+                </Badge>
+              )}
+            </TabsTrigger>
+            <TabsTrigger 
+              value="completed" 
+              className="flex items-center justify-center gap-1 sm:gap-1.5 text-[11px] sm:text-sm px-1 sm:px-3"
+              data-testid="tab-completed"
+            >
+              <Archive className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />
+              <span className="truncate">{t('exchange.tabCompleted')}</span>
+            </TabsTrigger>
+          </TabsList>
+
+          {/* New Exchanges Tab - Shows available matches */}
+          <TabsContent value="new" className="mt-0">
+            {matches.length === 0 ? (
+              <div className="text-center py-10 sm:py-16 px-4">
+                <Search className="h-12 w-12 sm:h-16 sm:w-16 mx-auto text-muted-foreground mb-3" />
+                <h3 className="text-base sm:text-lg font-semibold mb-2">{t('exchange.noNewMatches')}</h3>
+                <p className="text-xs sm:text-sm text-muted-foreground mb-4">{t('exchange.noNewMatchesHint')}</p>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => navigate(`/albums/${albumId}/inventory`)}
+                >
+                  {t('exchange.updateInventory')}
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-3 sm:space-y-4">
+                <p className="text-xs sm:text-sm text-muted-foreground text-center mb-2">
+                  {t('exchange.matchesFound', { count: matches.length })}
+                </p>
+                {matches.map((match) => (
+                  <Card 
+                    key={match.user.id}
+                    className="cursor-pointer hover:shadow-lg transition-all border-green-200 bg-green-50/30"
+                    onClick={() => navigate(`/albums/${albumId}/matches`)}
+                  >
+                    <CardContent className="p-3 sm:p-4">
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+                          <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-green-500 text-white flex items-center justify-center font-bold flex-shrink-0 text-sm sm:text-base">
+                            {getDisplayName(match.user, t)[0].toUpperCase()}
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="font-semibold text-sm sm:text-base truncate">
+                              {getDisplayName(match.user, t)}
+                            </p>
+                            <div className="flex items-center gap-2 mt-1">
+                              <ReputationBadge status={match.user?.reputation_status} t={t} />
+                            </div>
+                          </div>
+                        </div>
+                        <Badge className="bg-green-100 text-green-800 text-[10px] sm:text-xs flex-shrink-0">
+                          {t('exchange.canExchange')}
+                        </Badge>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+                <Button 
+                  className="w-full text-sm sm:text-base"
+                  onClick={() => navigate(`/albums/${albumId}/matches`)}
+                >
+                  {t('exchange.viewAllMatches')}
+                </Button>
+              </div>
+            )}
+          </TabsContent>
+
+          {/* Active Exchanges Tab */}
+          <TabsContent value="active" className="mt-0">
             {/* Tab triggers */}
             <TabsList className="grid w-full grid-cols-2 mb-4 sm:mb-6">
               <TabsTrigger 
