@@ -250,7 +250,7 @@ const resources = {
       },
       exchange: {
         myExchanges: 'Mis Intercambios',
-        tabNew: 'Nuevos',
+        tabNew: 'Nuevos intercambios',
         tabActive: 'Activos',
         tabCompleted: 'Completados',
         noExchanges: 'No tenés intercambios aún',
@@ -727,7 +727,7 @@ const resources = {
       },
       exchange: {
         myExchanges: 'My Exchanges',
-        tabNew: 'New',
+        tabNew: 'New exchanges',
         tabActive: 'Active',
         tabCompleted: 'Completed',
         noExchanges: 'No exchanges yet',
@@ -1204,7 +1204,7 @@ const resources = {
       },
       exchange: {
         myExchanges: 'Minhas Trocas',
-        tabNew: 'Novos',
+        tabNew: 'Novas trocas',
         tabActive: 'Ativos',
         tabCompleted: 'Concluídos',
         noExchanges: 'Você ainda não tem trocas',
@@ -1681,7 +1681,7 @@ const resources = {
       },
       exchange: {
         myExchanges: 'Mes Échanges',
-        tabNew: 'Nouveaux',
+        tabNew: 'Nouveaux échanges',
         tabActive: 'Actifs',
         tabCompleted: 'Terminés',
         noExchanges: 'Vous n\'avez pas encore d\'échanges',
@@ -2158,7 +2158,7 @@ const resources = {
       },
       exchange: {
         myExchanges: 'Meine Tausche',
-        tabNew: 'Neue',
+        tabNew: 'Neue Tausche',
         tabActive: 'Aktiv',
         tabCompleted: 'Abgeschlossen',
         noExchanges: 'Du hast noch keine Tausche',
@@ -2635,7 +2635,7 @@ const resources = {
       },
       exchange: {
         myExchanges: 'I miei Scambi',
-        tabNew: 'Nuovi',
+        tabNew: 'Nuovi scambi',
         tabActive: 'Attivi',
         tabCompleted: 'Completati',
         noExchanges: 'Non hai ancora scambi',
