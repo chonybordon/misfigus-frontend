@@ -299,8 +299,9 @@ const resources = {
         exchangeFailed: '❌ El intercambio no se completó.'
       },
       reputation: {
+        new: 'Nuevo',
         trusted: 'Confiable',
-        underReview: 'En revisión',
+        underReview: 'Con observaciones',
         restricted: 'Restringido'
       },
       chat: {
@@ -761,6 +762,7 @@ const resources = {
         exchangeFailed: '❌ Exchange was not completed.'
       },
       reputation: {
+        new: 'New',
         trusted: 'Trusted',
         underReview: 'Under review',
         restricted: 'Restricted'
@@ -1223,8 +1225,9 @@ const resources = {
         exchangeFailed: '❌ A troca não foi completada.'
       },
       reputation: {
+        new: 'Novo',
         trusted: 'Confiável',
-        underReview: 'Em revisão',
+        underReview: 'Com observações',
         restricted: 'Restrito'
       },
       chat: {
@@ -1685,8 +1688,9 @@ const resources = {
         exchangeFailed: '❌ L\'échange n\'a pas été complété.'
       },
       reputation: {
+        new: 'Nouveau',
         trusted: 'Fiable',
-        underReview: 'En révision',
+        underReview: 'Avec observations',
         restricted: 'Restreint'
       },
       chat: {
@@ -2147,8 +2151,9 @@ const resources = {
         exchangeFailed: '❌ Der Tausch wurde nicht abgeschlossen.'
       },
       reputation: {
+        new: 'Neu',
         trusted: 'Vertrauenswürdig',
-        underReview: 'In Überprüfung',
+        underReview: 'Mit Anmerkungen',
         restricted: 'Eingeschränkt'
       },
       chat: {
@@ -2609,8 +2614,9 @@ const resources = {
         exchangeFailed: '❌ Lo scambio non è stato completato.'
       },
       reputation: {
+        new: 'Nuovo',
         trusted: 'Affidabile',
-        underReview: 'In revisione',
+        underReview: 'Con osservazioni',
         restricted: 'Limitato'
       },
       chat: {
