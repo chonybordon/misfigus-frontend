@@ -317,7 +317,13 @@ export const Exchanges = () => {
               ) : (
                 <div className="space-y-3 sm:space-y-4">
                   {completedExchanges.map((exchange) => (
-                    <ExchangeCard key={exchange.id} exchange={exchange} isCompleted={true} />
+                    <ExchangeCard 
+                      key={exchange.id} 
+                      exchange={exchange} 
+                      isCompleted={true}
+                      onClick={() => navigate(`/exchanges/${exchange.id}`)}
+                      t={t}
+                    />
                   ))}
                 </div>
               )}
