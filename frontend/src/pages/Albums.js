@@ -212,7 +212,7 @@ export const Albums = () => {
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
-                        <h3 className={`text-base sm:text-xl font-bold truncate ${getTitleStyles(album)}`}>{album.name}</h3>
+                        <h3 className={`text-base sm:text-xl font-bold truncate ${getTitleStyles(album)}`}>{getAlbumNameDisplay(album, t)}</h3>
                         {/* Completion checkmark for 100% completed albums */}
                         {album.is_member && album.progress === 100 && (
                           <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 text-green-700 flex-shrink-0" />
