@@ -151,13 +151,13 @@ export const SubscriptionSection = ({ onPlanChange }) => {
               {isPremium ? (
                 <>
                   <BenefitItem icon={Album} text={t('subscription.premiumBenefits.albums')} included />
-                  <BenefitItem icon={Repeat} text={t('subscription.premiumBenefits.matches')} included />
+                  <BenefitItem icon={Repeat} text={t('subscription.premiumBenefits.chats')} included />
                   <BenefitItem icon={Megaphone} text={t('subscription.premiumBenefits.noAds')} included comingSoon />
                 </>
               ) : (
                 <>
                   <BenefitItem icon={Album} text={t('subscription.freeBenefits.albums')} included />
-                  <BenefitItem icon={Repeat} text={t('subscription.freeBenefits.matches')} included />
+                  <BenefitItem icon={Repeat} text={t('subscription.freeBenefits.chats')} included />
                   <BenefitItem icon={Check} text={t('subscription.freeBenefits.inventory')} included />
                 </>
               )}
