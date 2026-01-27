@@ -7,6 +7,22 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { AlertCircle, CheckCircle } from 'lucide-react';
 
+// Helper to get translated album name from nameKey
+const getAlbumNameDisplay = (album, t) => {
+  if (album?.name_key) {
+    return t(`albumNames.${album.name_key}`);
+  }
+  return album?.name || '';
+};
+
+// Helper to get translated category from categoryKey
+const getCategoryDisplay = (album, t) => {
+  if (album?.category_key) {
+    return t(`categories.${album.category_key}`);
+  }
+  return album?.category || '';
+};
+
 export const JoinAlbum = () => {
   const { token } = useParams();
   const { user } = useContext(AuthContext);
