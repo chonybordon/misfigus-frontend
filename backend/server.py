@@ -1988,28 +1988,29 @@ async def update_reputation_after_exchange(user_id: str, was_successful: bool, f
         rep['failed_exchanges'] += 1
         rep['consecutive_failures'] += 1
     
-    # Determine new status based on thresholds (only for serious failures)
+    # Calculate new status dynamically
     now = datetime.now(timezone.utc)
+    new_status = calculate_reputation_status(
+        rep['successful_exchanges'],
+        rep['failed_exchanges'],
+        rep['consecutive_failures']
+    )
     
-    if rep['consecutive_failures'] >= REPUTATION_CONSECUTIVE_FAIL_THRESHOLD:
-        # 2+ consecutive SERIOUS failures → 48h invisibility
-        rep['status'] = 'under_review'
+    # Handle invisibility period for under_review
+    if new_status == 'under_review' and rep['consecutive_failures'] >= REPUTATION_CONSECUTIVE_FAIL_THRESHOLD:
         rep['invisible_until'] = (now + timedelta(hours=48)).isoformat()
     
-    if rep['failed_exchanges'] >= REPUTATION_TOTAL_FAIL_THRESHOLD:
-        # 5+ total SERIOUS failures → suspended
-        rep['status'] = 'restricted'
+    # Handle suspension
+    if new_status == 'restricted':
         rep['suspended_at'] = now.isoformat()
     
-    # If no issues and was successful, ensure trusted status
-    if was_successful and rep['consecutive_failures'] == 0 and rep['status'] == 'under_review':
-        # Check if invisibility period has passed
-        if rep['invisible_until']:
-            inv_until = datetime.fromisoformat(rep['invisible_until'].replace('Z', '+00:00'))
-            if now > inv_until:
-                rep['status'] = 'trusted'
-                rep['invisible_until'] = None
+    # Clear invisibility if status improved
+    if new_status in ['new', 'trusted'] and rep.get('invisible_until'):
+        inv_until = datetime.fromisoformat(rep['invisible_until'].replace('Z', '+00:00'))
+        if now > inv_until:
+            rep['invisible_until'] = None
     
+    rep['status'] = new_status
     rep['updated_at'] = now.isoformat()
     
     await db.user_reputation.update_one(
