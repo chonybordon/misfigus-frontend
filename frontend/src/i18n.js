@@ -921,7 +921,7 @@ const resources = {
         albumLimitTitle: 'Album limit reached',
         albumLimitDesc: 'Free plan only allows 1 album. Upgrade to Premium for unlimited albums!',
         matchLimitTitle: 'Daily limit reached',
-        matchLimitDesc: 'Free plan only allows 1 trade per day. Upgrade to Premium for unlimited trades!',
+        matchLimitDesc: 'You have reached your free plan limit. Upgrade to Premium to start more chats!',
         unlimitedAlbums: 'Unlimited albums',
         unlimitedAlbumsDesc: 'Collect as many albums as you want',
         unlimitedMatches: 'Unlimited trades',
@@ -949,12 +949,12 @@ const resources = {
         benefits: 'Your plan benefits',
         freeBenefits: {
           albums: '1 active album',
-          matches: '1 trade per day',
+          chats: '1 chat per day',
           inventory: 'Unlimited inventory'
         },
         premiumBenefits: {
           albums: 'Unlimited albums',
-          matches: 'Unlimited trades',
+          chats: 'Unlimited chats',
           noAds: 'No ads (coming soon)'
         },
         changePlan: 'Change plan',
