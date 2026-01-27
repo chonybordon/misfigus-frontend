@@ -292,7 +292,7 @@ export const ExchangeDetail = () => {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-2xl font-bold">{t('common.loading')}</div>
+        <div className="text-xl sm:text-2xl font-bold">{t('common.loading')}</div>
       </div>
     );
   }
@@ -303,31 +303,32 @@ export const ExchangeDetail = () => {
   const theirOffers = exchange.is_user_a ? exchange.user_b_offers_details : exchange.user_a_offers_details;
 
   return (
-    <div className="min-h-screen sticker-album-pattern pb-20">
-      <div className="max-w-4xl mx-auto p-6">
-        <div className="flex items-center gap-4 mb-6">
+    <div className="min-h-screen sticker-album-pattern pb-20 overflow-x-hidden">
+      <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 py-4 sm:py-6">
+        <div className="flex items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
           <Button
             variant="outline"
             size="icon"
             onClick={() => navigate(getBackPath())}
+            className="flex-shrink-0"
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          <div className="flex-1">
-            <h1 className="text-2xl font-black tracking-tight text-primary">{t('exchange.details')}</h1>
+          <div className="flex-1 min-w-0">
+            <h1 className="text-lg sm:text-2xl font-black tracking-tight text-primary truncate">{t('exchange.details')}</h1>
           </div>
           <ExchangeStatusBadge status={exchange.status} t={t} />
         </div>
 
         {/* Partner Info */}
-        <Card className="mb-6">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-4">
-              <div className="h-16 w-16 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-xl">
+        <Card className="mb-4 sm:mb-6">
+          <CardContent className="p-3 sm:p-4">
+            <div className="flex items-center gap-3 sm:gap-4">
+              <div className="h-12 w-12 sm:h-16 sm:w-16 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-lg sm:text-xl flex-shrink-0">
                 {getDisplayName(exchange.partner, t)[0].toUpperCase()}
               </div>
-              <div>
-                <p className="text-xl font-semibold">
+              <div className="min-w-0 flex-1">
+                <p className="text-base sm:text-xl font-semibold truncate">
                   {getDisplayName(exchange.partner, t)}
                 </p>
                 <ReputationBadge status={exchange.partner?.reputation_status} t={t} />
@@ -337,15 +338,15 @@ export const ExchangeDetail = () => {
         </Card>
 
         {/* Stickers Exchange Summary */}
-        <div className="grid grid-cols-2 gap-4 mb-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-4 sm:mb-6">
           <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm text-muted-foreground">{t('exchange.youGive')}</CardTitle>
+            <CardHeader className="pb-2 px-3 sm:px-6 pt-3 sm:pt-6">
+              <CardTitle className="text-xs sm:text-sm text-muted-foreground">{t('exchange.youGive')}</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="px-3 sm:px-6 pb-3 sm:pb-6">
               <div className="space-y-1">
                 {myOffers?.map((sticker) => (
-                  <div key={sticker.id} className="text-sm bg-amber-50 p-2 rounded">
+                  <div key={sticker.id} className="text-xs sm:text-sm bg-amber-50 p-2 rounded">
                     N° {sticker.number} - {sticker.name}
                   </div>
                 ))}
@@ -353,13 +354,13 @@ export const ExchangeDetail = () => {
             </CardContent>
           </Card>
           <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm text-muted-foreground">{t('exchange.youReceive')}</CardTitle>
+            <CardHeader className="pb-2 px-3 sm:px-6 pt-3 sm:pt-6">
+              <CardTitle className="text-xs sm:text-sm text-muted-foreground">{t('exchange.youReceive')}</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="px-3 sm:px-6 pb-3 sm:pb-6">
               <div className="space-y-1">
                 {theirOffers?.map((sticker) => (
-                  <div key={sticker.id} className="text-sm bg-green-50 p-2 rounded">
+                  <div key={sticker.id} className="text-xs sm:text-sm bg-green-50 p-2 rounded">
                     N° {sticker.number} - {sticker.name}
                   </div>
                 ))}
@@ -370,10 +371,10 @@ export const ExchangeDetail = () => {
 
         {/* Chat Button */}
         <Button 
-          className="w-full mb-4"
+          className="w-full mb-3 sm:mb-4 text-sm sm:text-base"
           onClick={() => navigate(`/exchanges/${exchangeId}/chat`)}
         >
-          <MessageCircle className="h-5 w-5 mr-2" />
+          <MessageCircle className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
           {exchange.status === 'pending' ? t('exchange.openChat') : t('exchange.viewChat')}
         </Button>
 
