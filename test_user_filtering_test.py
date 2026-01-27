@@ -5,7 +5,7 @@ import time
 from datetime import datetime
 
 class MisFigusTestUserFilterTester:
-    def __init__(self, base_url="https://translate-profile.preview.emergentagent.com"):
+    def __init__(self, base_url="https://misfigus-trading.preview.emergentagent.com"):
         self.base_url = base_url
         self.api_url = f"{base_url}/api"
         self.token = None

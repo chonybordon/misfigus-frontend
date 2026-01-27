@@ -1,7 +1,7 @@
 {
   "test_type": "album_selection_and_routing",
   "timestamp": "2026-01-04T22:55:12.776682",
-  "base_url": "https://translate-profile.preview.emergentagent.com",
+  "base_url": "https://misfigus-trading.preview.emergentagent.com",
   "test_email": "albumtest_20260104_225512@example.com",
   "tests_run": 15,
   "tests_passed": 11,

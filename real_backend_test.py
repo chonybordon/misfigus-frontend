@@ -5,7 +5,7 @@ from datetime import datetime
 
 def test_real_auth_flow():
     """Test with real OTP from logs"""
-    base_url = "https://translate-profile.preview.emergentagent.com"
+    base_url = "https://misfigus-trading.preview.emergentagent.com"
     api_url = f"{base_url}/api"
     
     print("🔐 Testing Real Authentication Flow")
@@ -92,7 +92,7 @@ def test_full_workflow_with_auth(token, user_id):
         print("⚠️  Skipping authenticated tests - no valid token")
         return
         
-    base_url = "https://translate-profile.preview.emergentagent.com"
+    base_url = "https://misfigus-trading.preview.emergentagent.com"
     api_url = f"{base_url}/api"
     
     headers = {
