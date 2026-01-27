@@ -436,7 +436,7 @@ const resources = {
         albumLimitTitle: 'Límite de álbumes alcanzado',
         albumLimitDesc: 'Con el plan gratuito solo podés usar 1 álbum. ¡Pasá a Premium para álbumes ilimitados!',
         matchLimitTitle: 'Límite diario alcanzado',
-        matchLimitDesc: 'Con el plan gratuito solo podés hacer 1 intercambio por día. ¡Pasá a Premium para intercambios ilimitados!',
+        matchLimitDesc: 'Alcanzaste el límite de tu versión gratuita. ¡Pasá a Premium para iniciar más chats!',
         unlimitedAlbums: 'Álbumes ilimitados',
         unlimitedAlbumsDesc: 'Coleccioná todos los álbumes que quieras',
         unlimitedMatches: 'Intercambios ilimitados',
@@ -464,12 +464,12 @@ const resources = {
         benefits: 'Beneficios de tu plan',
         freeBenefits: {
           albums: '1 álbum activo',
-          matches: '1 intercambio por día',
+          chats: '1 chat por día',
           inventory: 'Inventario ilimitado'
         },
         premiumBenefits: {
           albums: 'Álbumes ilimitados',
-          matches: 'Intercambios ilimitados',
+          chats: 'Chats ilimitados',
           noAds: 'Sin publicidad (próximamente)'
         },
         changePlan: 'Cambiar plan',
