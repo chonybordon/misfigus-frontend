@@ -28,17 +28,23 @@ class TestFreemiumChatLimits:
         """Get OTP from backend logs (DEV_MODE enabled)"""
         import subprocess
         result = subprocess.run(
-            ['tail', '-n', '50', '/var/log/supervisor/backend.err.log'],
+            ['tail', '-n', '100', '/var/log/supervisor/backend.err.log'],
             capture_output=True, text=True
         )
         lines = result.stdout.split('\n')
-        for line in reversed(lines):
-            if 'OTP code' in line and self.test_email in line:
-                # Extract OTP from log line
+        
+        # Find the email line first, then get the OTP from the next line
+        found_email = False
+        for i, line in enumerate(lines):
+            if f'[OTP] To: {self.test_email}' in line:
+                found_email = True
+                continue
+            if found_email and '[OTP] OTP:' in line:
                 import re
-                match = re.search(r'OTP code (\d{6})', line)
+                match = re.search(r'\[OTP\] OTP: (\d{6})', line)
                 if match:
                     return match.group(1)
+                found_email = False
         return None
     
     def _authenticate(self, email=None):
