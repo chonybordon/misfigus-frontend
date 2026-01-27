@@ -195,7 +195,7 @@ const resources = {
       },
       matches: {
         title: 'Intercambios Sugeridos',
-        youGive: 'Das',
+        youGive: 'Figuritas que vos tenés',
         youGet: 'Recibes',
         noMatches: 'No hay intercambios disponibles',
         updateInventory: 'Actualiza tu inventario para encontrar intercambios',
@@ -657,7 +657,7 @@ const resources = {
       },
       matches: {
         title: 'Suggested Trades',
-        youGive: 'You Give',
+        youGive: 'Stickers you have',
         youGet: 'You Get',
         noMatches: 'No trades available',
         updateInventory: 'Update your inventory to find trades',
@@ -1119,7 +1119,7 @@ const resources = {
       },
       matches: {
         title: 'Trocas Sugeridas',
-        youGive: 'Você dá',
+        youGive: 'Figurinhas que você tem',
         youGet: 'Você recebe',
         noMatches: 'Nenhuma troca disponível',
         updateInventory: 'Atualize seu inventário para encontrar trocas',
@@ -1581,7 +1581,7 @@ const resources = {
       },
       matches: {
         title: 'Échanges Suggérés',
-        youGive: 'Vous donnez',
+        youGive: 'Vignettes que vous avez',
         youGet: 'Vous recevez',
         noMatches: 'Aucun échange disponible',
         updateInventory: 'Mettez à jour votre inventaire pour trouver des échanges',
@@ -2043,7 +2043,7 @@ const resources = {
       },
       matches: {
         title: 'Vorgeschlagene Tausche',
-        youGive: 'Du gibst',
+        youGive: 'Sticker die du hast',
         youGet: 'Du bekommst',
         noMatches: 'Keine Tausche verfügbar',
         updateInventory: 'Aktualisiere dein Inventar, um Tausche zu finden',
@@ -2505,7 +2505,7 @@ const resources = {
       },
       matches: {
         title: 'Scambi Suggeriti',
-        youGive: 'Dai',
+        youGive: 'Figurine che hai tu',
         youGet: 'Ricevi',
         noMatches: 'Nessuno scambio disponibile',
         updateInventory: 'Aggiorna il tuo inventario per trovare scambi',
