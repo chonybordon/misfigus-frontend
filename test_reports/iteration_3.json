@@ -1,0 +1,103 @@
+{
+  "summary": "Frontend i18n testing completed. Album names and legal disclaimer translate correctly across all 6 languages. ONE CRITICAL BUG FOUND: The 'Criaturas Fantásticas' album shows raw i18n key 'categories.cartas_coleccionables' because the database category_key doesn't match the i18n key 'trading_cards'.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {
+        "component": "Albums.js / AlbumHome.js",
+        "issue": "Raw i18n key 'categories.cartas_coleccionables' displayed for 'Criaturas Fantásticas' album",
+        "selector": "Album category subtitle",
+        "priority": "HIGH",
+        "root_cause": "Database has category_key='cartas_coleccionables' but i18n.js uses key 'trading_cards'",
+        "fix_options": [
+          "Option 1: Update database to use category_key='trading_cards' instead of 'cartas_coleccionables'",
+          "Option 2: Add 'cartas_coleccionables' key to all language translations in i18n.js"
+        ]
+      }
+    ],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "passed_tests": [
+    "Album names translate correctly when switching languages via Settings page",
+    "Language switcher works correctly in Settings page (tested ES, EN, PT)",
+    "Album list page displays translated album names for all 6 albums",
+    "Album detail page displays translated album name and category",
+    "Legal disclaimer (fanMadeDisclaimer) translates correctly per language",
+    "No raw albumNames.* keys visible in UI",
+    "Page titles translate correctly (Mis Álbumes, My Albums, Meus Álbuns)",
+    "Category subtitles translate correctly for: sports, anime, superheroes, entertainment",
+    "Status badges translate correctly (ACTIVO/ACTIVE/ATIVO, INACTIVO/INACTIVE/INATIVO, PRÓXIMAMENTE/COMING SOON/EM BREVE)"
+  ],
+  "failed_tests": [
+    "Category 'trading_cards' shows raw key 'categories.cartas_coleccionables' for Criaturas Fantásticas album"
+  ],
+  "test_report_links": [
+    "/app/frontend/src/i18n.js",
+    "/app/frontend/src/pages/Albums.js",
+    "/app/frontend/src/pages/AlbumHome.js",
+    "/app/frontend/src/pages/Settings.js"
+  ],
+  "action_items": [
+    "FIX REQUIRED: Update database category_key from 'cartas_coleccionables' to 'trading_cards' for the Criaturas Fantásticas album, OR add 'cartas_coleccionables' translations to all 6 languages in i18n.js"
+  ],
+  "critical_code_review_comments": [
+    "Database category_key values must match i18n translation keys exactly",
+    "Current mismatch: DB has 'cartas_coleccionables', i18n.js has 'trading_cards'",
+    "The getCategoryDisplay() helper function correctly falls back to raw category if translation key not found, but this causes raw keys to appear"
+  ],
+  "updated_files": [],
+  "success_rate": {
+    "backend": "N/A (frontend-only test)",
+    "frontend": "90% (1 category translation bug)"
+  },
+  "test_credentials": {
+    "email": "test@example.com",
+    "note": "DEV_MODE enabled - OTP codes visible in backend logs at /var/log/supervisor/backend.err.log"
+  },
+  "seed_data_creation": "None",
+  "retest_needed": true,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "i18n implementation is 90% complete. Album names, page titles, status badges, and legal disclaimer all translate correctly. The only issue is the 'Criaturas Fantásticas' album category showing raw key 'categories.cartas_coleccionables'. Fix by updating DB or adding translation key.",
+  "verified_translations": {
+    "album_names": {
+      "mundial_2022": {
+        "es": "Álbum Mundial de Fútbol 2022",
+        "en": "Football World Album 2022",
+        "pt": "Álbum Mundial de Futebol 2022"
+      },
+      "criaturas_fantasticas": {
+        "es": "Criaturas Fantásticas",
+        "en": "Fantastic Creatures",
+        "pt": "Criaturas Fantásticas"
+      }
+    },
+    "categories": {
+      "sports": {"es": "Fútbol", "en": "Sports", "pt": "Futebol"},
+      "anime": {"es": "Anime", "en": "Anime", "pt": "Anime"},
+      "superheroes": {"es": "Superhéroes", "en": "Superheroes", "pt": "Super-heróis"},
+      "entertainment": {"es": "Entretenimiento", "en": "Entertainment", "pt": "Entretenimento"},
+      "trading_cards": "MISSING - DB uses 'cartas_coleccionables' instead"
+    },
+    "legal_disclaimer": {
+      "en": "This album is a fan-made collection and is not affiliated with or endorsed by any official organization.",
+      "verified": true
+    }
+  },
+  "bug_details": {
+    "issue": "Raw i18n key displayed",
+    "affected_album": "Criaturas Fantásticas",
+    "displayed_text": "categories.cartas_coleccionables",
+    "expected_text": {
+      "es": "Cartas coleccionables",
+      "en": "Trading Cards",
+      "pt": "Cartas colecionáveis"
+    },
+    "database_value": "category_key: 'cartas_coleccionables'",
+    "i18n_key": "categories.trading_cards",
+    "mismatch": "DB key 'cartas_coleccionables' != i18n key 'trading_cards'"
+  }
+}
