@@ -11,6 +11,14 @@ import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Users, Package, UserPlus, Settings, Mail } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 
+// Helper to get translated album name from nameKey
+const getAlbumNameDisplay = (album, t) => {
+  if (album?.name_key) {
+    return t(`albumNames.${album.name_key}`);
+  }
+  return album?.name || '';
+};
+
 const maskEmail = (email) => {
   if (!email) return '';
   const [local, domain] = email.split('@');
