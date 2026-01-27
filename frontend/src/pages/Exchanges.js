@@ -155,10 +155,58 @@ export const Exchanges = () => {
   // Only show empty state if we've checked both exchanges AND matches
   const showEmptyState = exchanges.length === 0 && hasCheckedMatches && matches.length === 0;
 
+  // Exchange card component for reuse
+  const ExchangeCard = ({ exchange, isCompleted = false }) => (
+    <Card 
+      key={exchange.id}
+      className={`cursor-pointer hover:shadow-lg transition-all ${
+        !isCompleted && exchange.has_unread && exchange.status === 'pending' 
+          ? 'border-2 border-primary' 
+          : isCompleted ? 'opacity-80' : ''
+      }`}
+      onClick={() => navigate(`/exchanges/${exchange.id}`)}
+    >
+      <CardContent className="p-3 sm:p-4">
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+            <div className={`h-10 w-10 sm:h-12 sm:w-12 rounded-full flex items-center justify-center font-bold relative flex-shrink-0 text-sm sm:text-base ${
+              isCompleted ? 'bg-gray-400 text-white' : 'bg-primary text-primary-foreground'
+            }`}>
+              {getDisplayName(exchange.partner, t)[0].toUpperCase()}
+              {/* Unread indicator dot - only for active */}
+              {!isCompleted && exchange.has_unread && exchange.status === 'pending' && (
+                <span className="absolute -top-1 -right-1 h-4 w-4 bg-red-500 rounded-full flex items-center justify-center text-[10px] text-white font-bold">
+                  {exchange.unread_count > 9 ? '9+' : exchange.unread_count}
+                </span>
+              )}
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className={`font-semibold text-sm sm:text-base truncate ${isCompleted ? 'text-muted-foreground' : ''}`}>
+                {getDisplayName(exchange.partner, t)}
+              </p>
+              <div className="flex items-center gap-2 mt-1">
+                <ReputationBadge status={exchange.partner?.reputation_status} t={t} />
+              </div>
+            </div>
+          </div>
+          <div className="text-right flex-shrink-0">
+            <ExchangeStatusBadge status={exchange.status} t={t} />
+            <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">
+              {isCompleted && exchange.completed_at 
+                ? new Date(exchange.completed_at).toLocaleDateString()
+                : new Date(exchange.created_at).toLocaleDateString()
+              }
+            </p>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+
   return (
     <div className="min-h-screen sticker-album-pattern pb-20 overflow-x-hidden">
       <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 py-4 sm:py-6">
-        <div className="flex items-center gap-3 sm:gap-4 mb-6 sm:mb-8">
+        <div className="flex items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
           <Button
             variant="outline"
             size="icon"
@@ -192,49 +240,84 @@ export const Exchanges = () => {
             <p className="text-sm sm:text-base text-muted-foreground">{t('exchange.findMatches')}...</p>
           </div>
         ) : (
-          <div className="space-y-3 sm:space-y-4">
-            {exchanges.map((exchange) => (
-              <Card 
-                key={exchange.id}
-                className={`cursor-pointer hover:shadow-lg transition-all ${
-                  exchange.has_unread && exchange.status === 'pending' 
-                    ? 'border-2 border-primary' 
-                    : ''
-                }`}
-                onClick={() => navigate(`/exchanges/${exchange.id}`)}
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            {/* Tab triggers */}
+            <TabsList className="grid w-full grid-cols-2 mb-4 sm:mb-6">
+              <TabsTrigger 
+                value="active" 
+                className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm"
+                data-testid="tab-active"
               >
-                <CardContent className="p-3 sm:p-4">
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
-                      <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold relative flex-shrink-0 text-sm sm:text-base">
-                        {getDisplayName(exchange.partner, t)[0].toUpperCase()}
-                        {/* Unread indicator dot */}
-                        {exchange.has_unread && exchange.status === 'pending' && (
-                          <span className="absolute -top-1 -right-1 h-4 w-4 bg-red-500 rounded-full flex items-center justify-center text-[10px] text-white font-bold">
-                            {exchange.unread_count > 9 ? '9+' : exchange.unread_count}
-                          </span>
-                        )}
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="font-semibold text-sm sm:text-base truncate">
-                          {getDisplayName(exchange.partner, t)}
-                        </p>
-                        <div className="flex items-center gap-2 mt-1">
-                          <ReputationBadge status={exchange.partner?.reputation_status} t={t} />
-                        </div>
-                      </div>
-                    </div>
-                    <div className="text-right flex-shrink-0">
-                      <ExchangeStatusBadge status={exchange.status} t={t} />
-                      <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">
-                        {new Date(exchange.created_at).toLocaleDateString()}
-                      </p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+                <MessageCircle className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                <span>{t('exchange.tabActive')}</span>
+                {activeExchanges.length > 0 && (
+                  <Badge variant="secondary" className="ml-1 h-5 w-5 sm:h-6 sm:w-6 p-0 flex items-center justify-center text-[10px] sm:text-xs">
+                    {activeExchanges.length}
+                  </Badge>
+                )}
+              </TabsTrigger>
+              <TabsTrigger 
+                value="completed" 
+                className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm"
+                data-testid="tab-completed"
+              >
+                <Archive className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                <span>{t('exchange.tabCompleted')}</span>
+                {completedExchanges.length > 0 && (
+                  <Badge variant="secondary" className="ml-1 h-5 w-5 sm:h-6 sm:w-6 p-0 flex items-center justify-center text-[10px] sm:text-xs">
+                    {completedExchanges.length}
+                  </Badge>
+                )}
+              </TabsTrigger>
+            </TabsList>
+
+            {/* Active Exchanges Tab */}
+            <TabsContent value="active" className="mt-0">
+              {activeExchanges.length === 0 ? (
+                <div className="text-center py-10 sm:py-16 px-4">
+                  <MessageCircle className="h-12 w-12 sm:h-16 sm:w-16 mx-auto text-muted-foreground mb-3" />
+                  <h3 className="text-base sm:text-lg font-semibold mb-2">{t('exchange.noActiveExchanges')}</h3>
+                  <p className="text-xs sm:text-sm text-muted-foreground mb-4">{t('exchange.noActiveExchangesHint')}</p>
+                  <Button onClick={() => navigate(`/albums/${albumId}/matches`)} size="sm">
+                    {t('exchange.findMatches')}
+                  </Button>
+                </div>
+              ) : (
+                <div className="space-y-3 sm:space-y-4">
+                  {/* Find new exchanges button */}
+                  <Button 
+                    variant="outline" 
+                    className="w-full border-dashed text-sm sm:text-base"
+                    onClick={() => navigate(`/albums/${albumId}/matches`)}
+                  >
+                    <MessageCircle className="h-4 w-4 mr-2" />
+                    {t('exchange.findNewExchanges')}
+                  </Button>
+                  
+                  {activeExchanges.map((exchange) => (
+                    <ExchangeCard key={exchange.id} exchange={exchange} isCompleted={false} />
+                  ))}
+                </div>
+              )}
+            </TabsContent>
+
+            {/* Completed Exchanges Tab */}
+            <TabsContent value="completed" className="mt-0">
+              {completedExchanges.length === 0 ? (
+                <div className="text-center py-10 sm:py-16 px-4">
+                  <Archive className="h-12 w-12 sm:h-16 sm:w-16 mx-auto text-muted-foreground mb-3" />
+                  <h3 className="text-base sm:text-lg font-semibold mb-2">{t('exchange.noCompletedExchanges')}</h3>
+                  <p className="text-xs sm:text-sm text-muted-foreground">{t('exchange.noCompletedExchangesHint')}</p>
+                </div>
+              ) : (
+                <div className="space-y-3 sm:space-y-4">
+                  {completedExchanges.map((exchange) => (
+                    <ExchangeCard key={exchange.id} exchange={exchange} isCompleted={true} />
+                  ))}
+                </div>
+              )}
+            </TabsContent>
+          </Tabs>
         )}
       </div>
     </div>
