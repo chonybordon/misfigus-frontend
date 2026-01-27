@@ -87,6 +87,15 @@ MisFigus is a sticker trading platform that allows collectors to manage their st
 - **Profile Screen Translations**: Complete translations for all profile-related keys across all 6 languages
 - Database reset for production readiness
 - Trade flow logic fixes
+- **Comprehensive Duplicate User Fix**: Email normalization, unique DB index, data cleanup scripts
+- **Subscription Management UI**: View/manage plans in Settings (Free vs Premium)
+- **Full Mobile Responsive UI Overhaul**: Layout, spacing, overflow fixes across all pages
+- **Dynamic Reputation System**: "Nuevo" (0 exchanges), "Confiable" (3+ exchanges)
+- **Real-time Chat Polling**: Auto-refresh messages without manual refresh
+- **3-Tab Navigation for Exchanges**: "Nuevos intercambios" | "Activos" | "Completados"
+  - Icons: Search (magnifying glass), MessageCircle (chat), Archive (box)
+  - Default tab: Active (if exchanges exist) or New exchanges
+  - Badges: Green badge on New (if matches), Red pulsing badge on Active (if unread)
 
 ## Profile Translation Keys (Implemented)
 All the following keys are now translated in all 6 languages:
