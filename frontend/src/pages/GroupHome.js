@@ -123,7 +123,7 @@ export const GroupHome = () => {
           <div className="flex-1">
             <h1 className="text-3xl font-black tracking-tight text-primary">{group?.name}</h1>
             <p className="text-muted-foreground">
-              {group?.album?.name} • {getMemberCountDisplay()}
+              {getAlbumNameDisplay(group?.album, t)} • {getMemberCountDisplay()}
             </p>
           </div>
           {group?.is_owner && (
