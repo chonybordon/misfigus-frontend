@@ -183,7 +183,7 @@ export const Groups = () => {
                       <div>
                         <h3 className="text-xl font-bold">{group.name}</h3>
                         <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                          <span>{group.album?.name}</span>
+                          <span>{getAlbumNameDisplay(group.album, t)}</span>
                           <span>•</span>
                           <span>{getMemberCountDisplay(group.member_count)}</span>
                           <span>•</span>
