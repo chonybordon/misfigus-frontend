@@ -1562,6 +1562,14 @@ const resources = {
         superheroes: 'Super-héros',
         entertainment: 'Divertissement'
       },
+      albumNames: {
+        mundial_2022: 'Album Coupe du Monde 2022',
+        mundial_2026: 'Album Coupe du Monde 2026',
+        criaturas_fantasticas: 'Créatures Fantastiques',
+        guerreros_anime: 'Guerriers de l\'Anime',
+        heroes_multiverso: 'Héros du Multivers',
+        personajes_animados: 'Personnages Animés'
+      },
       login: {
         title: 'MisFigus',
         subtitle: 'Échangez des vignettes avec votre album',
