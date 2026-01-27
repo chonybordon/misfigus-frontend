@@ -1013,8 +1013,9 @@ async def get_albums(user_id: str = Depends(get_current_user)):
     
     # Compute user_state for each album
     for album in all_albums:
-        # Add category_key for i18n translation on frontend
-        album['category_key'] = get_category_key(album.get('category', ''))
+        # Add category_key for i18n translation on frontend (only if not already set in DB)
+        if not album.get('category_key'):
+            album['category_key'] = get_category_key(album.get('category', ''))
         
         if album.get('status') == 'coming_soon':
             album['user_state'] = 'coming_soon'
