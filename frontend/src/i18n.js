@@ -162,7 +162,8 @@ const resources = {
         joinedSuccess: 'Te has unido al álbum',
         noStickersYet: 'Figuritas próximamente',
         placeholderBanner: 'Colección en preparación: por ahora usá numeración',
-        newMessagesInExchanges: 'Tenés mensajes nuevos en tus intercambios'
+        newMessagesInExchanges: 'Tenés mensajes nuevos en tus intercambios',
+        fanMadeDisclaimer: 'Este álbum es una colección creada por fans y no está afiliado ni respaldado por ninguna organización oficial.'
       },
       invite: {
         title: 'Invitar al Álbum',
@@ -639,7 +640,8 @@ const resources = {
         joinedSuccess: 'You joined the album',
         noStickersYet: 'Stickers coming soon',
         placeholderBanner: 'Collection in preparation: use numbering for now',
-        newMessagesInExchanges: 'You have new messages in your exchanges'
+        newMessagesInExchanges: 'You have new messages in your exchanges',
+        fanMadeDisclaimer: 'This album is a fan-made collection and is not affiliated with or endorsed by any official organization.'
       },
       invite: {
         title: 'Invite to Album',
@@ -1116,7 +1118,8 @@ const resources = {
         joinedSuccess: 'Você entrou no álbum',
         noStickersYet: 'Figurinhas em breve',
         placeholderBanner: 'Coleção em preparação: use numeração por enquanto',
-        newMessagesInExchanges: 'Você tem novas mensagens nas suas trocas'
+        newMessagesInExchanges: 'Você tem novas mensagens nas suas trocas',
+        fanMadeDisclaimer: 'Este álbum é uma coleção criada por fãs e não é afiliado nem endossado por nenhuma organização oficial.'
       },
       invite: {
         title: 'Convidar para o Álbum',
@@ -1593,7 +1596,8 @@ const resources = {
         joinedSuccess: 'Vous avez rejoint l\'album',
         noStickersYet: 'Vignettes bientôt disponibles',
         placeholderBanner: 'Collection en préparation: utilisez la numérotation pour l\'instant',
-        newMessagesInExchanges: 'Vous avez de nouveaux messages dans vos échanges'
+        newMessagesInExchanges: 'Vous avez de nouveaux messages dans vos échanges',
+        fanMadeDisclaimer: 'Cet album est une collection créée par des fans et n\'est pas affilié ni approuvé par une organisation officielle.'
       },
       invite: {
         title: 'Inviter à l\'album',
@@ -2070,7 +2074,8 @@ const resources = {
         joinedSuccess: 'Du bist dem Album beigetreten',
         noStickersYet: 'Sticker kommen bald',
         placeholderBanner: 'Sammlung in Vorbereitung: verwende vorerst Nummerierung',
-        newMessagesInExchanges: 'Du hast neue Nachrichten in deinen Tauschen'
+        newMessagesInExchanges: 'Du hast neue Nachrichten in deinen Tauschen',
+        fanMadeDisclaimer: 'Dieses Album ist eine von Fans erstellte Sammlung und ist weder mit einer offiziellen Organisation verbunden noch von ihr unterstützt.'
       },
       invite: {
         title: 'Zum Album einladen',
@@ -2547,7 +2552,8 @@ const resources = {
         joinedSuccess: 'Ti sei unito all\'album',
         noStickersYet: 'Figurine in arrivo',
         placeholderBanner: 'Collezione in preparazione: usa la numerazione per ora',
-        newMessagesInExchanges: 'Hai nuovi messaggi nei tuoi scambi'
+        newMessagesInExchanges: 'Hai nuovi messaggi nei tuoi scambi',
+        fanMadeDisclaimer: 'Questo album è una collezione creata dai fan e non è affiliato né approvato da alcuna organizzazione ufficiale.'
       },
       invite: {
         title: 'Invita all\'Album',
