@@ -104,6 +104,14 @@ const resources = {
         superheroes: 'Superhéroes',
         entertainment: 'Entretenimiento'
       },
+      albumNames: {
+        mundial_2022: 'Álbum Mundial de Fútbol 2022',
+        mundial_2026: 'Álbum Mundial de Fútbol 2026',
+        criaturas_fantasticas: 'Criaturas Fantásticas',
+        guerreros_anime: 'Guerreros del Anime',
+        heroes_multiverso: 'Héroes del Multiverso',
+        personajes_animados: 'Personajes Animados'
+      },
       login: {
         title: 'MisFigus',
         subtitle: 'Intercambia figuritas con tu álbum',
