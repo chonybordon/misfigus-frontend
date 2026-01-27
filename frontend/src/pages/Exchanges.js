@@ -202,54 +202,6 @@ export const Exchanges = () => {
   // Only show empty state if we've checked both exchanges AND matches
   const showEmptyState = exchanges.length === 0 && hasCheckedMatches && matches.length === 0;
 
-  // Exchange card component for reuse
-  const ExchangeCard = ({ exchange, isCompleted = false }) => (
-    <Card 
-      key={exchange.id}
-      className={`cursor-pointer hover:shadow-lg transition-all ${
-        !isCompleted && exchange.has_unread && exchange.status === 'pending' 
-          ? 'border-2 border-primary' 
-          : isCompleted ? 'opacity-80' : ''
-      }`}
-      onClick={() => navigate(`/exchanges/${exchange.id}`)}
-    >
-      <CardContent className="p-3 sm:p-4">
-        <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
-            <div className={`h-10 w-10 sm:h-12 sm:w-12 rounded-full flex items-center justify-center font-bold relative flex-shrink-0 text-sm sm:text-base ${
-              isCompleted ? 'bg-gray-400 text-white' : 'bg-primary text-primary-foreground'
-            }`}>
-              {getDisplayName(exchange.partner, t)[0].toUpperCase()}
-              {/* Unread indicator dot - only for active */}
-              {!isCompleted && exchange.has_unread && exchange.status === 'pending' && (
-                <span className="absolute -top-1 -right-1 h-4 w-4 bg-red-500 rounded-full flex items-center justify-center text-[10px] text-white font-bold">
-                  {exchange.unread_count > 9 ? '9+' : exchange.unread_count}
-                </span>
-              )}
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className={`font-semibold text-sm sm:text-base truncate ${isCompleted ? 'text-muted-foreground' : ''}`}>
-                {getDisplayName(exchange.partner, t)}
-              </p>
-              <div className="flex items-center gap-2 mt-1">
-                <ReputationBadge status={exchange.partner?.reputation_status} t={t} />
-              </div>
-            </div>
-          </div>
-          <div className="text-right flex-shrink-0">
-            <ExchangeStatusBadge status={exchange.status} t={t} />
-            <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">
-              {isCompleted && exchange.completed_at 
-                ? new Date(exchange.completed_at).toLocaleDateString()
-                : new Date(exchange.created_at).toLocaleDateString()
-              }
-            </p>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
-
   return (
     <div className="min-h-screen sticker-album-pattern pb-20 overflow-x-hidden">
       <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 py-4 sm:py-6">
