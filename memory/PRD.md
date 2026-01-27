@@ -136,7 +136,23 @@ All the following keys are now translated in all 6 languages:
 ```
 
 ## Pending/Future Tasks
-- Real payment integration for Premium upgrade
+- Real payment integration for Premium upgrade (Stripe)
 - Push notifications for new matches/messages
 - Album sharing via deep links
 - Statistics/analytics dashboard
+
+## Exchange Tabs Feature (Completed January 2025)
+The "My Exchanges" screen now has a 3-tab navigation system:
+- **Tab 1: "Nuevos intercambios" (New exchanges)**: Shows available matches for trading
+- **Tab 2: "Activos" (Active)**: Shows ongoing exchanges with chat
+- **Tab 3: "Completados" (Completed)**: Shows exchange history
+
+### Tab Labels by Language
+| Language | Tab 1 | Tab 2 | Tab 3 |
+|----------|-------|-------|-------|
+| Spanish (es) | Nuevos intercambios | Activos | Completados |
+| English (en) | New exchanges | Active | Completed |
+| Portuguese (pt) | Novas trocas | Ativos | Concluídos |
+| French (fr) | Nouveaux échanges | Actifs | Terminés |
+| German (de) | Neue Tausche | Aktiv | Abgeschlossen |
+| Italian (it) | Nuovi scambi | Attivi | Completati |
