@@ -1896,22 +1896,69 @@ async def get_matches(group_id: str, user_id: str = Depends(get_current_user)):
 
 EXCHANGE_EXPIRY_DAYS = 7  # Exchanges expire after 7 days
 
+# Reputation thresholds
+REPUTATION_NEW_THRESHOLD = 0  # 0 successful exchanges = "new"
+REPUTATION_TRUSTED_THRESHOLD = 3  # 3+ successful exchanges = "trusted"
+REPUTATION_EXCELLENT_THRESHOLD = 10  # Future: 10+ = "excellent"
+
+def calculate_reputation_status(successful_exchanges: int, failed_serious: int, consecutive_failures: int) -> str:
+    """
+    Calculate reputation status dynamically based on exchange history.
+    
+    Status levels:
+    - "new": 0 successful exchanges (default for new users)
+    - "trusted": 3+ successful exchanges AND no serious failures
+    - "under_review": any serious failure or 2+ consecutive failures
+    - "restricted": 5+ total serious failures (suspended)
+    """
+    # Restricted takes priority (suspended users)
+    if failed_serious >= REPUTATION_TOTAL_FAIL_THRESHOLD:
+        return "restricted"
+    
+    # Under review for consecutive or any serious failure
+    if consecutive_failures >= REPUTATION_CONSECUTIVE_FAIL_THRESHOLD or failed_serious > 0:
+        return "under_review"
+    
+    # Trusted requires 3+ successful AND no serious failures
+    if successful_exchanges >= REPUTATION_TRUSTED_THRESHOLD and failed_serious == 0:
+        return "trusted"
+    
+    # Default: new user
+    return "new"
+
 async def get_user_reputation(user_id: str) -> dict:
-    """Get or create user reputation record."""
+    """Get or create user reputation record with dynamically calculated status."""
     rep = await db.user_reputation.find_one({"user_id": user_id}, {"_id": 0})
     if not rep:
         rep = {
             "user_id": user_id,
             "total_exchanges": 0,
             "successful_exchanges": 0,
-            "failed_exchanges": 0,
+            "failed_exchanges": 0,  # Serious failures only
             "consecutive_failures": 0,
-            "status": "trusted",
+            "status": "new",  # Default status for new users
             "invisible_until": None,
             "suspended_at": None,
             "updated_at": datetime.now(timezone.utc).isoformat()
         }
         await db.user_reputation.insert_one(rep)
+    else:
+        # Recalculate status dynamically to ensure consistency
+        calculated_status = calculate_reputation_status(
+            rep.get('successful_exchanges', 0),
+            rep.get('failed_exchanges', 0),
+            rep.get('consecutive_failures', 0)
+        )
+        # Only update if status changed (except for time-based invisibility)
+        if rep['status'] != calculated_status and rep['status'] != 'restricted':
+            # Check if under_review should be lifted based on time
+            if rep['status'] == 'under_review' and rep.get('invisible_until'):
+                inv_until = datetime.fromisoformat(rep['invisible_until'].replace('Z', '+00:00'))
+                if datetime.now(timezone.utc) > inv_until:
+                    rep['status'] = calculated_status
+                    rep['invisible_until'] = None
+            else:
+                rep['status'] = calculated_status
     return rep
 
 async def update_reputation_after_exchange(user_id: str, was_successful: bool, failure_reason: str = None):
