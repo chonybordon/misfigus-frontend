@@ -141,42 +141,43 @@ export const Exchanges = () => {
   const showEmptyState = exchanges.length === 0 && hasCheckedMatches && matches.length === 0;
 
   return (
-    <div className="min-h-screen sticker-album-pattern pb-20">
-      <div className="max-w-4xl mx-auto p-6">
-        <div className="flex items-center gap-4 mb-8">
+    <div className="min-h-screen sticker-album-pattern pb-20 overflow-x-hidden">
+      <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 py-4 sm:py-6">
+        <div className="flex items-center gap-3 sm:gap-4 mb-6 sm:mb-8">
           <Button
             variant="outline"
             size="icon"
             onClick={() => navigate(`/albums/${albumId}`)}
+            className="flex-shrink-0"
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          <h1 className="text-3xl font-black tracking-tight text-primary">{t('exchange.myExchanges')}</h1>
+          <h1 className="text-xl sm:text-3xl font-black tracking-tight text-primary truncate">{t('exchange.myExchanges')}</h1>
           {(hasNewExchanges || hasUnreadMessages) && (
-            <Badge className="bg-red-500 text-white animate-pulse flex items-center gap-1">
+            <Badge className="bg-red-500 text-white animate-pulse flex items-center gap-1 flex-shrink-0 text-xs">
               <Mail className="h-3 w-3" />
-              {hasNewExchanges ? t('exchange.newExchange') : t('exchange.hasNewMessage')}
+              <span className="hidden sm:inline">{hasNewExchanges ? t('exchange.newExchange') : t('exchange.hasNewMessage')}</span>
             </Badge>
           )}
         </div>
 
         {showEmptyState ? (
-          <div className="text-center py-20">
-            <MessageCircle className="h-24 w-24 mx-auto text-muted-foreground mb-4" />
-            <h2 className="text-2xl font-bold mb-2">{t('exchange.noExchangesInArea')}</h2>
-            <p className="text-muted-foreground mb-6">{t('exchange.noExchangesHint')}</p>
+          <div className="text-center py-12 sm:py-20 px-4">
+            <MessageCircle className="h-16 w-16 sm:h-24 sm:w-24 mx-auto text-muted-foreground mb-4" />
+            <h2 className="text-xl sm:text-2xl font-bold mb-2">{t('exchange.noExchangesInArea')}</h2>
+            <p className="text-sm sm:text-base text-muted-foreground mb-6">{t('exchange.noExchangesHint')}</p>
             <Button onClick={() => navigate(`/albums/${albumId}/matches`)}>
               {t('exchange.findMatches')}
             </Button>
           </div>
         ) : exchanges.length === 0 ? (
           // Still loading matches, show loading indicator
-          <div className="text-center py-20">
-            <div className="animate-spin h-12 w-12 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4" />
-            <p className="text-muted-foreground">{t('exchange.findMatches')}...</p>
+          <div className="text-center py-12 sm:py-20">
+            <div className="animate-spin h-10 w-10 sm:h-12 sm:w-12 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4" />
+            <p className="text-sm sm:text-base text-muted-foreground">{t('exchange.findMatches')}...</p>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             {exchanges.map((exchange) => (
               <Card 
                 key={exchange.id}
@@ -187,10 +188,10 @@ export const Exchanges = () => {
                 }`}
                 onClick={() => navigate(`/exchanges/${exchange.id}`)}
               >
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="h-12 w-12 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold relative">
+                <CardContent className="p-3 sm:p-4">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+                      <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold relative flex-shrink-0 text-sm sm:text-base">
                         {getDisplayName(exchange.partner, t)[0].toUpperCase()}
                         {/* Unread indicator dot */}
                         {exchange.has_unread && exchange.status === 'pending' && (
@@ -199,8 +200,8 @@ export const Exchanges = () => {
                           </span>
                         )}
                       </div>
-                      <div>
-                        <p className="font-semibold">
+                      <div className="min-w-0 flex-1">
+                        <p className="font-semibold text-sm sm:text-base truncate">
                           {getDisplayName(exchange.partner, t)}
                         </p>
                         <div className="flex items-center gap-2 mt-1">
@@ -208,9 +209,9 @@ export const Exchanges = () => {
                         </div>
                       </div>
                     </div>
-                    <div className="text-right">
+                    <div className="text-right flex-shrink-0">
                       <ExchangeStatusBadge status={exchange.status} t={t} />
-                      <p className="text-xs text-muted-foreground mt-1">
+                      <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">
                         {new Date(exchange.created_at).toLocaleDateString()}
                       </p>
                     </div>
