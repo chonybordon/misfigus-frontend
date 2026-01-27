@@ -174,7 +174,7 @@ export const SubscriptionSection = ({ onPlanChange }) => {
                 </span>
               </div>
               <div className="flex justify-between text-xs sm:text-sm">
-                <span>{t('subscription.freeBenefits.matches')}</span>
+                <span>{t('subscription.freeBenefits.chats')}</span>
                 <span className="font-medium">
                   {planStatus.matches_used_today} / {planStatus.matches_limit}
                 </span>
