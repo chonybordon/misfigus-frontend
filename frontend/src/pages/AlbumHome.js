@@ -203,6 +203,11 @@ export const AlbumHome = () => {
 
         {/* Invite button removed - exchanges happen organically through matches */}
 
+        {/* Legal Disclaimer */}
+        <p className="text-[10px] text-muted-foreground/70 text-center mt-8 px-4">
+          {t('albumHome.fanMadeDisclaimer')}
+        </p>
+
         {/* Deactivate Album Dialog */}
         <Dialog open={deactivateDialogOpen} onOpenChange={setDeactivateDialogOpen}>
           <DialogContent data-testid="deactivate-dialog">
