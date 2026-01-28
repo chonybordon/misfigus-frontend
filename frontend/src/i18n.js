@@ -1948,18 +1948,37 @@ const resources = {
         upgradeSuccess: 'Vous êtes maintenant Premium!'
       },
       subscription: {
-        title: 'Mon abonnement',
-        currentPlan: 'Plan actuel',
+        title: 'Mon Plan',
+        currentPlan: 'Votre plan actuel',
+        free: 'Plan Gratuit',
+        plus: 'Plan Plus',
+        unlimited: 'Plan Illimité',
+        premium: 'Premium',
         freePlan: 'Plan Gratuit',
         premiumPlan: 'Plan Premium',
+        recommended: 'Recommandé',
+        comingSoon: 'Bientôt disponible',
         monthly: 'Mensuel',
         annual: 'Annuel',
         activeUntil: 'Actif jusqu\'au',
         benefits: 'Avantages de votre plan',
         freeBenefits: {
           albums: '1 album actif',
-          chats: '1 chat par jour',
+          chats: '1 nouveau chat par jour',
           inventory: 'Inventaire illimité'
+        },
+        plusBenefits: {
+          albums: '2 albums actifs',
+          chats: '5 nouveaux chats par jour',
+          inventory: 'Inventaire illimité',
+          noAds: 'Sans publicité'
+        },
+        unlimitedBenefits: {
+          albums: 'Albums illimités',
+          chats: 'Chats illimités',
+          inventory: 'Inventaire illimité',
+          noAds: 'Sans publicité',
+          priority: 'Support prioritaire'
         },
         premiumBenefits: {
           albums: 'Albums illimités',
@@ -1967,15 +1986,22 @@ const resources = {
           noAds: 'Sans publicité (bientôt)'
         },
         changePlan: 'Changer de plan',
+        upgrade: 'Améliorer le plan',
+        upgradeToPlus: 'Passer à Plus',
+        upgradeToUnlimited: 'Passer à Illimité',
         upgradeToPremium: 'Passer à Premium',
+        downgrade: 'Passer au plan gratuit',
         downgradeToFree: 'Passer au plan gratuit',
-        downgradeWarning: 'En passant au plan gratuit, vous conserverez vos données mais aurez les limitations du plan gratuit.',
+        downgradeWarning: 'Si vous passez au plan gratuit, vous conserverez vos données mais aurez les limitations du plan gratuit.',
         downgradeBlocked: 'Pour passer au plan gratuit, vous devez avoir seulement 1 album actif.',
         currentlyActive: 'Vous avez {{count}} albums actifs.',
         deactivateFirst: 'Désactivez les albums supplémentaires depuis l\'écran Albums.',
+        mustDeactivate: 'Vous devez désactiver des albums avant de changer de plan.',
         downgradeSuccess: 'Vous êtes passé au plan gratuit',
         confirmDowngrade: 'Êtes-vous sûr de vouloir passer au plan gratuit?',
-        confirmDowngradeDesc: 'Vous perdrez l\'accès aux fonctionnalités Premium mais conserverez toutes vos données.'
+        confirmDowngradeDesc: 'Vous perdrez l\'accès aux fonctionnalités Premium mais conserverez toutes vos données.',
+        unlimitedMessages: 'Messages illimités dans les chats commencés',
+        planComparison: 'Comparer les plans'
       },
       common: {
         loading: 'Chargement...',
