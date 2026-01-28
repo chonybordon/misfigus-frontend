@@ -9,7 +9,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogD
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { ArrowLeft, MessageCircle, CheckCircle, XCircle, Clock, AlertTriangle, Mail, Archive, Search } from 'lucide-react';
-import { PaywallModal } from '../components/Paywall';
 import { UpgradeModal } from '../components/UpgradeModal';
 
 // Helper to get display name with i18n fallback

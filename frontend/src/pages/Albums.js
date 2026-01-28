@@ -8,7 +8,6 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Settings, BookOpen, CheckCircle } from 'lucide-react';
-import { PaywallModal } from '../components/Paywall';
 import { UpgradeModal } from '../components/UpgradeModal';
 
 // Helper to get translated category name from categoryKey
