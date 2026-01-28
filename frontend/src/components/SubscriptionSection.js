@@ -38,47 +38,74 @@ const PlanCard = ({
   name, 
   planKey,
   benefits, 
-  isCurrentPlan, 
+  isCurrentPlan,
+  isSelected,
   isRecommended, 
   onSelect, 
   disabled,
   t 
-}) => (
-  <button
-    className={`w-full p-3 sm:p-4 rounded-lg border-2 text-left transition-all relative ${
-      isCurrentPlan 
-        ? 'border-primary bg-primary/5 cursor-default' 
-        : disabled 
-          ? 'border-gray-200 opacity-50 cursor-not-allowed'
-          : 'border-gray-200 hover:border-primary/50 cursor-pointer'
-    }`}
-    onClick={() => !isCurrentPlan && !disabled && onSelect?.()}
-    disabled={isCurrentPlan || disabled}
-  >
-    {isRecommended && !isCurrentPlan && (
-      <Badge className="absolute -top-2 left-1/2 -translate-x-1/2 bg-gradient-to-r from-purple-500 to-pink-500 text-[10px] whitespace-nowrap">
-        <Star className="w-3 h-3 mr-1" />
-        {t('subscription.recommended')}
-      </Badge>
-    )}
-    {isCurrentPlan && (
-      <Badge className="absolute -top-2 right-2 bg-green-500 text-[10px]">
-        {t('subscription.currentPlan')}
-      </Badge>
-    )}
-    <div className="font-semibold text-sm sm:text-base mb-2">{name}</div>
-    <div className="space-y-1">
-      {benefits.map((benefit, idx) => (
-        <BenefitItem key={idx} {...benefit} small />
-      ))}
-    </div>
-    {!isCurrentPlan && !disabled && (
-      <div className="mt-3 text-xs text-muted-foreground">
-        {t('subscription.comingSoon')}
+}) => {
+  // Determine card styling based on state
+  const getCardStyle = () => {
+    if (isCurrentPlan) {
+      return 'border-green-500 bg-green-50/50 cursor-default';
+    }
+    if (isSelected) {
+      // Selected state: strong highlight with plan-specific color
+      if (planKey === 'unlimited') {
+        return 'border-purple-500 bg-purple-50 ring-2 ring-purple-500/30 shadow-lg cursor-pointer';
+      }
+      return 'border-blue-500 bg-blue-50 ring-2 ring-blue-500/30 shadow-lg cursor-pointer';
+    }
+    if (disabled) {
+      return 'border-gray-200 opacity-50 cursor-not-allowed';
+    }
+    return 'border-gray-200 hover:border-gray-300 cursor-pointer';
+  };
+
+  return (
+    <button
+      className={`w-full p-3 sm:p-4 rounded-lg border-2 text-left transition-all duration-200 relative ${getCardStyle()}`}
+      onClick={() => !isCurrentPlan && !disabled && onSelect?.()}
+      disabled={isCurrentPlan || disabled}
+    >
+      {/* Recommended badge - only on Plus, consistent blue color */}
+      {isRecommended && !isCurrentPlan && planKey === 'plus' && (
+        <Badge className="absolute -top-2 left-1/2 -translate-x-1/2 bg-gradient-to-r from-blue-500 to-cyan-500 text-[10px] whitespace-nowrap">
+          <Star className="w-3 h-3 mr-1" />
+          {t('subscription.recommended')}
+        </Badge>
+      )}
+      {/* Current plan badge */}
+      {isCurrentPlan && (
+        <Badge className="absolute -top-2 right-2 bg-green-500 text-[10px]">
+          {t('subscription.currentPlan')}
+        </Badge>
+      )}
+      {/* Selected indicator */}
+      {isSelected && !isCurrentPlan && (
+        <div className={`absolute top-2 right-2 w-5 h-5 rounded-full flex items-center justify-center ${
+          planKey === 'unlimited' ? 'bg-purple-500' : 'bg-blue-500'
+        }`}>
+          <Check className="w-3 h-3 text-white" />
+        </div>
+      )}
+      <div className={`font-semibold text-sm sm:text-base mb-2 ${isSelected && !isCurrentPlan ? (planKey === 'unlimited' ? 'text-purple-700' : 'text-blue-700') : ''}`}>
+        {name}
       </div>
-    )}
-  </button>
-);
+      <div className="space-y-1">
+        {benefits.map((benefit, idx) => (
+          <BenefitItem key={idx} {...benefit} small />
+        ))}
+      </div>
+      {!isCurrentPlan && !disabled && (
+        <div className="mt-3 text-xs text-muted-foreground">
+          {t('subscription.comingSoon')}
+        </div>
+      )}
+    </button>
+  );
+};
 
 export const SubscriptionSection = ({ onPlanChange }) => {
   const { t } = useTranslation();
