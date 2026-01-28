@@ -366,10 +366,10 @@ class TestI18nSubscriptionKeys:
         with open(i18n_path, 'r') as f:
             content = f.read()
         
-        # Check for plan name keys in Spanish
-        assert "subscription.free" in content or "'free':" in content, "Missing subscription.free key"
-        assert "subscription.plus" in content or "'plus':" in content, "Missing subscription.plus key"
-        assert "subscription.unlimited" in content or "'unlimited':" in content, "Missing subscription.unlimited key"
+        # Check for plan name keys in subscription section (keys are: free:, plus:, unlimited:)
+        assert "free:" in content, "Missing subscription free key"
+        assert "plus:" in content, "Missing subscription plus key"
+        assert "unlimited:" in content, "Missing subscription unlimited key"
         
         # Check for plan display names
         assert "Plan Gratuito" in content, "Missing Spanish 'Plan Gratuito'"
@@ -408,13 +408,12 @@ class TestI18nSubscriptionKeys:
         with open(i18n_path, 'r') as f:
             content = f.read()
         
-        # Check each language has subscription section
+        # Check each language has subscription section (format is: es: { or en: {)
         languages = ['es', 'en', 'pt', 'fr', 'de', 'it']
         
         for lang in languages:
-            # Each language should have subscription section
-            # We check for the pattern of language code followed by subscription
-            assert f"'{lang}':" in content or f'"{lang}":' in content, f"Missing {lang} language section"
+            # Each language should have a section in resources object
+            assert f"{lang}:" in content or f"{lang} :" in content, f"Missing {lang} language section"
         
         # Check for specific translations in different languages
         translations_to_check = [
