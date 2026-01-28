@@ -2052,7 +2052,11 @@ const resources = {
         confirmDowngradeDesc: 'Vous perdrez l\'accès aux fonctionnalités Premium mais conserverez toutes vos données.',
         unlimitedMessages: 'Messages illimités dans les chats commencés',
         planComparison: 'Comparer les plans',
-        upgradeSuccess: 'Plan mis à jour avec succès!'
+        upgradeSuccess: 'Plan mis à jour avec succès!',
+        usage: 'Votre utilisation actuelle',
+        albumsActive: 'Albums actifs',
+        chatsToday: 'Nouveaux chats aujourd\'hui',
+        noLimits: 'Sans limites - profitez de tout sans restrictions'
       },
       upgrade: {
         albumLimitTitle: 'Besoin de plus d\'albums',
