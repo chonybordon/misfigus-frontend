@@ -10,7 +10,7 @@ from datetime import datetime
 def test_misfigus_fixes():
     """Test the two specific fixes mentioned in the review request"""
     
-    base_url = "https://misfigus-trading.preview.emergentagent.com"
+    base_url = "https://sticker-swap-1.preview.emergentagent.com"
     api_url = f"{base_url}/api"
     album_id = "bc32fecb-f640-4d00-880d-5043bc112d4b"
     
