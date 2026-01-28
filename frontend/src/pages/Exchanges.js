@@ -125,6 +125,7 @@ export const Exchanges = () => {
   const [activeTab, setActiveTab] = useState(null); // Will be set after data loads: 'new', 'active', or 'completed'
   const [paywallOpen, setPaywallOpen] = useState(false);
   const [paywallReason, setPaywallReason] = useState(null);
+  const [currentUserPlan, setCurrentUserPlan] = useState('free');
   const [startingExchange, setStartingExchange] = useState(null); // Track which match is being started
   const navigate = useNavigate();
   const { t } = useTranslation();
