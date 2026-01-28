@@ -45,23 +45,44 @@ const PlanCard = ({
   disabled,
   t 
 }) => {
+  // Plan-specific color schemes
+  const planColors = {
+    plus: {
+      border: 'border-blue-500',
+      bg: 'bg-blue-50',
+      ring: 'ring-blue-500/30',
+      text: 'text-blue-600',
+      badge: 'bg-gradient-to-r from-blue-500 to-cyan-500',
+      checkBg: 'bg-blue-500'
+    },
+    unlimited: {
+      border: 'border-purple-500',
+      bg: 'bg-purple-50',
+      ring: 'ring-purple-500/30',
+      text: 'text-purple-600',
+      badge: 'bg-gradient-to-r from-purple-600 to-purple-500',
+      checkBg: 'bg-purple-500'
+    }
+  };
+
+  const colors = planColors[planKey] || planColors.plus;
+
   // Determine card styling based on state
   const getCardStyle = () => {
     if (isCurrentPlan) {
       return 'border-green-500 bg-green-50/50 cursor-default';
     }
     if (isSelected) {
-      // Selected state: strong highlight with plan-specific color
-      if (planKey === 'unlimited') {
-        return 'border-purple-500 bg-purple-50 ring-2 ring-purple-500/30 shadow-lg cursor-pointer';
-      }
-      return 'border-blue-500 bg-blue-50 ring-2 ring-blue-500/30 shadow-lg cursor-pointer';
+      return `${colors.border} ${colors.bg} ring-2 ${colors.ring} shadow-lg cursor-pointer`;
     }
     if (disabled) {
       return 'border-gray-200 opacity-50 cursor-not-allowed';
     }
-    return 'border-gray-200 hover:border-gray-300 cursor-pointer';
+    return 'border-gray-200 hover:border-gray-300 hover:shadow-sm cursor-pointer';
   };
+
+  // TEMPORARY: Set to false when payments go live
+  const showComingSoon = true;
 
   return (
     <button
@@ -69,38 +90,44 @@ const PlanCard = ({
       onClick={() => !isCurrentPlan && !disabled && onSelect?.()}
       disabled={isCurrentPlan || disabled}
     >
-      {/* Recommended badge - only on Plus, consistent blue color */}
+      {/* Recommended badge - only on Plus, uses Plus brand color */}
       {isRecommended && !isCurrentPlan && planKey === 'plus' && (
-        <Badge className="absolute -top-2 left-1/2 -translate-x-1/2 bg-gradient-to-r from-blue-500 to-cyan-500 text-[10px] whitespace-nowrap">
+        <Badge className={`absolute -top-2 left-1/2 -translate-x-1/2 ${colors.badge} text-[10px] whitespace-nowrap text-white`}>
           <Star className="w-3 h-3 mr-1" />
           {t('subscription.recommended')}
         </Badge>
       )}
       {/* Current plan badge */}
       {isCurrentPlan && (
-        <Badge className="absolute -top-2 right-2 bg-green-500 text-[10px]">
+        <Badge className="absolute -top-2 right-2 bg-green-500 text-[10px] text-white">
           {t('subscription.currentPlan')}
         </Badge>
       )}
-      {/* Selected indicator */}
+      {/* Selected indicator - checkmark in plan color */}
       {isSelected && !isCurrentPlan && (
-        <div className={`absolute top-2 right-2 w-5 h-5 rounded-full flex items-center justify-center ${
-          planKey === 'unlimited' ? 'bg-purple-500' : 'bg-blue-500'
-        }`}>
-          <Check className="w-3 h-3 text-white" />
+        <div className={`absolute top-3 right-3 w-6 h-6 rounded-full flex items-center justify-center ${colors.checkBg} shadow-md`}>
+          <Check className="w-4 h-4 text-white" />
         </div>
       )}
-      <div className={`font-semibold text-sm sm:text-base mb-2 ${isSelected && !isCurrentPlan ? (planKey === 'unlimited' ? 'text-purple-700' : 'text-blue-700') : ''}`}>
+      
+      {/* Plan name - highlighted when selected */}
+      <div className={`font-bold text-base sm:text-lg mb-3 ${isSelected && !isCurrentPlan ? colors.text : ''}`}>
         {name}
       </div>
-      <div className="space-y-1">
+      
+      {/* Benefits list */}
+      <div className="space-y-1.5">
         {benefits.map((benefit, idx) => (
           <BenefitItem key={idx} {...benefit} small />
         ))}
       </div>
-      {!isCurrentPlan && !disabled && (
-        <div className="mt-3 text-xs text-muted-foreground">
-          {t('subscription.comingSoon')}
+      
+      {/* Coming Soon notice - easily removable when payments go live */}
+      {showComingSoon && !isCurrentPlan && !disabled && (
+        <div className="mt-3 pt-2 border-t border-gray-100">
+          <span className="text-xs text-muted-foreground italic">
+            {t('subscription.comingSoon')}
+          </span>
         </div>
       )}
     </button>
