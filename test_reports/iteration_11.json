@@ -1,0 +1,90 @@
+{
+  "summary": "Tested downgrade blocked warning i18n fix. All tests PASSED for both Spanish and English. The yellow warning now shows user-friendly messages instead of internal i18n keys.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/frontend/src/components/SubscriptionSection.js",
+    "/app/frontend/src/i18n.js"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [],
+  "updated_files": [],
+  "success_rate": {
+    "backend": "N/A (frontend only test)",
+    "frontend": "100%"
+  },
+  "test_credentials": "OTP-based login - OTP codes appear in backend logs",
+  "seed_data_creation": "Test users created: test_downgrade_* with Plus plan and 2 active albums",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Downgrade blocked warning i18n fix verified. The warning shows correctly in Spanish and English with user-friendly messages. Plan upgrades are MOCKED via POST /api/user/set-plan endpoint.",
+  "test_results": {
+    "features_tested": [
+      {
+        "feature": "Spanish downgrade blocked title",
+        "status": "PASSED",
+        "expected": "⚠️ No podés cambiar de plan todavía",
+        "actual": "⚠️ No podés cambiar de plan todavía"
+      },
+      {
+        "feature": "Spanish downgrade blocked body text",
+        "status": "PASSED",
+        "expected": "Para bajar a un plan inferior, primero desactivá álbumes hasta cumplir el límite del plan seleccionado.",
+        "actual": "Para bajar a un plan inferior, primero desactivá álbumes hasta cumplir el límite del plan seleccionado."
+      },
+      {
+        "feature": "Spanish album limit helper text",
+        "status": "PASSED",
+        "expected": "El plan Gratuito permite solo 1 álbum activo.",
+        "actual": "El plan Gratuito permite solo 1 álbum activo."
+      },
+      {
+        "feature": "English downgrade blocked title",
+        "status": "PASSED",
+        "expected": "⚠️ You cannot change plans yet",
+        "actual": "⚠️ You cannot change plans yet"
+      },
+      {
+        "feature": "English downgrade blocked body text",
+        "status": "PASSED",
+        "expected": "To downgrade to a lower plan, first deactivate albums until you meet the limit of the selected plan.",
+        "actual": "To downgrade to a lower plan, first deactivate albums until you meet the limit of the selected plan."
+      },
+      {
+        "feature": "English album limit helper text",
+        "status": "PASSED",
+        "expected": "The Free plan allows only 1 active album.",
+        "actual": "The Free plan allows only 1 active album."
+      },
+      {
+        "feature": "No internal i18n keys visible (Spanish)",
+        "status": "PASSED",
+        "details": "No 'subscription.downgradeBlocked' or 'subscription.deactivateFirst' keys visible"
+      },
+      {
+        "feature": "No internal i18n keys visible (English)",
+        "status": "PASSED",
+        "details": "No 'subscription.downgradeBlocked' or 'subscription.deactivateFirst' keys visible"
+      }
+    ],
+    "test_flow": [
+      "1. Create new user via OTP login",
+      "2. Complete onboarding (Spanish or English)",
+      "3. Activate first album (Mundial 2022)",
+      "4. Upgrade to Plus plan via API (mocked)",
+      "5. Activate second album (Criaturas Fantásticas)",
+      "6. Navigate to Settings > Subscription",
+      "7. Verify yellow warning box shows user-friendly messages"
+    ]
+  },
+  "mocked_apis": {
+    "POST /api/user/set-plan": "Plan upgrades are MOCKED - directly updates DB without real payment"
+  }
+}
