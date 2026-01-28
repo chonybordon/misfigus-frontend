@@ -51,7 +51,12 @@ class User(BaseModel):
 
 # Freemium constants
 FREE_PLAN_MAX_ALBUMS = 1
-FREE_PLAN_MAX_MATCHES_PER_DAY = 1
+FREE_PLAN_MAX_CHATS_PER_DAY = 1
+
+PLUS_PLAN_MAX_ALBUMS = 2
+PLUS_PLAN_MAX_CHATS_PER_DAY = 5
+
+# Unlimited plan has no limits (represented as None)
 
 class UserCreate(BaseModel):
     email: str
