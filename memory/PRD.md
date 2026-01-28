@@ -183,10 +183,22 @@ A fan-made disclaimer is displayed on the album detail page in all 6 languages.
 ```
 
 ## Pending/Future Tasks
-- Real payment integration for Premium upgrade (Stripe)
+- **P1**: Real payment integration for Premium upgrade (Stripe) - subscription system is currently MOCKED
 - Push notifications for new matches/messages
 - Album sharing via deep links
 - Statistics/analytics dashboard
+- App packaging for Android / iOS
+
+## Upgrade Modal UX (Completed January 2025)
+The "Upgrade Plan" modal has been enhanced with the following UX improvements:
+- **Plan Labels**: Display "Plus" and "Unlimited" (removed redundant "Plan" prefix)
+- **No Preselection**: Modal opens with no plan selected by default
+- **Disabled CTA**: Upgrade button is grayed out until a plan is selected
+- **Dynamic Button**: 
+  - Plus selection: Blue gradient button with "Upgrade to Plus" text
+  - Unlimited selection: Purple gradient button with "Upgrade to Unlimited" text
+- **Visual Highlighting**: Selected plan card has colored border and checkmark indicator
+- **Full i18n Support**: All labels translated in all 6 languages
 
 ## Exchange Tabs Feature (Completed January 2025)
 The "My Exchanges" screen now has a 3-tab navigation system:
