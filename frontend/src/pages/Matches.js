@@ -153,7 +153,9 @@ export const Matches = () => {
     }
   };
 
-  const handlePaywallUpgrade = () => {
+  const handlePaywallUpgrade = (newPlan) => {
+    // Update local plan state
+    setCurrentUserPlan(newPlan);
     // After upgrade, user can retry the match
     setPaywallOpen(false);
   };
