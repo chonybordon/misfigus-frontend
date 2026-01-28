@@ -764,34 +764,7 @@ async def downgrade_to_free(user_id: str = Depends(get_current_user)):
     Downgrade user to free plan.
     Only allowed if user has 1 or fewer active albums.
     """
-    # Count active albums
-    active_albums = await db.user_album_activations.count_documents({"user_id": user_id})
-    
-    if active_albums > FREE_PLAN_MAX_ALBUMS:
-        raise HTTPException(
-            status_code=400,
-            detail={
-                "code": "TOO_MANY_ALBUMS",
-                "message": f"To switch to the free plan, you must keep only {FREE_PLAN_MAX_ALBUMS} active album.",
-                "active_albums": active_albums,
-                "max_allowed": FREE_PLAN_MAX_ALBUMS
-            }
-        )
-    
-    today = get_today_date_str()
-    await db.users.update_one(
-        {"id": user_id},
-        {"$set": {
-            "plan": "free",
-            "plan_type": None,
-            "premium_until": None,
-            "matches_used_today": 0,
-            "matches_used_date": today
-        }}
-    )
-    
-    user = await db.users.find_one({"id": user_id}, {"_id": 0})
-    return {"message": "Downgraded to Free", "user": user}
+    return await set_plan(plan="free", user_id=user_id)
 
 # ============================================
 # LOCATION ENDPOINTS (Structured, Global)
