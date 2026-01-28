@@ -136,8 +136,20 @@ All the following keys are now translated in all 6 languages:
 - `profile.termsAcceptedAt`, `profile.viewTerms`
 
 ## Known Limitations
-- **Premium Upgrade**: The "Upgrade" button on the paywall is MOCKED (no Stripe/payment integration)
+- **Subscription Upgrade**: All upgrade functionality is MOCKED (no Stripe/payment integration). Users can upgrade but no actual payment is processed.
 - Dates use browser's `toLocaleDateString()` for locale-friendly formatting
+
+## Unified Upgrade System (January 2025)
+All upgrade/paywall flows now use a single consistent UI:
+- **Old System (REMOVED)**: Premium plan with Monthly/Annual options
+- **New System**: Free / Plus / Unlimited plans
+- **Component**: `UpgradeModal.js` used across Albums.js, Exchanges.js, Matches.js
+- **Triggers**:
+  - Album limit: Shows when free user tries to activate 2nd album
+  - Chat limit: Shows when free/plus user hits daily chat limit
+- **Benefits displayed**:
+  - Plus: 2 albums, 5 chats/day, unlimited inventory, no ads
+  - Unlimited: unlimited albums, unlimited chats, unlimited inventory, no ads
 
 ## Trademark Cleanup (January 2025)
 All trademarked content has been replaced with legally safe, generic alternatives:
