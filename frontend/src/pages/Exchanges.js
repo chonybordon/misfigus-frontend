@@ -327,8 +327,9 @@ export const Exchanges = () => {
                 {matches.map((match) => (
                   <Card 
                     key={match.user.id}
-                    className="cursor-pointer hover:shadow-lg transition-all border-green-200 bg-green-50/30"
-                    onClick={() => navigate(`/albums/${albumId}/matches`)}
+                    data-testid={`match-card-${match.user.id}`}
+                    className={`cursor-pointer hover:shadow-lg transition-all border-green-200 bg-green-50/30 ${startingExchange === match.user.id ? 'opacity-50' : ''}`}
+                    onClick={() => !startingExchange && handleStartExchange(match.user.id)}
                   >
                     <CardContent className="p-3 sm:p-4">
                       <div className="flex items-center justify-between gap-2">
@@ -345,19 +346,19 @@ export const Exchanges = () => {
                             </div>
                           </div>
                         </div>
-                        <Badge className="bg-green-100 text-green-800 text-[10px] sm:text-xs flex-shrink-0">
-                          {t('exchange.canExchange')}
-                        </Badge>
+                        {startingExchange === match.user.id ? (
+                          <Badge className="bg-gray-100 text-gray-600 text-[10px] sm:text-xs flex-shrink-0">
+                            {t('common.loading')}...
+                          </Badge>
+                        ) : (
+                          <Badge className="bg-green-100 text-green-800 text-[10px] sm:text-xs flex-shrink-0">
+                            {t('exchange.canExchange')}
+                          </Badge>
+                        )}
                       </div>
                     </CardContent>
                   </Card>
                 ))}
-                <Button 
-                  className="w-full text-sm sm:text-base"
-                  onClick={() => navigate(`/albums/${albumId}/matches`)}
-                >
-                  {t('exchange.viewAllMatches')}
-                </Button>
               </div>
             )}
           </TabsContent>
