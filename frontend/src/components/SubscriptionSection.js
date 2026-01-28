@@ -15,7 +15,70 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Crown, Check, X, AlertTriangle, Sparkles, Calendar, Album, MessageCircle, Megaphone } from 'lucide-react';
+import { Crown, Check, X, AlertTriangle, Sparkles, Calendar, Album, MessageCircle, Megaphone, Star, Infinity } from 'lucide-react';
+
+// Plan benefit item component
+const BenefitItem = ({ icon: Icon, text, included = true, comingSoon = false, small = false }) => (
+  <div className={`flex items-center gap-2 ${small ? 'text-xs' : 'text-xs sm:text-sm'}`}>
+    {included ? (
+      <Check className={`${small ? 'w-3 h-3' : 'w-3.5 h-3.5 sm:w-4 sm:h-4'} text-green-500 flex-shrink-0`} />
+    ) : (
+      <X className={`${small ? 'w-3 h-3' : 'w-3.5 h-3.5 sm:w-4 sm:h-4'} text-gray-300 flex-shrink-0`} />
+    )}
+    <Icon className={`${small ? 'w-3 h-3' : 'w-3.5 h-3.5 sm:w-4 sm:h-4'} text-muted-foreground flex-shrink-0`} />
+    <span className={included ? '' : 'text-gray-400'}>
+      {text}
+      {comingSoon && <span className="text-[10px] text-muted-foreground ml-1">({comingSoon})</span>}
+    </span>
+  </div>
+);
+
+// Plan card component for selection
+const PlanCard = ({ 
+  name, 
+  planKey,
+  benefits, 
+  isCurrentPlan, 
+  isRecommended, 
+  onSelect, 
+  disabled,
+  t 
+}) => (
+  <button
+    className={`w-full p-3 sm:p-4 rounded-lg border-2 text-left transition-all relative ${
+      isCurrentPlan 
+        ? 'border-primary bg-primary/5 cursor-default' 
+        : disabled 
+          ? 'border-gray-200 opacity-50 cursor-not-allowed'
+          : 'border-gray-200 hover:border-primary/50 cursor-pointer'
+    }`}
+    onClick={() => !isCurrentPlan && !disabled && onSelect?.()}
+    disabled={isCurrentPlan || disabled}
+  >
+    {isRecommended && !isCurrentPlan && (
+      <Badge className="absolute -top-2 left-1/2 -translate-x-1/2 bg-gradient-to-r from-purple-500 to-pink-500 text-[10px] whitespace-nowrap">
+        <Star className="w-3 h-3 mr-1" />
+        {t('subscription.recommended')}
+      </Badge>
+    )}
+    {isCurrentPlan && (
+      <Badge className="absolute -top-2 right-2 bg-green-500 text-[10px]">
+        {t('subscription.currentPlan')}
+      </Badge>
+    )}
+    <div className="font-semibold text-sm sm:text-base mb-2">{name}</div>
+    <div className="space-y-1">
+      {benefits.map((benefit, idx) => (
+        <BenefitItem key={idx} {...benefit} small />
+      ))}
+    </div>
+    {!isCurrentPlan && !disabled && (
+      <div className="mt-3 text-xs text-muted-foreground">
+        {t('subscription.comingSoon')}
+      </div>
+    )}
+  </button>
+);
 
 export const SubscriptionSection = ({ onPlanChange }) => {
   const { t } = useTranslation();
@@ -25,7 +88,7 @@ export const SubscriptionSection = ({ onPlanChange }) => {
   const [downgrading, setDowngrading] = useState(false);
   const [showDowngradeDialog, setShowDowngradeDialog] = useState(false);
   const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
-  const [selectedPlanType, setSelectedPlanType] = useState('monthly');
+  const [selectedUpgradePlan, setSelectedUpgradePlan] = useState('plus');
 
   useEffect(() => {
     fetchPlanStatus();
@@ -42,16 +105,16 @@ export const SubscriptionSection = ({ onPlanChange }) => {
     }
   };
 
-  const handleUpgrade = async () => {
+  const handleUpgrade = async (targetPlan) => {
     setUpgrading(true);
     try {
-      await api.post(`/user/upgrade-premium?plan_type=${selectedPlanType}`);
+      await api.post(`/user/set-plan?plan=${targetPlan}&plan_type=monthly`);
       toast.success(t('premium.upgradeSuccess'));
       await fetchPlanStatus();
       onPlanChange?.();
       setShowUpgradeDialog(false);
     } catch (error) {
-      toast.error(error.response?.data?.detail || t('common.error'));
+      toast.error(error.response?.data?.detail?.message || error.response?.data?.detail || t('common.error'));
     } finally {
       setUpgrading(false);
     }
@@ -60,7 +123,7 @@ export const SubscriptionSection = ({ onPlanChange }) => {
   const handleDowngrade = async () => {
     setDowngrading(true);
     try {
-      await api.post('/user/downgrade-free');
+      await api.post('/user/set-plan?plan=free');
       toast.success(t('subscription.downgradeSuccess'));
       await fetchPlanStatus();
       onPlanChange?.();
@@ -102,8 +165,55 @@ export const SubscriptionSection = ({ onPlanChange }) => {
 
   if (!planStatus) return null;
 
-  const isPremium = planStatus.is_premium;
-  const canDowngrade = planStatus.can_downgrade;
+  const currentPlan = planStatus.plan || 'free';
+  const isPaid = currentPlan === 'plus' || currentPlan === 'unlimited';
+  const canDowngradeToFree = planStatus.can_downgrade_to_free;
+
+  // Plan display name mapping
+  const getPlanDisplayName = (plan) => {
+    switch (plan) {
+      case 'free': return t('subscription.free');
+      case 'plus': return t('subscription.plus');
+      case 'unlimited': return t('subscription.unlimited');
+      default: return t('subscription.free');
+    }
+  };
+
+  // Get benefits based on current plan
+  const getCurrentPlanBenefits = () => {
+    switch (currentPlan) {
+      case 'unlimited':
+        return [
+          { icon: Album, text: t('subscription.unlimitedBenefits.albums'), included: true },
+          { icon: MessageCircle, text: t('subscription.unlimitedBenefits.chats'), included: true },
+          { icon: Megaphone, text: t('subscription.unlimitedBenefits.noAds'), included: true },
+        ];
+      case 'plus':
+        return [
+          { icon: Album, text: t('subscription.plusBenefits.albums'), included: true },
+          { icon: MessageCircle, text: t('subscription.plusBenefits.chats'), included: true },
+          { icon: Megaphone, text: t('subscription.plusBenefits.noAds'), included: true },
+        ];
+      default: // free
+        return [
+          { icon: Album, text: t('subscription.freeBenefits.albums'), included: true },
+          { icon: MessageCircle, text: t('subscription.freeBenefits.chats'), included: true },
+          { icon: Check, text: t('subscription.freeBenefits.inventory'), included: true },
+        ];
+    }
+  };
+
+  // Get plan badge color
+  const getPlanBadgeStyle = () => {
+    switch (currentPlan) {
+      case 'unlimited':
+        return 'bg-gradient-to-r from-purple-600 to-pink-600';
+      case 'plus':
+        return 'bg-gradient-to-r from-blue-500 to-cyan-500';
+      default:
+        return 'bg-gray-500';
+    }
+  };
 
   return (
     <>
@@ -111,29 +221,23 @@ export const SubscriptionSection = ({ onPlanChange }) => {
         <CardHeader className="pb-2 sm:pb-3 px-4 sm:px-6 pt-4 sm:pt-6">
           <div className="flex items-center justify-between gap-2">
             <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-              <Crown className={`w-4 h-4 sm:w-5 sm:h-5 ${isPremium ? 'text-yellow-500' : 'text-gray-400'}`} />
+              <Crown className={`w-4 h-4 sm:w-5 sm:h-5 ${isPaid ? 'text-yellow-500' : 'text-gray-400'}`} />
               <span className="truncate">{t('subscription.title')}</span>
             </CardTitle>
-            {isPremium && (
-              <Badge className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white text-xs flex-shrink-0">
-                <Sparkles className="w-3 h-3 mr-1" />
-                Premium
-              </Badge>
-            )}
+            <Badge className={`${getPlanBadgeStyle()} text-white text-xs flex-shrink-0`}>
+              {currentPlan === 'unlimited' && <Infinity className="w-3 h-3 mr-1" />}
+              {currentPlan === 'plus' && <Sparkles className="w-3 h-3 mr-1" />}
+              {getPlanDisplayName(currentPlan)}
+            </Badge>
           </div>
           <CardDescription className="text-xs sm:text-sm">
-            {t('subscription.currentPlan')}: {isPremium ? t('subscription.premiumPlan') : t('subscription.freePlan')}
-            {isPremium && planStatus.plan_type && (
-              <span className="ml-1 sm:ml-2">
-                ({planStatus.plan_type === 'annual' ? t('subscription.annual') : t('subscription.monthly')})
-              </span>
-            )}
+            {t('subscription.currentPlan')}: {getPlanDisplayName(currentPlan)}
           </CardDescription>
         </CardHeader>
         
         <CardContent className="space-y-4 sm:space-y-6 px-4 sm:px-6 pb-4 sm:pb-6">
-          {/* Premium Until */}
-          {isPremium && planStatus.premium_until && (
+          {/* Premium Until for paid plans */}
+          {isPaid && planStatus.premium_until && (
             <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground bg-green-50 p-2 sm:p-3 rounded-lg">
               <Calendar className="w-4 h-4 text-green-600 flex-shrink-0" />
               <span className="text-green-700">
@@ -142,77 +246,95 @@ export const SubscriptionSection = ({ onPlanChange }) => {
             </div>
           )}
 
-          {/* Benefits Section */}
+          {/* Current Plan Benefits */}
           <div>
             <h4 className="font-medium mb-2 sm:mb-3 text-xs sm:text-sm text-muted-foreground uppercase tracking-wide">
-              {t('subscription.benefits')}
+              {t('subscription.benefits') || 'Beneficios de tu plan'}
             </h4>
             <div className="space-y-1.5 sm:space-y-2">
-              {isPremium ? (
-                <>
-                  <BenefitItem icon={Album} text={t('subscription.premiumBenefits.albums')} included />
-                  <BenefitItem icon={MessageCircle} text={t('subscription.premiumBenefits.chats')} included />
-                  <BenefitItem icon={Megaphone} text={t('subscription.premiumBenefits.noAds')} included comingSoon />
-                </>
-              ) : (
-                <>
-                  <BenefitItem icon={Album} text={t('subscription.freeBenefits.albums')} included />
-                  <BenefitItem icon={MessageCircle} text={t('subscription.freeBenefits.chats')} included />
-                  <BenefitItem icon={Check} text={t('subscription.freeBenefits.inventory')} included />
-                </>
-              )}
+              {getCurrentPlanBenefits().map((benefit, idx) => (
+                <BenefitItem key={idx} {...benefit} />
+              ))}
             </div>
           </div>
 
-          {/* Usage Stats for Free Users */}
-          {!isPremium && (
-            <div className="bg-gray-50 p-3 sm:p-4 rounded-lg space-y-1.5 sm:space-y-2">
-              <div className="flex justify-between text-xs sm:text-sm">
-                <span>{t('subscription.freeBenefits.albums')}</span>
-                <span className="font-medium">
-                  {planStatus.active_albums} / {planStatus.albums_limit}
-                </span>
-              </div>
-              <div className="flex justify-between text-xs sm:text-sm">
-                <span>{t('subscription.freeBenefits.chats')}</span>
-                <span className="font-medium">
-                  {planStatus.matches_used_today} / {planStatus.matches_limit}
-                </span>
-              </div>
+          {/* Usage Stats */}
+          <div className="bg-gray-50 p-3 sm:p-4 rounded-lg space-y-1.5 sm:space-y-2">
+            <div className="flex justify-between text-xs sm:text-sm">
+              <span>{t('subscription.freeBenefits.albums')}</span>
+              <span className="font-medium">
+                {planStatus.active_albums} / {planStatus.albums_limit || '∞'}
+              </span>
             </div>
-          )}
+            <div className="flex justify-between text-xs sm:text-sm">
+              <span>{t('subscription.freeBenefits.chats')}</span>
+              <span className="font-medium">
+                {planStatus.matches_used_today} / {planStatus.matches_limit || '∞'}
+              </span>
+            </div>
+            <p className="text-[10px] sm:text-xs text-muted-foreground pt-1">
+              {t('subscription.unlimitedMessages')}
+            </p>
+          </div>
 
           {/* Action Buttons */}
           <div className="space-y-2 sm:space-y-3 pt-2">
-            {!isPremium ? (
+            {currentPlan === 'free' && (
               <Button
                 data-testid="upgrade-btn"
-                className="w-full bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-sm sm:text-base"
+                className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-sm sm:text-base"
                 onClick={() => setShowUpgradeDialog(true)}
               >
-                <Crown className="w-4 h-4 mr-2" />
-                {t('subscription.upgradeToPremium')}
+                <Sparkles className="w-4 h-4 mr-2" />
+                {t('subscription.upgradeToPlus')}
               </Button>
-            ) : (
+            )}
+            
+            {currentPlan === 'plus' && (
+              <>
+                <Button
+                  data-testid="upgrade-unlimited-btn"
+                  className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-sm sm:text-base"
+                  onClick={() => {
+                    setSelectedUpgradePlan('unlimited');
+                    setShowUpgradeDialog(true);
+                  }}
+                >
+                  <Infinity className="w-4 h-4 mr-2" />
+                  {t('subscription.upgradeToUnlimited')}
+                </Button>
+                <Button
+                  data-testid="downgrade-btn"
+                  variant="outline"
+                  className="w-full text-sm sm:text-base"
+                  onClick={() => setShowDowngradeDialog(true)}
+                  disabled={!canDowngradeToFree}
+                >
+                  {t('subscription.downgrade')}
+                </Button>
+              </>
+            )}
+
+            {currentPlan === 'unlimited' && (
               <Button
                 data-testid="downgrade-btn"
                 variant="outline"
                 className="w-full text-sm sm:text-base"
                 onClick={() => setShowDowngradeDialog(true)}
-                disabled={!canDowngrade}
+                disabled={!canDowngradeToFree}
               >
-                {t('subscription.downgradeToFree')}
+                {t('subscription.downgrade')}
               </Button>
             )}
             
             {/* Downgrade blocked message */}
-            {isPremium && !canDowngrade && (
+            {isPaid && !canDowngradeToFree && (
               <div className="flex items-start gap-2 p-2 sm:p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-xs sm:text-sm">
                 <AlertTriangle className="w-4 h-4 text-yellow-600 mt-0.5 flex-shrink-0" />
                 <div className="text-yellow-800 min-w-0">
-                  <p className="font-medium">{t('subscription.downgradeBlocked')}</p>
+                  <p className="font-medium">{t('subscription.downgradeBlocked') || t('subscription.mustDeactivate')}</p>
                   <p className="text-yellow-700 mt-1">
-                    {t('subscription.currentlyActive', { count: planStatus.active_albums })} {t('subscription.deactivateFirst')}
+                    {t('subscription.currentlyActive', { count: planStatus.active_albums })} {t('subscription.deactivateFirst') || ''}
                   </p>
                 </div>
               </div>
@@ -223,73 +345,74 @@ export const SubscriptionSection = ({ onPlanChange }) => {
 
       {/* Upgrade Dialog */}
       <AlertDialog open={showUpgradeDialog} onOpenChange={setShowUpgradeDialog}>
-        <AlertDialogContent>
+        <AlertDialogContent className="max-w-md">
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2">
-              <Crown className="w-5 h-5 text-yellow-500" />
-              {t('subscription.upgradeToPremium')}
+              <Sparkles className="w-5 h-5 text-blue-500" />
+              {t('subscription.upgrade')}
             </AlertDialogTitle>
-            <AlertDialogDescription className="space-y-4">
-              {/* Plan Type Selection */}
-              <div className="grid grid-cols-2 gap-3 mt-4">
-                <button
-                  className={`p-4 rounded-lg border-2 text-left transition-all ${
-                    selectedPlanType === 'monthly' 
-                      ? 'border-primary bg-primary/5' 
-                      : 'border-gray-200 hover:border-gray-300'
-                  }`}
-                  onClick={() => setSelectedPlanType('monthly')}
-                >
-                  <div className="font-medium">{t('subscription.monthly')}</div>
-                  <div className="text-sm text-muted-foreground">30 {t('common.days') || 'días'}</div>
-                </button>
-                <button
-                  className={`p-4 rounded-lg border-2 text-left transition-all relative ${
-                    selectedPlanType === 'annual' 
-                      ? 'border-primary bg-primary/5' 
-                      : 'border-gray-200 hover:border-gray-300'
-                  }`}
-                  onClick={() => setSelectedPlanType('annual')}
-                >
-                  <Badge className="absolute -top-2 -right-2 bg-green-500 text-xs">
-                    {t('premium.bestValue')}
-                  </Badge>
-                  <div className="font-medium">{t('subscription.annual')}</div>
-                  <div className="text-sm text-muted-foreground">365 {t('common.days') || 'días'}</div>
-                </button>
-              </div>
-              
-              {/* Benefits preview */}
-              <div className="bg-gray-50 p-4 rounded-lg space-y-2 mt-4">
-                <BenefitItem icon={Album} text={t('subscription.premiumBenefits.albums')} included small />
-                <BenefitItem icon={MessageCircle} text={t('subscription.premiumBenefits.chats')} included small />
-                <BenefitItem icon={Megaphone} text={t('subscription.premiumBenefits.noAds')} included small comingSoon />
-              </div>
+            <AlertDialogDescription className="text-left">
+              {t('subscription.planComparison')}
             </AlertDialogDescription>
           </AlertDialogHeader>
+          
+          <div className="space-y-3 py-4">
+            {/* Plus Plan */}
+            <PlanCard
+              name={t('subscription.plus')}
+              planKey="plus"
+              isCurrentPlan={currentPlan === 'plus'}
+              isRecommended={currentPlan === 'free'}
+              benefits={[
+                { icon: Album, text: t('subscription.plusBenefits.albums'), included: true },
+                { icon: MessageCircle, text: t('subscription.plusBenefits.chats'), included: true },
+                { icon: Megaphone, text: t('subscription.plusBenefits.noAds'), included: true },
+              ]}
+              onSelect={() => setSelectedUpgradePlan('plus')}
+              t={t}
+            />
+            
+            {/* Unlimited Plan */}
+            <PlanCard
+              name={t('subscription.unlimited')}
+              planKey="unlimited"
+              isCurrentPlan={currentPlan === 'unlimited'}
+              isRecommended={currentPlan === 'plus'}
+              benefits={[
+                { icon: Album, text: t('subscription.unlimitedBenefits.albums'), included: true },
+                { icon: MessageCircle, text: t('subscription.unlimitedBenefits.chats'), included: true },
+                { icon: Megaphone, text: t('subscription.unlimitedBenefits.noAds'), included: true },
+              ]}
+              onSelect={() => setSelectedUpgradePlan('unlimited')}
+              t={t}
+            />
+          </div>
+
           <AlertDialogFooter>
             <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
             <AlertDialogAction
-              onClick={handleUpgrade}
-              disabled={upgrading}
-              className="bg-gradient-to-r from-yellow-500 to-orange-500"
+              onClick={() => handleUpgrade(selectedUpgradePlan)}
+              disabled={upgrading || currentPlan === selectedUpgradePlan}
+              className={selectedUpgradePlan === 'unlimited' 
+                ? 'bg-gradient-to-r from-purple-600 to-pink-600'
+                : 'bg-gradient-to-r from-blue-500 to-cyan-500'}
             >
-              {upgrading ? t('common.loading') : t('subscription.upgradeToPremium')}
+              {upgrading ? t('common.loading') : t('subscription.upgrade')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Downgrade Confirmation Dialog */}
+      {/* Downgrade Dialog */}
       <AlertDialog open={showDowngradeDialog} onOpenChange={setShowDowngradeDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>{t('subscription.confirmDowngrade')}</AlertDialogTitle>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="w-5 h-5 text-yellow-500" />
+              {t('subscription.confirmDowngrade') || 'Cambiar a plan gratuito'}
+            </AlertDialogTitle>
             <AlertDialogDescription>
-              <p>{t('subscription.confirmDowngradeDesc')}</p>
-              <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-sm text-yellow-800">
-                {t('subscription.downgradeWarning')}
-              </div>
+              {t('subscription.downgradeWarning')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -297,9 +420,9 @@ export const SubscriptionSection = ({ onPlanChange }) => {
             <AlertDialogAction
               onClick={handleDowngrade}
               disabled={downgrading}
-              className="bg-red-500 hover:bg-red-600"
+              className="bg-gray-600 hover:bg-gray-700"
             >
-              {downgrading ? t('common.loading') : t('subscription.downgradeToFree')}
+              {downgrading ? t('common.loading') : t('subscription.downgrade')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -307,21 +430,5 @@ export const SubscriptionSection = ({ onPlanChange }) => {
     </>
   );
 };
-
-// Benefit item component
-const BenefitItem = ({ icon: Icon, text, included, comingSoon, small }) => (
-  <div className={`flex items-center gap-1.5 sm:gap-2 ${small ? 'text-xs sm:text-sm' : 'text-xs sm:text-base'}`}>
-    {included ? (
-      <Check className={`${small ? 'w-3 h-3' : 'w-3.5 h-3.5 sm:w-4 sm:h-4'} text-green-500 flex-shrink-0`} />
-    ) : (
-      <X className={`${small ? 'w-3 h-3' : 'w-3.5 h-3.5 sm:w-4 sm:h-4'} text-gray-300 flex-shrink-0`} />
-    )}
-    <Icon className={`${small ? 'w-3 h-3' : 'w-3.5 h-3.5 sm:w-4 sm:h-4'} text-muted-foreground flex-shrink-0`} />
-    <span className={`${included ? '' : 'text-muted-foreground'} truncate`}>
-      {text}
-      {comingSoon && <span className="text-[10px] sm:text-xs text-muted-foreground ml-1">*</span>}
-    </span>
-  </div>
-);
 
 export default SubscriptionSection;
