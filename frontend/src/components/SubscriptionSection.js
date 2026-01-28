@@ -142,7 +142,7 @@ export const SubscriptionSection = ({ onPlanChange }) => {
   const [downgrading, setDowngrading] = useState(false);
   const [showDowngradeDialog, setShowDowngradeDialog] = useState(false);
   const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
-  const [selectedUpgradePlan, setSelectedUpgradePlan] = useState('plus');
+  const [selectedUpgradePlan, setSelectedUpgradePlan] = useState(null);
 
   useEffect(() => {
     fetchPlanStatus();
