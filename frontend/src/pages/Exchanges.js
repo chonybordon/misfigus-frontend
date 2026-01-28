@@ -413,6 +413,14 @@ export const Exchanges = () => {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Paywall Modal */}
+      <PaywallModal
+        isOpen={paywallOpen}
+        onClose={() => setPaywallOpen(false)}
+        reason={paywallReason}
+        onUpgradeSuccess={() => setPaywallOpen(false)}
+      />
     </div>
   );
 };
