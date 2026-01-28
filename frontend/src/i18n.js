@@ -2025,7 +2025,14 @@ const resources = {
         confirmDowngrade: 'Êtes-vous sûr de vouloir passer au plan gratuit?',
         confirmDowngradeDesc: 'Vous perdrez l\'accès aux fonctionnalités Premium mais conserverez toutes vos données.',
         unlimitedMessages: 'Messages illimités dans les chats commencés',
-        planComparison: 'Comparer les plans'
+        planComparison: 'Comparer les plans',
+        upgradeSuccess: 'Plan mis à jour avec succès!'
+      },
+      upgrade: {
+        albumLimitTitle: 'Besoin de plus d\'albums',
+        albumLimitDesc: 'Votre plan actuel ne permet qu\'1 album actif. Passez à Plus ou Illimité pour activer plus d\'albums.',
+        chatLimitTitle: 'Limite de chats atteinte',
+        chatLimitDesc: 'Votre plan gratuit permet 1 nouveau chat par jour. Mettez à niveau pour démarrer plus de chats.'
       },
       common: {
         loading: 'Chargement...',
