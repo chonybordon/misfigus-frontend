@@ -300,12 +300,13 @@ export const Albums = () => {
           </DialogContent>
         </Dialog>
 
-        {/* Paywall Modal */}
-        <PaywallModal
+        {/* Upgrade Modal (replaces old PaywallModal) */}
+        <UpgradeModal
           isOpen={paywallOpen}
           onClose={() => setPaywallOpen(false)}
           reason={paywallReason}
           onUpgradeSuccess={handlePaywallUpgrade}
+          currentPlan={currentUserPlan}
         />
       </div>
     </div>
