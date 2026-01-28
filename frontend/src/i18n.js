@@ -962,6 +962,7 @@ const resources = {
         recommended: 'Recommended',
         comingSoon: 'Coming soon',
         activeUntil: 'Active until',
+        benefits: 'Your plan benefits',
         freeBenefits: {
           albums: '1 active album',
           chats: '1 new chat per day',
