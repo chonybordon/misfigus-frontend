@@ -2576,7 +2576,11 @@ const resources = {
         confirmDowngradeDesc: 'Du verlierst den Zugang zu Premium-Funktionen, behältst aber alle deine Daten.',
         unlimitedMessages: 'Unbegrenzte Nachrichten in gestarteten Chats',
         planComparison: 'Pläne vergleichen',
-        upgradeSuccess: 'Plan erfolgreich aktualisiert!'
+        upgradeSuccess: 'Plan erfolgreich aktualisiert!',
+        usage: 'Deine aktuelle Nutzung',
+        albumsActive: 'Aktive Alben',
+        chatsToday: 'Neue Chats heute',
+        noLimits: 'Keine Limits - genieße alles ohne Einschränkungen'
       },
       upgrade: {
         albumLimitTitle: 'Mehr Alben benötigt',
