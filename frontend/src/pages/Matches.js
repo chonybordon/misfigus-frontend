@@ -244,12 +244,13 @@ export const Matches = () => {
         )}
       </div>
 
-      {/* Paywall Modal */}
-      <PaywallModal
+      {/* Upgrade Modal (replaces old PaywallModal) */}
+      <UpgradeModal
         isOpen={paywallOpen}
         onClose={() => setPaywallOpen(false)}
-        reason={paywallReason}
+        reason={paywallReason === 'DAILY_MATCH_LIMIT' ? 'DAILY_CHAT_LIMIT' : paywallReason}
         onUpgradeSuccess={handlePaywallUpgrade}
+        currentPlan={currentUserPlan}
       />
     </div>
   );
