@@ -148,7 +148,17 @@ export const Exchanges = () => {
 
   useEffect(() => {
     fetchExchanges();
+    fetchUserPlan();
   }, [albumId]);
+
+  const fetchUserPlan = async () => {
+    try {
+      const response = await api.get('/user/plan-status');
+      setCurrentUserPlan(response.data.plan || 'free');
+    } catch (error) {
+      setCurrentUserPlan('free');
+    }
+  };
 
   // Set default tab after data loads - ALWAYS default to "New exchanges"
   useEffect(() => {
