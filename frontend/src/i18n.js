@@ -2970,18 +2970,37 @@ const resources = {
         upgradeSuccess: 'Ora sei Premium!'
       },
       subscription: {
-        title: 'Il mio abbonamento',
-        currentPlan: 'Piano attuale',
+        title: 'Il mio Piano',
+        currentPlan: 'Il tuo piano attuale',
+        free: 'Piano Gratuito',
+        plus: 'Piano Plus',
+        unlimited: 'Piano Illimitato',
+        premium: 'Premium',
         freePlan: 'Piano Gratuito',
         premiumPlan: 'Piano Premium',
+        recommended: 'Consigliato',
+        comingSoon: 'In arrivo',
         monthly: 'Mensile',
         annual: 'Annuale',
         activeUntil: 'Attivo fino al',
         benefits: 'Vantaggi del tuo piano',
         freeBenefits: {
           albums: '1 album attivo',
-          chats: '1 chat al giorno',
+          chats: '1 nuova chat al giorno',
           inventory: 'Inventario illimitato'
+        },
+        plusBenefits: {
+          albums: '2 album attivi',
+          chats: '5 nuove chat al giorno',
+          inventory: 'Inventario illimitato',
+          noAds: 'Senza pubblicità'
+        },
+        unlimitedBenefits: {
+          albums: 'Album illimitati',
+          chats: 'Chat illimitate',
+          inventory: 'Inventario illimitato',
+          noAds: 'Senza pubblicità',
+          priority: 'Supporto prioritario'
         },
         premiumBenefits: {
           albums: 'Album illimitati',
@@ -2989,15 +3008,22 @@ const resources = {
           noAds: 'Senza pubblicità (in arrivo)'
         },
         changePlan: 'Cambia piano',
+        upgrade: 'Migliora piano',
+        upgradeToPlus: 'Passa a Plus',
+        upgradeToUnlimited: 'Passa a Illimitato',
         upgradeToPremium: 'Passa a Premium',
+        downgrade: 'Passa al piano gratuito',
         downgradeToFree: 'Passa al piano gratuito',
         downgradeWarning: 'Passando al piano gratuito, manterrai i tuoi dati ma avrai le limitazioni del piano gratuito.',
         downgradeBlocked: 'Per passare al piano gratuito, devi avere solo 1 album attivo.',
         currentlyActive: 'Hai {{count}} album attivi.',
         deactivateFirst: 'Disattiva gli album extra dalla schermata Album.',
+        mustDeactivate: 'Devi disattivare gli album prima di cambiare piano.',
         downgradeSuccess: 'Sei passato al piano gratuito',
         confirmDowngrade: 'Sei sicuro di voler passare al piano gratuito?',
-        confirmDowngradeDesc: 'Perderai l\'accesso alle funzioni Premium ma manterrai tutti i tuoi dati.'
+        confirmDowngradeDesc: 'Perderai l\'accesso alle funzioni Premium ma manterrai tutti i tuoi dati.',
+        unlimitedMessages: 'Messaggi illimitati nelle chat avviate',
+        planComparison: 'Confronta piani'
       },
       common: {
         loading: 'Caricamento...',
