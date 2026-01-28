@@ -39,6 +39,7 @@ export const Albums = () => {
   const [activating, setActivating] = useState(false);
   const [paywallOpen, setPaywallOpen] = useState(false);
   const [paywallReason, setPaywallReason] = useState(null);
+  const [currentUserPlan, setCurrentUserPlan] = useState('free');
   const navigate = useNavigate();
   const { t } = useTranslation();
 
