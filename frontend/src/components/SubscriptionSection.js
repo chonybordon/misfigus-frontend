@@ -15,7 +15,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Crown, Check, X, AlertTriangle, Sparkles, Calendar, Album, MessageCircle, Megaphone, Star, Infinity } from 'lucide-react';
+import { Crown, Check, X, AlertTriangle, Sparkles, Calendar, Album, MessageCircle, Megaphone, Star, Infinity, Package } from 'lucide-react';
 
 // Plan benefit item component
 const BenefitItem = ({ icon: Icon, text, included = true, comingSoon = false, small = false }) => (
