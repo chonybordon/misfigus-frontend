@@ -63,10 +63,14 @@ def verify_otp_hash(otp: str, hashed: str) -> bool:
     """Verify OTP against stored hash."""
     return hash_otp(otp) == hashed
 
-def send_otp_email(email: str, otp: str) -> bool:
+def send_otp_email(email: str, otp: str) -> tuple[bool, str]:
     """
     Send OTP via email using Resend.
     Falls back to console logging if Resend is not configured.
+    
+    Returns: (success: bool, status: str)
+    - success: True if email was sent or dev mode is active
+    - status: 'sent', 'dev_mode', 'quota_exceeded', 'fallback'
     
     IMPORTANT: OTP is NEVER returned to the caller or shown in UI.
     """
@@ -76,7 +80,9 @@ def send_otp_email(email: str, otp: str) -> bool:
     
     # In DEV_MODE, always log OTP to console for testing
     dev_mode = os.environ.get('DEV_MODE', 'false').lower() == 'true'
-    if dev_mode:
+    dev_otp_mode = os.environ.get('DEV_OTP_MODE', 'false').lower() == 'true'
+    
+    if dev_mode or dev_otp_mode:
         logger.warning("="*50)
         logger.warning(f"[OTP] DEV MODE - OTP for testing")
         logger.warning(f"[OTP] To: {email}")
@@ -112,10 +118,21 @@ def send_otp_email(email: str, otp: str) -> bool:
             response = emails.send(params)
             logger.info(f"[OTP] Resend API response: {response}")
             logger.info(f"[OTP] Email successfully sent to {email}")
-            return True
+            return True, 'sent'
             
         except Exception as e:
+            error_msg = str(e)
             logger.error(f"[OTP] Resend API error: {type(e).__name__}: {e}")
+            
+            # Check for quota exceeded error
+            if 'quota' in error_msg.lower() or 'limit' in error_msg.lower():
+                logger.error(f"[OTP] QUOTA EXCEEDED - Daily sending limit reached")
+                # In dev mode, still allow login via console OTP
+                if dev_mode or dev_otp_mode:
+                    logger.warning(f"[OTP] DEV MODE active - OTP logged to console, login can proceed")
+                    return True, 'dev_mode'
+                return False, 'quota_exceeded'
+            
             # Log more details if available
             if hasattr(e, 'message'):
                 logger.error(f"[OTP] Error message: {getattr(e, 'message', 'N/A')}")
@@ -131,7 +148,12 @@ def send_otp_email(email: str, otp: str) -> bool:
     logger.warning(f"[OTP] To: {email}")
     logger.warning(f"[OTP] OTP: {otp}")
     logger.warning("="*50)
-    return True
+    
+    # In dev mode, fallback is OK
+    if dev_mode or dev_otp_mode:
+        return True, 'dev_mode'
+    
+    return True, 'fallback'
 
 def send_invite_email(email: str, invite_code: str, group_name: str, inviter_name: str) -> bool:
     """
