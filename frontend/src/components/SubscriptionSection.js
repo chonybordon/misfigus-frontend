@@ -312,24 +312,41 @@ export const SubscriptionSection = ({ onPlanChange }) => {
             </div>
           </div>
 
-          {/* Usage Stats */}
-          <div className="bg-gray-50 p-3 sm:p-4 rounded-lg space-y-1.5 sm:space-y-2">
-            <div className="flex justify-between text-xs sm:text-sm">
-              <span>{t('subscription.freeBenefits.albums')}</span>
-              <span className="font-medium">
-                {planStatus.active_albums} / {planStatus.albums_limit || '∞'}
-              </span>
+          {/* Usage Stats - Only show for Free and Plus plans with limits */}
+          {currentPlan !== 'unlimited' && (
+            <div className="bg-gray-50 p-3 sm:p-4 rounded-lg space-y-1.5 sm:space-y-2">
+              <h4 className="font-medium text-xs text-muted-foreground uppercase tracking-wide mb-2">
+                {t('subscription.usage') || 'Tu uso actual'}
+              </h4>
+              <div className="flex justify-between text-xs sm:text-sm">
+                <span>{t('subscription.albumsActive') || 'Álbumes activos'}</span>
+                <span className="font-medium">
+                  {planStatus.active_albums} / {planStatus.albums_limit}
+                </span>
+              </div>
+              <div className="flex justify-between text-xs sm:text-sm">
+                <span>{t('subscription.chatsToday') || 'Chats nuevos hoy'}</span>
+                <span className="font-medium">
+                  {planStatus.matches_used_today} / {planStatus.matches_limit}
+                </span>
+              </div>
+              <p className="text-[10px] sm:text-xs text-muted-foreground pt-1">
+                {t('subscription.unlimitedMessages')}
+              </p>
             </div>
-            <div className="flex justify-between text-xs sm:text-sm">
-              <span>{t('subscription.freeBenefits.chats')}</span>
-              <span className="font-medium">
-                {planStatus.matches_used_today} / {planStatus.matches_limit || '∞'}
-              </span>
+          )}
+          
+          {/* For Unlimited plan - show "no limits" message */}
+          {currentPlan === 'unlimited' && (
+            <div className="bg-purple-50 p-3 sm:p-4 rounded-lg">
+              <div className="flex items-center gap-2 text-purple-700">
+                <Infinity className="w-4 h-4" />
+                <span className="text-sm font-medium">
+                  {t('subscription.noLimits') || 'Sin límites - disfruta de todo sin restricciones'}
+                </span>
+              </div>
             </div>
-            <p className="text-[10px] sm:text-xs text-muted-foreground pt-1">
-              {t('subscription.unlimitedMessages')}
-            </p>
-          </div>
+          )}
 
           {/* Action Buttons */}
           <div className="space-y-2 sm:space-y-3 pt-2">
