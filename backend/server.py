@@ -371,7 +371,32 @@ async def send_otp(user_input: UserCreate):
     user = await db.users.find_one({"email": normalized_email}, {"_id": 0})
     
     # Send OTP via email (logged to console if Resend not configured)
-    send_otp_email(normalized_email, otp)
+    success, status = send_otp_email(normalized_email, otp)
+    
+    # Check DEV mode
+    dev_mode = os.environ.get('DEV_MODE', 'false').lower() == 'true'
+    dev_otp_mode = os.environ.get('DEV_OTP_MODE', 'false').lower() == 'true'
+    
+    # In DEV mode, always allow (OTP is in logs)
+    if dev_mode or dev_otp_mode:
+        return {
+            "message": "OTP sent", 
+            "email": normalized_email,
+            "dev_mode": True,
+            "hint": "Check server logs for OTP code"
+        }
+    
+    # In production, check if email was actually sent
+    if not success:
+        if status == 'quota_exceeded':
+            raise HTTPException(
+                status_code=503, 
+                detail="Email service temporarily unavailable. Please try again later."
+            )
+        raise HTTPException(
+            status_code=500, 
+            detail="Could not send verification code. Please try again."
+        )
     
     # NEVER return OTP in response
     return {"message": "OTP sent", "email": normalized_email}
