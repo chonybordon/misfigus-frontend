@@ -1,0 +1,88 @@
+{
+  "summary": "Code review verification of downgrade modal i18n fix. The fix adds missing confirmDowngrade and confirmDowngradeDesc keys to all 6 languages in i18n.js. SubscriptionSection.js correctly uses t('subscription.confirmDowngrade') and t('subscription.confirmDowngradeDesc') for the modal.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [],
+  "action_items": [],
+  "critical_code_review_comments": [],
+  "updated_files": [],
+  "success_rate": {
+    "backend": "N/A - skipped per request",
+    "frontend": "Code review PASSED"
+  },
+  "test_credentials": "OTP-based login required. OTP codes appear in backend logs.",
+  "seed_data_creation": "",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Downgrade modal i18n fix verified via code review. All 6 languages have confirmDowngrade and confirmDowngradeDesc keys properly defined under subscription namespace.",
+  "test_results": {
+    "features_tested": [
+      {
+        "feature": "1. Downgrade modal title shows 'Confirmar cambio a plan gratuito' in Spanish (NOT 'subscription.confirmDowngrade')",
+        "status": "VERIFIED via code review",
+        "details": "i18n.js line 494: confirmDowngrade: 'Confirmar cambio a plan gratuito'. SubscriptionSection.js line 503 uses t('subscription.confirmDowngrade')"
+      },
+      {
+        "feature": "2. Downgrade modal body shows proper description text (NOT raw i18n key)",
+        "status": "VERIFIED via code review",
+        "details": "i18n.js line 495: confirmDowngradeDesc: 'Si cambiás al plan gratuito, mantendrás tus datos, pero se aplicarán las limitaciones del plan gratuito.'. SubscriptionSection.js line 506 uses t('subscription.confirmDowngradeDesc')"
+      },
+      {
+        "feature": "3. Primary button shows 'Cambiar a plan gratuito'",
+        "status": "VERIFIED via code review",
+        "details": "SubscriptionSection.js line 516 uses t('subscription.downgrade') which maps to 'Cambiar a plan gratuito' in Spanish (i18n.js line 493)"
+      },
+      {
+        "feature": "4. Secondary button shows 'Cancelar'",
+        "status": "VERIFIED via code review",
+        "details": "SubscriptionSection.js line 510 uses t('common.cancel') which maps to 'Cancelar' in Spanish"
+      },
+      {
+        "feature": "5. Test in English: title 'Confirm switch to free plan', body text properly translated",
+        "status": "VERIFIED via code review",
+        "details": "i18n.js lines 1010-1011: confirmDowngrade: 'Confirm switch to free plan', confirmDowngradeDesc: 'If you switch to the free plan, you will keep your data, but free plan limitations will apply.'"
+      },
+      {
+        "feature": "6. No internal i18n keys visible anywhere in the downgrade modal",
+        "status": "VERIFIED via code review",
+        "details": "All i18n keys used in downgrade modal (lines 497-520) have corresponding translations in all 6 languages"
+      }
+    ],
+    "i18n_verification": {
+      "languages_verified": ["es", "en", "pt", "fr", "de", "it"],
+      "keys_added": {
+        "subscription.confirmDowngrade": {
+          "es": "Confirmar cambio a plan gratuito",
+          "en": "Confirm switch to free plan",
+          "pt": "Confirmar mudança para plano gratuito",
+          "fr": "Confirmer le passage au plan gratuit",
+          "de": "Wechsel zum kostenlosen Plan bestätigen",
+          "it": "Conferma passaggio al piano gratuito"
+        },
+        "subscription.confirmDowngradeDesc": {
+          "es": "Si cambiás al plan gratuito, mantendrás tus datos, pero se aplicarán las limitaciones del plan gratuito.",
+          "en": "If you switch to the free plan, you will keep your data, but free plan limitations will apply.",
+          "pt": "Se você mudar para o plano gratuito, manterá seus dados, mas as limitações do plano gratuito serão aplicadas.",
+          "fr": "Si vous passez au plan gratuit, vous conserverez vos données, mais les limitations du plan gratuit seront appliquées.",
+          "de": "Wenn du zum kostenlosen Plan wechselst, behältst du deine Daten, aber die Einschränkungen des kostenlosen Plans gelten.",
+          "it": "Se passi al piano gratuito, manterrai i tuoi dati, ma si applicheranno le limitazioni del piano gratuito."
+        }
+      }
+    },
+    "code_locations": {
+      "modal_component": "/app/frontend/src/components/SubscriptionSection.js lines 497-520",
+      "i18n_translations": "/app/frontend/src/i18n.js"
+    }
+  },
+  "testing_limitations": "UI testing via Playwright was attempted but OTP-based authentication made it difficult to maintain session state across browser automation calls. Each new browser session requires a fresh OTP which gets regenerated on each send-otp request.",
+  "mocked_apis": {
+    "POST /api/user/set-plan": "Plan changes are MOCKED - directly updates DB without real payment"
+  }
+}
