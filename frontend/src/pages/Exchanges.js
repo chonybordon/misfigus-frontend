@@ -156,6 +156,48 @@ export const Exchanges = () => {
     }
   }, [loading, activeTab]);
 
+  // Handle starting an exchange directly from the New Exchanges tab
+  const handleStartExchange = async (partnerUserId) => {
+    setStartingExchange(partnerUserId);
+    try {
+      const response = await api.post(`/albums/${albumId}/exchanges`, {
+        album_id: albumId,
+        partner_user_id: partnerUserId
+      });
+      
+      // Show appropriate message based on whether it's new or existing
+      if (response.data.is_existing) {
+        toast.success(t('exchange.exchangeExists'));
+      } else {
+        toast.success(t('exchange.exchangeCreated'));
+      }
+      
+      // Navigate directly to the exchange detail
+      navigate(`/exchanges/${response.data.exchange.id}`);
+    } catch (error) {
+      // Check for freemium limit error
+      const errorDetail = error.response?.data?.detail;
+      if (errorDetail?.code === 'DAILY_MATCH_LIMIT') {
+        setPaywallReason('DAILY_MATCH_LIMIT');
+        setPaywallOpen(true);
+        return;
+      }
+      
+      // Translate backend error codes to user-friendly messages
+      const errorCode = typeof errorDetail === 'string' ? errorDetail : errorDetail?.code;
+      const errorMessages = {
+        'ALBUM_NOT_ACTIVATED': t('errors.albumNotActivated'),
+        'PARTNER_NOT_FOUND': t('errors.partnerNotFound'),
+        'ACCOUNT_RESTRICTED': t('errors.accountRestricted'),
+        'PARTNER_NOT_AVAILABLE': t('errors.partnerNotAvailable'),
+        'NO_MUTUAL_MATCH': t('errors.noMutualMatch')
+      };
+      toast.error(errorMessages[errorCode] || t('common.error'));
+    } finally {
+      setStartingExchange(null);
+    }
+  };
+
   const fetchExchanges = async () => {
     try {
       const response = await api.get(`/albums/${albumId}/exchanges`);
