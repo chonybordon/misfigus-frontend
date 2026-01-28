@@ -46,18 +46,24 @@ MisFigus is a sticker trading platform that allows collectors to manage their st
   - "Con observaciones" (🟡) → any serious failure
   - "Restringido" (🔴) → 5+ serious failures (suspended)
 
-### Freemium Model
-- **Free Plan**: 1 active album, 1 chat initiation per day
-- **Premium Plan**: Unlimited albums and chats, no ads (future)
+### Subscription Plans (3-Tier System)
+
+| Plan | Albums | Chats/Day | Messages | Ads |
+|------|--------|-----------|----------|-----|
+| **Gratuito** | 1 | 1 | Unlimited | Yes |
+| **Plus** (Recommended) | 2 | 5 | Unlimited | No |
+| **Ilimitado** | ∞ | ∞ | Unlimited | No |
+
 - Plan types: Monthly (30 days), Annual (365 days)
 - Subscription management UI in Settings with:
-  - Current plan display with benefits ("1 chat por día" with X/1 counter)
-  - Upgrade to Premium option
-  - Downgrade to Free (blocked if >1 active album)
+  - Current plan badge (color-coded: gray/blue/purple)
+  - Usage counters (albums X/N, chats X/N)
+  - Upgrade dialog showing Plus and Unlimited options
+  - Downgrade blocked if albums exceed target plan limit
 - Paywall UI when limits hit (MOCKED - no real payment integration)
-- **Chat limit enforcement**: Free users blocked after 1 chat/day with message "Alcanzaste el límite de tu versión gratuita. ¡Pasá a Premium para iniciar más chats!"
-- **Unlimited messages**: Within an existing chat, users can send unlimited messages
-- **i18n**: Chat limit labels translated in all 6 languages (ES/EN/PT/FR/DE/IT)
+- **Chat limit enforcement**: "Alcanzaste el límite de tu versión gratuita. Pasá a Premium para iniciar más chats."
+- **Unlimited messages**: Once a chat is started, messaging is unlimited
+- **i18n**: All plan labels translated in all 6 languages
 
 ### Inventory UX
 - **3 tabs only**: "Mi inventario" (editable), "Faltan" (read-only, red styling), "Duplicados" (read-only, yellow styling)
