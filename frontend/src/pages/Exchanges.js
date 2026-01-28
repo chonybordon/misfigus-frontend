@@ -275,7 +275,7 @@ export const Exchanges = () => {
             >
               <Search className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />
               <span className="truncate">{t('exchange.tabNew')}</span>
-              {hasNewMatches && (
+              {matches.length > 0 && (
                 <Badge className="ml-0.5 sm:ml-1 h-4 w-4 sm:h-5 sm:w-5 p-0 flex items-center justify-center text-[9px] sm:text-[10px] bg-green-500 text-white flex-shrink-0">
                   {matches.length > 9 ? '9+' : matches.length}
                 </Badge>
@@ -288,9 +288,9 @@ export const Exchanges = () => {
             >
               <MessageCircle className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />
               <span className="truncate">{t('exchange.tabActive')}</span>
-              {hasUnreadMessages && (
-                <Badge className="ml-0.5 sm:ml-1 h-4 w-4 sm:h-5 sm:w-5 p-0 flex items-center justify-center text-[9px] sm:text-[10px] bg-red-500 text-white animate-pulse flex-shrink-0">
-                  !
+              {activeExchanges.length > 0 && (
+                <Badge className={`ml-0.5 sm:ml-1 h-4 w-4 sm:h-5 sm:w-5 p-0 flex items-center justify-center text-[9px] sm:text-[10px] flex-shrink-0 ${hasUnreadMessages ? 'bg-red-500 animate-pulse' : 'bg-blue-500'} text-white`}>
+                  {hasUnreadMessages ? '!' : (activeExchanges.length > 9 ? '9+' : activeExchanges.length)}
                 </Badge>
               )}
             </TabsTrigger>
@@ -301,6 +301,11 @@ export const Exchanges = () => {
             >
               <Archive className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />
               <span className="truncate">{t('exchange.tabCompleted')}</span>
+              {completedExchanges.length > 0 && (
+                <Badge className="ml-0.5 sm:ml-1 h-4 w-4 sm:h-5 sm:w-5 p-0 flex items-center justify-center text-[9px] sm:text-[10px] bg-gray-400 text-white flex-shrink-0">
+                  {completedExchanges.length > 9 ? '9+' : completedExchanges.length}
+                </Badge>
+              )}
             </TabsTrigger>
           </TabsList>
 
