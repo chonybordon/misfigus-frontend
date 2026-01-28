@@ -2163,9 +2163,9 @@ async def create_or_get_exchange(
                 status_code=403,
                 detail={
                     "code": "DAILY_MATCH_LIMIT",
-                    "message": "Free plan allows only 1 match per day. Upgrade to Premium for unlimited matches.",
+                    "message": "You have reached your daily chat limit. Upgrade your plan for more chats.",
                     "matches_used": user.get('matches_used_today', 0),
-                    "limit": FREE_PLAN_MAX_MATCHES_PER_DAY
+                    "limit": FREE_PLAN_MAX_CHATS_PER_DAY if user.get('plan') == 'free' else PLUS_PLAN_MAX_CHATS_PER_DAY
                 }
             )
         raise HTTPException(status_code=400, detail=reason)
