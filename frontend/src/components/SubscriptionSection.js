@@ -421,6 +421,7 @@ export const SubscriptionSection = ({ onPlanChange }) => {
               benefits={[
                 { icon: Album, text: t('subscription.plusBenefits.albums'), included: true },
                 { icon: MessageCircle, text: t('subscription.plusBenefits.chats'), included: true },
+                { icon: Package, text: t('subscription.plusBenefits.inventory'), included: true },
                 { icon: Megaphone, text: t('subscription.plusBenefits.noAds'), included: true },
               ]}
               onSelect={() => setSelectedUpgradePlan('plus')}
@@ -437,6 +438,7 @@ export const SubscriptionSection = ({ onPlanChange }) => {
               benefits={[
                 { icon: Album, text: t('subscription.unlimitedBenefits.albums'), included: true },
                 { icon: MessageCircle, text: t('subscription.unlimitedBenefits.chats'), included: true },
+                { icon: Package, text: t('subscription.unlimitedBenefits.inventory'), included: true },
                 { icon: Megaphone, text: t('subscription.unlimitedBenefits.noAds'), included: true },
               ]}
               onSelect={() => setSelectedUpgradePlan('unlimited')}
