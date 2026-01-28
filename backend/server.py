@@ -633,6 +633,8 @@ async def get_plan_status(user_id: str = Depends(get_current_user)):
     """
     Get user's current plan status and usage.
     Includes daily match reset check.
+    
+    Plans: free, plus, unlimited
     """
     user = await check_and_reset_daily_matches(user_id)
     if not user:
@@ -644,22 +646,43 @@ async def get_plan_status(user_id: str = Depends(get_current_user)):
     # Count active albums
     active_albums = await db.user_album_activations.count_documents({"user_id": user_id})
     
-    # Check if user can downgrade (only if 1 or fewer active albums)
-    can_downgrade = active_albums <= FREE_PLAN_MAX_ALBUMS
+    # Determine limits based on plan
+    if plan == 'unlimited':
+        chats_limit = None
+        albums_limit = None
+        can_match = True
+        can_activate = True
+    elif plan == 'plus':
+        chats_limit = PLUS_PLAN_MAX_CHATS_PER_DAY
+        albums_limit = PLUS_PLAN_MAX_ALBUMS
+        can_match = user.get('matches_used_today', 0) < PLUS_PLAN_MAX_CHATS_PER_DAY
+        can_activate = active_albums < PLUS_PLAN_MAX_ALBUMS
+    else:  # free
+        chats_limit = FREE_PLAN_MAX_CHATS_PER_DAY
+        albums_limit = FREE_PLAN_MAX_ALBUMS
+        can_match = user.get('matches_used_today', 0) < FREE_PLAN_MAX_CHATS_PER_DAY
+        can_activate = active_albums < FREE_PLAN_MAX_ALBUMS
+    
+    # Check if user can downgrade (only if 1 or fewer active albums for free)
+    can_downgrade_to_free = active_albums <= FREE_PLAN_MAX_ALBUMS
+    can_downgrade_to_plus = active_albums <= PLUS_PLAN_MAX_ALBUMS
     
     return {
         "plan": plan,
-        "plan_type": plan_type if plan == 'premium' else None,
-        "is_premium": plan == 'premium',
+        "plan_type": plan_type if plan in ['plus', 'unlimited'] else None,
+        "is_premium": plan in ['plus', 'unlimited'],
+        "is_plus": plan == 'plus',
+        "is_unlimited": plan == 'unlimited',
         "matches_used_today": user.get('matches_used_today', 0),
-        "matches_limit": None if plan == 'premium' else FREE_PLAN_MAX_MATCHES_PER_DAY,
-        "can_match": plan == 'premium' or user.get('matches_used_today', 0) < FREE_PLAN_MAX_MATCHES_PER_DAY,
+        "matches_limit": chats_limit,
+        "can_match": can_match,
         "active_albums": active_albums,
-        "albums_limit": None if plan == 'premium' else FREE_PLAN_MAX_ALBUMS,
-        "can_activate_album": plan == 'premium' or active_albums < FREE_PLAN_MAX_ALBUMS,
+        "albums_limit": albums_limit,
+        "can_activate_album": can_activate,
         "premium_until": user.get('premium_until'),
-        "can_downgrade": can_downgrade,
-        "downgrade_blocked_reason": None if can_downgrade else "TOO_MANY_ALBUMS"
+        "can_downgrade_to_free": can_downgrade_to_free,
+        "can_downgrade_to_plus": can_downgrade_to_plus,
+        "downgrade_blocked_reason": None if can_downgrade_to_free else "TOO_MANY_ALBUMS"
     }
 
 @api_router.post("/user/upgrade-premium")
