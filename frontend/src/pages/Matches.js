@@ -58,6 +58,7 @@ export const Matches = () => {
   const [loading, setLoading] = useState(true);
   const [paywallOpen, setPaywallOpen] = useState(false);
   const [paywallReason, setPaywallReason] = useState(null);
+  const [currentUserPlan, setCurrentUserPlan] = useState('free');
   const navigate = useNavigate();
   const { t } = useTranslation();
 
