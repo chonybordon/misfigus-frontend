@@ -1014,7 +1014,11 @@ const resources = {
         mustDeactivate: 'You must deactivate albums before switching to this plan.',
         unlimitedMessages: 'Unlimited messages in started chats',
         planComparison: 'Compare plans',
-        upgradeSuccess: 'Plan upgraded successfully!'
+        upgradeSuccess: 'Plan upgraded successfully!',
+        usage: 'Your current usage',
+        albumsActive: 'Active albums',
+        chatsToday: 'New chats today',
+        noLimits: 'No limits - enjoy everything without restrictions'
       },
       upgrade: {
         albumLimitTitle: 'Need more albums',
