@@ -685,31 +685,78 @@ async def get_plan_status(user_id: str = Depends(get_current_user)):
         "downgrade_blocked_reason": None if can_downgrade_to_free else "TOO_MANY_ALBUMS"
     }
 
-@api_router.post("/user/upgrade-premium")
-async def upgrade_to_premium(plan_type: str = "monthly", user_id: str = Depends(get_current_user)):
+@api_router.post("/user/set-plan")
+async def set_plan(plan: str = "free", plan_type: str = "monthly", user_id: str = Depends(get_current_user)):
     """
-    Upgrade user to premium plan.
+    Set user's plan (free, plus, or unlimited).
     FOR TESTING ONLY - In production, this would be called after payment verification.
+    
+    Plans:
+    - free: 1 album, 1 chat/day
+    - plus: 2 albums, 5 chats/day
+    - unlimited: no limits
     """
-    # Calculate premium_until based on plan type
+    if plan not in ['free', 'plus', 'unlimited']:
+        raise HTTPException(status_code=400, detail="Invalid plan. Must be 'free', 'plus', or 'unlimited'")
+    
+    # Check if user can downgrade based on active albums
+    if plan == 'free':
+        active_albums = await db.user_album_activations.count_documents({"user_id": user_id})
+        if active_albums > FREE_PLAN_MAX_ALBUMS:
+            raise HTTPException(
+                status_code=400,
+                detail={
+                    "code": "TOO_MANY_ALBUMS",
+                    "message": f"To switch to the free plan, you must keep only {FREE_PLAN_MAX_ALBUMS} active album.",
+                    "active_albums": active_albums,
+                    "limit": FREE_PLAN_MAX_ALBUMS
+                }
+            )
+    elif plan == 'plus':
+        active_albums = await db.user_album_activations.count_documents({"user_id": user_id})
+        if active_albums > PLUS_PLAN_MAX_ALBUMS:
+            raise HTTPException(
+                status_code=400,
+                detail={
+                    "code": "TOO_MANY_ALBUMS",
+                    "message": f"To switch to the Plus plan, you must keep only {PLUS_PLAN_MAX_ALBUMS} active albums.",
+                    "active_albums": active_albums,
+                    "limit": PLUS_PLAN_MAX_ALBUMS
+                }
+            )
+    
     now = datetime.now(timezone.utc)
-    if plan_type == "annual":
-        premium_until = (now + timedelta(days=365)).isoformat()
+    
+    # Calculate premium_until for paid plans
+    if plan in ['plus', 'unlimited']:
+        if plan_type == "annual":
+            premium_until = (now + timedelta(days=365)).isoformat()
+        else:
+            premium_until = (now + timedelta(days=30)).isoformat()
     else:
-        premium_until = (now + timedelta(days=30)).isoformat()
+        premium_until = None
     
     await db.users.update_one(
         {"id": user_id},
         {"$set": {
-            "plan": "premium",
-            "plan_type": plan_type,
+            "plan": plan,
+            "plan_type": plan_type if plan in ['plus', 'unlimited'] else None,
             "premium_until": premium_until,
-            "upgraded_at": now.isoformat()
+            "upgraded_at": now.isoformat() if plan != 'free' else None
         }}
     )
     
     user = await db.users.find_one({"id": user_id}, {"_id": 0})
-    return {"message": "Upgraded to Premium", "user": user}
+    return {"message": f"Plan changed to {plan}", "user": user}
+
+# Keep backwards compatibility with old upgrade endpoint
+@api_router.post("/user/upgrade-premium")
+async def upgrade_to_premium(plan_type: str = "monthly", user_id: str = Depends(get_current_user)):
+    """
+    Upgrade user to Plus plan (legacy endpoint for backwards compatibility).
+    FOR TESTING ONLY - In production, this would be called after payment verification.
+    """
+    return await set_plan(plan="plus", plan_type=plan_type, user_id=user_id)
 
 @api_router.post("/user/downgrade-free")
 async def downgrade_to_free(user_id: str = Depends(get_current_user)):
