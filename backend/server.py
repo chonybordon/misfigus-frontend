@@ -556,20 +556,31 @@ async def can_user_create_match(user_id: str):
     """
     Check if user can create a new match based on their plan.
     Returns (can_create: bool, reason: str, user: dict)
+    
+    Plans:
+    - free: 1 new chat per day
+    - plus: 5 new chats per day
+    - unlimited: no limits
     """
     user = await check_and_reset_daily_matches(user_id)
     if not user:
         return False, "USER_NOT_FOUND", None
     
     plan = user.get('plan', 'free')
+    matches_used = user.get('matches_used_today', 0)
     
-    # Premium users have unlimited matches
-    if plan == 'premium':
+    # Unlimited plan has no limits
+    if plan == 'unlimited':
         return True, None, user
     
-    # Free users: check daily limit
-    matches_used = user.get('matches_used_today', 0)
-    if matches_used >= FREE_PLAN_MAX_MATCHES_PER_DAY:
+    # Plus plan: 5 chats per day
+    if plan == 'plus':
+        if matches_used >= PLUS_PLAN_MAX_CHATS_PER_DAY:
+            return False, "DAILY_MATCH_LIMIT", user
+        return True, None, user
+    
+    # Free plan: 1 chat per day
+    if matches_used >= FREE_PLAN_MAX_CHATS_PER_DAY:
         return False, "DAILY_MATCH_LIMIT", user
     
     return True, None, user
