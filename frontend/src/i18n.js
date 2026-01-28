@@ -463,6 +463,7 @@ const resources = {
         recommended: 'Recomendado',
         comingSoon: 'Disponible próximamente',
         activeUntil: 'Activo hasta',
+        benefits: 'Beneficios de tu plan',
         freeBenefits: {
           albums: '1 álbum activo',
           chats: '1 chat nuevo por día',
