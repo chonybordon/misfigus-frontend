@@ -452,7 +452,9 @@ export const SubscriptionSection = ({ onPlanChange }) => {
               className={`w-full sm:w-auto transition-all duration-200 ${
                 selectedUpgradePlan === 'unlimited' 
                   ? 'bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-700 hover:to-purple-600'
-                  : 'bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600'
+                  : selectedUpgradePlan === 'plus'
+                    ? 'bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600'
+                    : 'bg-gray-400 hover:bg-gray-500'
               }`}
             >
               {selectedUpgradePlan === 'unlimited' && <Infinity className="w-4 h-4 mr-2" />}
@@ -461,7 +463,9 @@ export const SubscriptionSection = ({ onPlanChange }) => {
                 ? t('common.loading') 
                 : selectedUpgradePlan === 'unlimited' 
                   ? t('subscription.upgradeToUnlimited') 
-                  : t('subscription.upgradeToPlus')
+                  : selectedUpgradePlan === 'plus'
+                    ? t('subscription.upgradeToPlus')
+                    : t('subscription.upgrade')
               }
             </AlertDialogAction>
           </AlertDialogFooter>
