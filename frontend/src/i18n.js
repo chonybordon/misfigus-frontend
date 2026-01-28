@@ -2466,7 +2466,7 @@ const resources = {
         currentPlan: 'Dein aktueller Plan',
         free: 'Kostenloser Plan',
         plus: 'Plus',
-        unlimited: 'Unlimited',
+        unlimited: 'Unbegrenzt',
         premium: 'Premium',
         freePlan: 'Kostenloser Plan',
         premiumPlan: 'Premium Plan',
