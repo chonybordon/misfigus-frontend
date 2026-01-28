@@ -2459,18 +2459,37 @@ const resources = {
         upgradeSuccess: 'Du bist jetzt Premium!'
       },
       subscription: {
-        title: 'Mein Abonnement',
-        currentPlan: 'Aktueller Plan',
+        title: 'Mein Plan',
+        currentPlan: 'Dein aktueller Plan',
+        free: 'Kostenloser Plan',
+        plus: 'Plus Plan',
+        unlimited: 'Unlimited Plan',
+        premium: 'Premium',
         freePlan: 'Kostenloser Plan',
         premiumPlan: 'Premium Plan',
+        recommended: 'Empfohlen',
+        comingSoon: 'Bald verfügbar',
         monthly: 'Monatlich',
         annual: 'Jährlich',
         activeUntil: 'Aktiv bis',
         benefits: 'Vorteile deines Plans',
         freeBenefits: {
           albums: '1 aktives Album',
-          chats: '1 Chat pro Tag',
+          chats: '1 neuer Chat pro Tag',
           inventory: 'Unbegrenztes Inventar'
+        },
+        plusBenefits: {
+          albums: '2 aktive Alben',
+          chats: '5 neue Chats pro Tag',
+          inventory: 'Unbegrenztes Inventar',
+          noAds: 'Keine Werbung'
+        },
+        unlimitedBenefits: {
+          albums: 'Unbegrenzte Alben',
+          chats: 'Unbegrenzte Chats',
+          inventory: 'Unbegrenztes Inventar',
+          noAds: 'Keine Werbung',
+          priority: 'Prioritäts-Support'
         },
         premiumBenefits: {
           albums: 'Unbegrenzte Alben',
@@ -2478,15 +2497,22 @@ const resources = {
           noAds: 'Keine Werbung (bald)'
         },
         changePlan: 'Plan ändern',
+        upgrade: 'Plan verbessern',
+        upgradeToPlus: 'Zu Plus wechseln',
+        upgradeToUnlimited: 'Zu Unlimited wechseln',
         upgradeToPremium: 'Zu Premium wechseln',
+        downgrade: 'Zum kostenlosen Plan wechseln',
         downgradeToFree: 'Zum kostenlosen Plan wechseln',
         downgradeWarning: 'Beim Wechsel zum kostenlosen Plan behältst du deine Daten, hast aber die Einschränkungen des kostenlosen Plans.',
         downgradeBlocked: 'Um zum kostenlosen Plan zu wechseln, musst du nur 1 aktives Album haben.',
         currentlyActive: 'Du hast {{count}} aktive Alben.',
         deactivateFirst: 'Deaktiviere zusätzliche Alben auf dem Alben-Bildschirm.',
+        mustDeactivate: 'Du musst Alben deaktivieren, bevor du den Plan wechselst.',
         downgradeSuccess: 'Du bist zum kostenlosen Plan gewechselt',
         confirmDowngrade: 'Bist du sicher, dass du zum kostenlosen Plan wechseln möchtest?',
-        confirmDowngradeDesc: 'Du verlierst den Zugang zu Premium-Funktionen, behältst aber alle deine Daten.'
+        confirmDowngradeDesc: 'Du verlierst den Zugang zu Premium-Funktionen, behältst aber alle deine Daten.',
+        unlimitedMessages: 'Unbegrenzte Nachrichten in gestarteten Chats',
+        planComparison: 'Pläne vergleichen'
       },
       common: {
         loading: 'Wird geladen...',
