@@ -375,7 +375,7 @@ export const SubscriptionSection = ({ onPlanChange }) => {
         <AlertDialogContent className="max-w-md">
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-blue-500" />
+              <Sparkles className={`w-5 h-5 ${selectedUpgradePlan === 'unlimited' ? 'text-purple-500' : 'text-blue-500'}`} />
               {t('subscription.upgrade')}
             </AlertDialogTitle>
             <AlertDialogDescription className="text-left">
@@ -389,6 +389,7 @@ export const SubscriptionSection = ({ onPlanChange }) => {
               name={t('subscription.plus')}
               planKey="plus"
               isCurrentPlan={currentPlan === 'plus'}
+              isSelected={selectedUpgradePlan === 'plus'}
               isRecommended={currentPlan === 'free'}
               benefits={[
                 { icon: Album, text: t('subscription.plusBenefits.albums'), included: true },
@@ -404,7 +405,8 @@ export const SubscriptionSection = ({ onPlanChange }) => {
               name={t('subscription.unlimited')}
               planKey="unlimited"
               isCurrentPlan={currentPlan === 'unlimited'}
-              isRecommended={currentPlan === 'plus'}
+              isSelected={selectedUpgradePlan === 'unlimited'}
+              isRecommended={false}
               benefits={[
                 { icon: Album, text: t('subscription.unlimitedBenefits.albums'), included: true },
                 { icon: MessageCircle, text: t('subscription.unlimitedBenefits.chats'), included: true },
@@ -415,16 +417,20 @@ export const SubscriptionSection = ({ onPlanChange }) => {
             />
           </div>
 
-          <AlertDialogFooter>
-            <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
+          <AlertDialogFooter className="flex-col sm:flex-row gap-2">
+            <AlertDialogCancel className="w-full sm:w-auto">{t('common.cancel')}</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => handleUpgrade(selectedUpgradePlan)}
               disabled={upgrading || currentPlan === selectedUpgradePlan}
-              className={selectedUpgradePlan === 'unlimited' 
-                ? 'bg-gradient-to-r from-purple-600 to-pink-600'
-                : 'bg-gradient-to-r from-blue-500 to-cyan-500'}
+              className={`w-full sm:w-auto transition-all duration-200 ${
+                selectedUpgradePlan === 'unlimited' 
+                  ? 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700'
+                  : 'bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600'
+              }`}
             >
-              {upgrading ? t('common.loading') : t('subscription.upgrade')}
+              {selectedUpgradePlan === 'unlimited' && <Infinity className="w-4 h-4 mr-2" />}
+              {selectedUpgradePlan === 'plus' && <Sparkles className="w-4 h-4 mr-2" />}
+              {upgrading ? t('common.loading') : `${t('subscription.upgrade')} ${selectedUpgradePlan === 'unlimited' ? t('subscription.unlimited') : t('subscription.plus')}`}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
