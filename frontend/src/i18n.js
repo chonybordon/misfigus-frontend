@@ -1507,7 +1507,14 @@ const resources = {
         currentlyActive: 'Você tem {{count}} álbuns ativos.',
         mustDeactivate: 'Você deve desativar álbuns antes de mudar para este plano.',
         unlimitedMessages: 'Mensagens ilimitadas em chats iniciados',
-        planComparison: 'Comparar planos'
+        planComparison: 'Comparar planos',
+        upgradeSuccess: 'Plano atualizado com sucesso!'
+      },
+      upgrade: {
+        albumLimitTitle: 'Precisa de mais álbuns',
+        albumLimitDesc: 'Seu plano atual permite apenas 1 álbum ativo. Atualize para Plus ou Ilimitado para ativar mais álbuns.',
+        chatLimitTitle: 'Limite de chats atingido',
+        chatLimitDesc: 'Seu plano gratuito permite 1 novo chat por dia. Atualize para iniciar mais chats.'
       },
       common: {
         loading: 'Carregando...',
