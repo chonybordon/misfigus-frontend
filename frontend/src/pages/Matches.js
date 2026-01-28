@@ -64,7 +64,17 @@ export const Matches = () => {
 
   useEffect(() => {
     fetchMatches();
+    fetchUserPlan();
   }, [contextId]);
+
+  const fetchUserPlan = async () => {
+    try {
+      const response = await api.get('/user/plan-status');
+      setCurrentUserPlan(response.data.plan || 'free');
+    } catch (error) {
+      setCurrentUserPlan('free');
+    }
+  };
 
   const fetchMatches = async () => {
     try {
