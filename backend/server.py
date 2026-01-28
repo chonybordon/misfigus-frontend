@@ -597,6 +597,11 @@ async def can_user_activate_album(user_id: str):
     """
     Check if user can activate another album based on their plan.
     Returns (can_activate: bool, reason: str, active_count: int)
+    
+    Plans:
+    - free: 1 album max
+    - plus: 2 albums max
+    - unlimited: no limits
     """
     user = await db.users.find_one({"id": user_id}, {"_id": 0})
     if not user:
@@ -607,11 +612,17 @@ async def can_user_activate_album(user_id: str):
     # Count currently active albums
     active_count = await db.user_album_activations.count_documents({"user_id": user_id})
     
-    # Premium users have unlimited albums
-    if plan == 'premium':
+    # Unlimited plan has no limits
+    if plan == 'unlimited':
         return True, None, active_count
     
-    # Free users: check album limit
+    # Plus plan: 2 albums max
+    if plan == 'plus':
+        if active_count >= PLUS_PLAN_MAX_ALBUMS:
+            return False, "ALBUM_LIMIT", active_count
+        return True, None, active_count
+    
+    # Free plan: 1 album max
     if active_count >= FREE_PLAN_MAX_ALBUMS:
         return False, "ALBUM_LIMIT", active_count
     
