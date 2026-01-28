@@ -151,6 +151,21 @@ All upgrade/paywall flows now use a single consistent UI:
   - Plus: 2 albums, 5 chats/day, unlimited inventory, no ads
   - Unlimited: unlimited albums, unlimited chats, unlimited inventory, no ads
 
+## Subscription Plan Limits (January 2025)
+| Plan | Albums | Chats/Day | Inventory |
+|------|--------|-----------|-----------|
+| Free | 1 | 1 | Unlimited |
+| Plus | 2 | 5 | Unlimited |
+| Unlimited | ∞ | ∞ | Unlimited |
+
+**UI Behavior:**
+- Free/Plus: Show usage counters ("0 / 2 álbumes", "0 / 5 chats")
+- Unlimited: Show "Sin límites" message, NO counters
+
+**Backend Enforcement:**
+- Chat counter increments for both Free AND Plus users
+- Unlimited users have no counter increment
+
 ## Trademark Cleanup (January 2025)
 All trademarked content has been replaced with legally safe, generic alternatives:
 
