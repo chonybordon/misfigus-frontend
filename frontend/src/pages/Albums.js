@@ -45,7 +45,18 @@ export const Albums = () => {
 
   useEffect(() => {
     fetchAlbums();
+    fetchUserPlan();
   }, []);
+
+  const fetchUserPlan = async () => {
+    try {
+      const response = await api.get('/user/plan-status');
+      setCurrentUserPlan(response.data.plan || 'free');
+    } catch (error) {
+      // Default to free if can't fetch
+      setCurrentUserPlan('free');
+    }
+  };
 
   const fetchAlbums = async () => {
     try {
