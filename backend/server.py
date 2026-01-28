@@ -2197,9 +2197,9 @@ async def create_or_get_exchange(
     if not i_can_give or not i_can_get:
         raise HTTPException(status_code=400, detail="NO_MUTUAL_MATCH")
     
-    # FREEMIUM: Increment daily match counter for free users
+    # FREEMIUM: Increment daily match counter for free and plus users
     user_plan = user.get('plan', 'free') if user else 'free'
-    if user_plan == 'free':
+    if user_plan in ['free', 'plus']:
         await increment_user_match_count(user_id)
     
     # Create exchange
