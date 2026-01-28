@@ -386,9 +386,12 @@ export const SubscriptionSection = ({ onPlanChange }) => {
               <div className="flex items-start gap-2 p-2 sm:p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-xs sm:text-sm">
                 <AlertTriangle className="w-4 h-4 text-yellow-600 mt-0.5 flex-shrink-0" />
                 <div className="text-yellow-800 min-w-0">
-                  <p className="font-medium">{t('subscription.downgradeBlocked') || t('subscription.mustDeactivate')}</p>
+                  <p className="font-medium">{t('subscription.downgradeBlocked')}</p>
                   <p className="text-yellow-700 mt-1">
-                    {t('subscription.currentlyActive', { count: planStatus.active_albums })} {t('subscription.deactivateFirst') || ''}
+                    {t('subscription.deactivateFirst')}
+                  </p>
+                  <p className="text-yellow-600 mt-1 text-xs">
+                    {t('subscription.currentlyActive', { count: planStatus.active_albums })} {t('subscription.freeAlbumLimit')}
                   </p>
                 </div>
               </div>
