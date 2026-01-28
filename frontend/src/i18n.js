@@ -2543,7 +2543,14 @@ const resources = {
         confirmDowngrade: 'Bist du sicher, dass du zum kostenlosen Plan wechseln möchtest?',
         confirmDowngradeDesc: 'Du verlierst den Zugang zu Premium-Funktionen, behältst aber alle deine Daten.',
         unlimitedMessages: 'Unbegrenzte Nachrichten in gestarteten Chats',
-        planComparison: 'Pläne vergleichen'
+        planComparison: 'Pläne vergleichen',
+        upgradeSuccess: 'Plan erfolgreich aktualisiert!'
+      },
+      upgrade: {
+        albumLimitTitle: 'Mehr Alben benötigt',
+        albumLimitDesc: 'Dein aktueller Plan erlaubt nur 1 aktives Album. Upgrade auf Plus oder Unbegrenzt um mehr Alben zu aktivieren.',
+        chatLimitTitle: 'Chat-Limit erreicht',
+        chatLimitDesc: 'Dein kostenloser Plan erlaubt 1 neuen Chat pro Tag. Upgrade um mehr Chats zu starten.'
       },
       common: {
         loading: 'Wird geladen...',
