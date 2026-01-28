@@ -66,6 +66,8 @@ MisFigus is a sticker trading platform that allows collectors to manage their st
 ### Exchanges UX
 - Default tab is "New exchanges" (not "Active")
 - 3-tab navigation: "Nuevos intercambios" | "Activos" | "Completados"
+- **Direct navigation**: Clicking a match goes directly to Exchange Detail (no intermediate screen)
+- Flow: Exchanges (New tab) → Click match → Exchange Detail + Chat
 
 ## Technical Architecture
 
