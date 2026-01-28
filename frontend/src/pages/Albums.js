@@ -110,12 +110,16 @@ export const Albums = () => {
     }
   };
 
-  const handlePaywallUpgrade = () => {
-    // Refresh albums to reflect premium status
+  const handlePaywallUpgrade = (newPlan) => {
+    // Update local plan state
+    setCurrentUserPlan(newPlan);
+    // Refresh albums to reflect new plan status
     fetchAlbums();
+    setPaywallOpen(false);
     // Try activating again
     if (selectedAlbum) {
-      handleActivateAlbum();
+      // Small delay to let state settle
+      setTimeout(() => handleActivateAlbum(), 500);
     }
   };
 
