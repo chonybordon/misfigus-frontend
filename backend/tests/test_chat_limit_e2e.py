@@ -89,14 +89,22 @@ def activate_album(token, album_id):
     response = requests.post(f"{BASE_URL}/api/albums/{album_id}/activate", headers=headers)
     return response.status_code == 200
 
-def add_sticker_to_album(token, album_id, sticker_number, status="have"):
-    """Add a sticker to an album"""
+def get_inventory(token, album_id):
+    """Get stickers for an album"""
+    headers = {"Authorization": f"Bearer {token}"}
+    response = requests.get(f"{BASE_URL}/api/inventory?album_id={album_id}", headers=headers)
+    if response.status_code == 200:
+        return response.json()
+    return []
+
+def update_inventory(token, sticker_id, owned_qty):
+    """Update user's inventory for a sticker"""
     headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
-    response = requests.post(f"{BASE_URL}/api/albums/{album_id}/stickers", headers=headers, json={
-        "sticker_number": sticker_number,
-        "status": status
+    response = requests.put(f"{BASE_URL}/api/inventory", headers=headers, json={
+        "sticker_id": sticker_id,
+        "owned_qty": owned_qty
     })
-    return response.status_code == 201
+    return response.status_code == 200
 
 def create_exchange(token, album_id, partner_id):
     """Create an exchange"""
@@ -183,20 +191,43 @@ def test_chat_limit_error_structure():
     activate_album(token_b, album_id)
     activate_album(token_c, album_id)
     
-    # Add stickers - create mutual matches
-    # A has 1, needs 2
-    # B has 2, needs 1 (matches with A)
-    # C has 3, needs 1 (matches with A)
-    print("\nAdding stickers...")
-    add_sticker_to_album(token_a, album_id, "1", "have")
-    add_sticker_to_album(token_a, album_id, "2", "need")
-    add_sticker_to_album(token_a, album_id, "3", "need")
+    # Get stickers for the album
+    print("\nGetting stickers...")
+    stickers = get_inventory(token_a, album_id)
+    if len(stickers) < 4:
+        print(f"FAILED: Not enough stickers in album (found {len(stickers)})")
+        return False
     
-    add_sticker_to_album(token_b, album_id, "1", "need")
-    add_sticker_to_album(token_b, album_id, "2", "have")
+    # Use first 4 stickers
+    sticker_1 = stickers[0]['id']
+    sticker_2 = stickers[1]['id']
+    sticker_3 = stickers[2]['id']
+    sticker_4 = stickers[3]['id']
     
-    add_sticker_to_album(token_c, album_id, "1", "need")
-    add_sticker_to_album(token_c, album_id, "3", "have")
+    print(f"  Using stickers: {sticker_1[:8]}..., {sticker_2[:8]}..., {sticker_3[:8]}..., {sticker_4[:8]}...")
+    
+    # Set up inventory for mutual matches
+    # A has sticker 1 (duplicate), needs sticker 2
+    # B has sticker 2 (duplicate), needs sticker 1 -> matches with A
+    # C has sticker 3 (duplicate), needs sticker 1 -> matches with A
+    print("\nSetting up inventory for mutual matches...")
+    
+    # User A: has sticker 1 (2 copies = 1 duplicate), needs sticker 2
+    update_inventory(token_a, sticker_1, 2)  # 2 copies = 1 duplicate
+    update_inventory(token_a, sticker_2, 0)  # needs this
+    
+    # User B: has sticker 2 (2 copies), needs sticker 1
+    update_inventory(token_b, sticker_2, 2)  # 2 copies = 1 duplicate
+    update_inventory(token_b, sticker_1, 0)  # needs this
+    
+    # User C: has sticker 3 (2 copies), needs sticker 1
+    update_inventory(token_c, sticker_3, 2)  # 2 copies = 1 duplicate
+    update_inventory(token_c, sticker_1, 0)  # needs this
+    
+    # Also give A a need for sticker 3 so C can match
+    update_inventory(token_a, sticker_3, 0)  # A needs sticker 3
+    
+    print("  Inventory set up for mutual matches")
     
     # Step 1: User A creates exchange with User B (uses A's 1/1 limit)
     print("\nStep 1: User A creates exchange with User B...")
