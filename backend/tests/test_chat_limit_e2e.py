@@ -98,16 +98,18 @@ def add_sticker_to_album(token, album_id, sticker_number, status="have"):
     })
     return response.status_code == 201
 
-def create_exchange(token, partner_id, offered_stickers, requested_stickers):
+def create_exchange(token, album_id, partner_id):
     """Create an exchange"""
     headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
-    response = requests.post(f"{BASE_URL}/api/exchanges", headers=headers, json={
-        "partner_id": partner_id,
-        "offered_stickers": offered_stickers,
-        "requested_stickers": requested_stickers
+    response = requests.post(f"{BASE_URL}/api/albums/{album_id}/exchanges", headers=headers, json={
+        "partner_user_id": partner_id
     })
-    if response.status_code == 201:
-        return response.json()
+    if response.status_code == 201 or response.status_code == 200:
+        data = response.json()
+        # Handle both new exchange and existing exchange responses
+        if 'exchange' in data:
+            return data['exchange']
+        return data
     print(f"Failed to create exchange: {response.status_code} - {response.text}")
     return None
 
@@ -180,34 +182,36 @@ def test_chat_limit_error_structure():
     activate_album(token_b, album_id)
     activate_album(token_c, album_id)
     
-    # Add stickers
+    # Add stickers - create mutual matches
+    # A has 1, needs 2
+    # B has 2, needs 1 (matches with A)
+    # C has 3, needs 1 (matches with A)
     print("\nAdding stickers...")
     add_sticker_to_album(token_a, album_id, "1", "have")
     add_sticker_to_album(token_a, album_id, "2", "need")
+    add_sticker_to_album(token_a, album_id, "3", "need")
+    
     add_sticker_to_album(token_b, album_id, "1", "need")
     add_sticker_to_album(token_b, album_id, "2", "have")
-    add_sticker_to_album(token_c, album_id, "3", "have")
+    
     add_sticker_to_album(token_c, album_id, "1", "need")
+    add_sticker_to_album(token_c, album_id, "3", "have")
     
     # Step 1: User A creates exchange with User B (uses A's 1/1 limit)
     print("\nStep 1: User A creates exchange with User B...")
-    exchange_ab = create_exchange(token_a, user_b['id'], 
-                                   [{"album_id": album_id, "sticker_number": "1"}],
-                                   [{"album_id": album_id, "sticker_number": "2"}])
+    exchange_ab = create_exchange(token_a, album_id, user_b['id'])
     if not exchange_ab:
         print("FAILED: Could not create exchange A->B")
         return False
-    print(f"  Exchange created: {exchange_ab['id']}")
+    print(f"  Exchange created: {exchange_ab.get('id')}")
     
     # Step 2: User C creates exchange with User A
     print("\nStep 2: User C creates exchange with User A...")
-    exchange_ca = create_exchange(token_c, user_a['id'],
-                                   [{"album_id": album_id, "sticker_number": "3"}],
-                                   [{"album_id": album_id, "sticker_number": "1"}])
+    exchange_ca = create_exchange(token_c, album_id, user_a['id'])
     if not exchange_ca:
         print("FAILED: Could not create exchange C->A")
         return False
-    print(f"  Exchange created: {exchange_ca['id']}")
+    print(f"  Exchange created: {exchange_ca.get('id')}")
     
     # Step 3: User A tries to reply to User C's chat
     print("\nStep 3: User A tries to reply to User C's chat...")
