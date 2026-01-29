@@ -44,6 +44,8 @@ export const ExchangeChat = () => {
   const [newMessage, setNewMessage] = useState('');
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [currentUserPlan, setCurrentUserPlan] = useState('free');
   const messagesEndRef = useRef(null);
   const messagesContainerRef = useRef(null);
   const isAtBottomRef = useRef(true);
