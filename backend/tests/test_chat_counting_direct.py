@@ -159,8 +159,8 @@ def update_inventory(token: str, sticker_id: str, owned_qty: int):
 def create_exchange(token: str, album_id: str, partner_id: str):
     """Create an exchange between users"""
     return requests.post(
-        f"{BASE_URL}/api/exchanges",
-        json={"album_id": album_id, "partner_id": partner_id},
+        f"{BASE_URL}/api/albums/{album_id}/exchanges",
+        json={"partner_id": partner_id},
         headers=get_auth_headers(token)
     )
 
