@@ -285,6 +285,15 @@ export const ExchangeChat = () => {
           {t('chat.chatClosed')}
         </div>
       )}
+
+      {/* Upgrade Modal for chat limit */}
+      <UpgradeModal
+        isOpen={showUpgradeModal}
+        onClose={() => setShowUpgradeModal(false)}
+        reason="DAILY_CHAT_LIMIT"
+        onUpgradeSuccess={handleUpgradeSuccess}
+        currentPlan={currentUserPlan}
+      />
     </div>
   );
 };
