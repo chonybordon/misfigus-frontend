@@ -8,6 +8,7 @@ import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Send, Lock } from 'lucide-react';
+import { UpgradeModal } from '../components/UpgradeModal';
 
 // Polling interval in milliseconds
 const POLL_INTERVAL = 2000;
