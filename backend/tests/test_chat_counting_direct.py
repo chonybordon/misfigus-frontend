@@ -26,24 +26,35 @@ import os
 
 BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://sticker-swap-1.preview.emergentagent.com').rstrip('/')
 
-def get_otp_from_logs(email: str, max_wait: int = 5) -> str:
+def get_otp_from_logs(email: str, max_wait: int = 10) -> str:
     """Parse OTP from backend logs for a given email"""
-    time.sleep(0.5)  # Wait for log to be written
+    time.sleep(1)  # Wait for log to be written
     
-    for _ in range(max_wait):
+    for attempt in range(max_wait):
         try:
             result = subprocess.run(
-                ['tail', '-100', '/var/log/supervisor/backend.err.log'],
+                ['tail', '-200', '/var/log/supervisor/backend.err.log'],
                 capture_output=True, text=True, timeout=5
             )
-            logs = result.stdout + result.stderr
+            logs = result.stdout
             
-            # Look for OTP pattern: [OTP] To: email followed by [OTP] OTP: code
-            pattern = rf'\[OTP\] To: {re.escape(email)}.*?\[OTP\] OTP: (\d{{6}})'
-            matches = re.findall(pattern, logs, re.DOTALL)
+            # Look for OTP pattern line by line
+            lines = logs.split('\n')
+            found_email = False
+            for i, line in enumerate(lines):
+                if f'[OTP] To: {email}' in line:
+                    found_email = True
+                    # Look for OTP in next few lines
+                    for j in range(i, min(i+5, len(lines))):
+                        if '[OTP] OTP:' in lines[j]:
+                            match = re.search(r'\[OTP\] OTP: (\d{6})', lines[j])
+                            if match:
+                                return match.group(1)
             
-            if matches:
-                return matches[-1]  # Return most recent OTP
+            if not found_email:
+                time.sleep(0.5)
+                continue
+                
         except Exception as e:
             print(f"Error reading logs: {e}")
         
