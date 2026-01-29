@@ -2512,7 +2512,15 @@ async def send_chat_message(
     content: str = Body(..., embed=True),
     user_id: str = Depends(get_current_user)
 ):
-    """Send a message in an exchange chat. Only allowed for pending exchanges."""
+    """
+    Send a message in an exchange chat. Only allowed for pending exchanges.
+    
+    CHAT LIMIT LOGIC:
+    - If this is the user's FIRST message in this chat, it counts as a "new chat"
+    - The user who created the exchange already had it counted when creating
+    - The other user gets it counted when they send their first reply
+    - Subsequent messages in the same chat don't count
+    """
     exchange = await db.exchanges.find_one({"id": exchange_id}, {"_id": 0})
     if not exchange:
         raise HTTPException(status_code=404, detail="Exchange not found")
@@ -2526,6 +2534,40 @@ async def send_chat_message(
     chat = await db.chats.find_one({"exchange_id": exchange_id}, {"_id": 0})
     if not chat:
         raise HTTPException(status_code=404, detail="Chat not found")
+    
+    # Check if this is the user's first message in this chat
+    existing_user_message = await db.chat_messages.find_one({
+        "chat_id": chat['id'],
+        "sender_id": user_id,
+        "is_system": {"$ne": True}
+    })
+    
+    is_first_message = existing_user_message is None
+    
+    # If this is the first message and user is NOT the exchange creator (user_a),
+    # we need to check and count their chat limit
+    # (Exchange creator already had it counted at creation time)
+    if is_first_message and user_id != exchange['user_a_id']:
+        # Check if user can create a new chat (respects daily limit)
+        can_chat, reason, user = await can_user_create_match(user_id)
+        if not can_chat:
+            if reason == "DAILY_MATCH_LIMIT":
+                raise HTTPException(
+                    status_code=403,
+                    detail={
+                        "code": "DAILY_MATCH_LIMIT",
+                        "message": "You have reached your daily chat limit. Upgrade your plan for more chats.",
+                        "matches_used": user.get('matches_used_today', 0),
+                        "limit": FREE_PLAN_MAX_CHATS_PER_DAY if user.get('plan') == 'free' else PLUS_PLAN_MAX_CHATS_PER_DAY
+                    }
+                )
+            raise HTTPException(status_code=400, detail=reason)
+        
+        # Increment their daily chat count
+        user_plan = user.get('plan', 'free') if user else 'free'
+        if user_plan in ['free', 'plus']:
+            await increment_user_match_count(user_id)
+            logger.info(f"[CHAT] User {user_id} replied to chat for first time - daily count incremented")
     
     now = datetime.now(timezone.utc)
     message = {
