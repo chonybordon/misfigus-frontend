@@ -65,7 +65,7 @@ def get_otp_from_logs(email: str, max_wait: int = 10) -> str:
 def create_test_user(email_prefix: str) -> dict:
     """Create a test user via OTP flow"""
     timestamp = int(time.time() * 1000)
-    email = f"TEST_{email_prefix}_{timestamp}@test.com"
+    email = f"test_{email_prefix}_{timestamp}@test.com"  # lowercase to match backend normalization
     
     session = requests.Session()
     
