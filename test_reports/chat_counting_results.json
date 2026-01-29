@@ -1,13 +1,13 @@
 {
-  "timestamp": "2026-01-29 02:23:56",
+  "timestamp": "2026-01-29 02:24:46",
   "results": {
-    "plan_status_endpoint": "False",
-    "free_plan_default": "False",
-    "plus_plan_limit": "False",
-    "unlimited_plan_no_limits": "False",
-    "exchange_creation_counts_for_creator": "False",
-    "first_reply_counts_for_replier": "False",
-    "subsequent_messages_dont_count": "False",
-    "free_plan_blocks_second_chat_reply": "False"
+    "plan_status_endpoint": "True",
+    "free_plan_default": "True",
+    "plus_plan_limit": "True",
+    "unlimited_plan_no_limits": "True",
+    "exchange_creation_counts_for_creator": "None",
+    "first_reply_counts_for_replier": "None",
+    "subsequent_messages_dont_count": "None",
+    "free_plan_blocks_second_chat_reply": "None"
   }
 }
