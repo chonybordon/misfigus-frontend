@@ -160,7 +160,7 @@ def create_exchange(token: str, album_id: str, partner_id: str):
     """Create an exchange between users"""
     return requests.post(
         f"{BASE_URL}/api/albums/{album_id}/exchanges",
-        json={"partner_id": partner_id},
+        json={"album_id": album_id, "partner_user_id": partner_id},
         headers=get_auth_headers(token)
     )
 
