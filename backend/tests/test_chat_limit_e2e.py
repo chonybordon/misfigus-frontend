@@ -102,6 +102,7 @@ def create_exchange(token, album_id, partner_id):
     """Create an exchange"""
     headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
     response = requests.post(f"{BASE_URL}/api/albums/{album_id}/exchanges", headers=headers, json={
+        "album_id": album_id,
         "partner_user_id": partner_id
     })
     if response.status_code == 201 or response.status_code == 200:
