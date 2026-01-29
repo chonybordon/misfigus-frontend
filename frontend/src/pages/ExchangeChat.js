@@ -116,13 +116,15 @@ export const ExchangeChat = () => {
 
   const fetchData = async () => {
     try {
-      const [exchangeRes, chatRes] = await Promise.all([
+      const [exchangeRes, chatRes, planRes] = await Promise.all([
         api.get(`/exchanges/${exchangeId}`),
-        api.get(`/exchanges/${exchangeId}/chat`)
+        api.get(`/exchanges/${exchangeId}/chat`),
+        api.get('/user/plan-status')
       ]);
       setExchange(exchangeRes.data);
       setChatData(chatRes.data);
       setMessages(chatRes.data.messages || []);
+      setCurrentUserPlan(planRes.data.plan || 'free');
     } catch (error) {
       // Don't show raw backend error - use generic message
       toast.error(t('common.error'));
@@ -149,10 +151,27 @@ export const ExchangeChat = () => {
       setMessages([...messages, response.data]);
       setNewMessage('');
     } catch (error) {
-      toast.error(error.response?.data?.detail || t('common.error'));
+      const errorDetail = error.response?.data?.detail;
+      
+      // Check if this is a chat limit error (detail can be string or object)
+      if (errorDetail && typeof errorDetail === 'object' && errorDetail.code === 'DAILY_MATCH_LIMIT') {
+        // Show upgrade modal instead of error toast
+        setShowUpgradeModal(true);
+      } else {
+        // For other errors, safely extract a string message
+        const errorMessage = typeof errorDetail === 'string' 
+          ? errorDetail 
+          : (errorDetail?.message || t('common.error'));
+        toast.error(errorMessage);
+      }
     } finally {
       setSending(false);
     }
+  };
+
+  const handleUpgradeSuccess = (newPlan) => {
+    setCurrentUserPlan(newPlan);
+    setShowUpgradeModal(false);
   };
 
   if (loading) {
